@@ -48,16 +48,22 @@ def createWildApricotEvent(eventDetails):
 
 	checkWhenReady('eventDetailsMain_editAttendeesSettings_showRegistrantsList')
 	checkWhenReady('eventDetailsMain_editGuestRegistrationSettings_withEmail')
-
+	
 	print('Setting description')
 	driver.switch_to.frame(driver.find_element_by_xpath('//*[@id="tdDescription"]/div[1]/iframe'))
 	el = driver.find_element_by_tag_name('p')
 	setInnerHTML(el, eventDetails['description'])
 
+	print('Hiding authorizations field')
 	driver.switch_to_default_content()
 	driver.switch_to.frame(contentFrame)
+	click(waitForID('eventCustomizeFieldsShowLink'))
+	uncheckWhenReady('cbxAllCommonFields')
+	click(waitForXPath('//span[contains(.,"authorizations")]')) 
 
 	print('Setting registration limit')
+	driver.switch_to_default_content()
+	driver.switch_to.frame(contentFrame)
 	click(waitForID('eventRegistrationTypesShowLink'))
 
 	if 'rsvpLimit' in eventDetails and eventDetails['rsvpLimit'] != '':
@@ -225,7 +231,7 @@ def createFacebookEvent(eventDetails, ticketURL):
 	#click(waitForXPath('//button[contains("Publish")]'))
 	# Draft only
 	click(waitForXPath('//button[contains(.,"Publish")]/following-sibling::div/a'))
-	click(waitForXPath('//a[contains(.,"Save Draft")]')) 
+	click(waitForXPath('//a[contains(.,"Save Draft")]'))
 
 	time.sleep(2)
 	return driver.current_url

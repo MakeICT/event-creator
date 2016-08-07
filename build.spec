@@ -2,7 +2,7 @@
 
 import platform
 
-version = '1.5'
+version = '1.6'
 if platform.system() == 'Linux':
      platformExt = 'linux.bin'
 else:
