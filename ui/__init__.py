@@ -67,3 +67,5 @@ def addTarget(name, callback):
 def addResource(name, callback):
 	pass
 	
+def addPopulationType(name):
+	pass
