@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+ui/*.py
 
 # Distribution / packaging
 env/
