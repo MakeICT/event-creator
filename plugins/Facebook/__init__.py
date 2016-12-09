@@ -28,7 +28,7 @@ class FacebookPlugin(Plugin):
 			}
 		]
 
-		ui.addTarget('Facebook', self.createEvent)
+		ui.addTarget(self.name, self.createEvent)
 		
 	def createEvent(self, event):
 		driver = startSelenium()

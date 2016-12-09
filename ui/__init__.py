@@ -183,7 +183,11 @@ def _publishClicked():
 	if mainWindowUI.publishButton.text() == 'CANCEL':
 		print('Do cancel...')
 		mainWindowUI.publishButton.setText('Publish')
-	else:	
+	else:
+		if settings.value('Plugin priority') is None or settings.value('Plugin priority') == '':
+			QtGui.QMessageBox.warning(None, 'Options not configured', 'Plugin priority must be configured. Please see general options.')
+			return
+
 		print('Do publish...')
 		mainWindowUI.publishButton.setText('CANCEL')
 
@@ -216,13 +220,13 @@ def _publishClicked():
 				'availability': rsvpType.availability,
 			})
 		
-		for checkbox in _getChildren(mainWindowUI.postToGrid):
-			if checkbox.isChecked():
-				for target in targets:
-					if target['checkbox'] == checkbox:
+		for plugin in settings.value('Plugin priority').split(','):
+			for target in targets:
+				if plugin == target['name']:
+					if target['checkbox'].isChecked():
 						target['callback'](event)
 						setDetails(event)
-						break
+					break
 
 class PriceSummaryListWidget(QtGui.QWidget):
 	def __init__(self, parent=None, valuesUI=None):

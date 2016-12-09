@@ -15,7 +15,7 @@ class MakerspaceAuthorizationsPlugin(Plugin):
 			}
 		]
 
-		ui.addTarget('Makerspace Authorizations', self.createEvent)
+		ui.addTarget(self.name, self.createEvent)
 		
 	def createEvent(self, event):
 		print(event)

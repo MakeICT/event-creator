@@ -28,7 +28,7 @@ class WildApricotPlugin(Plugin):
 			}
 		]
 
-		ui.addTarget('WildApricot', self.createEvent)
+		ui.addTarget(self.name, self.createEvent)
 		ui.addPopulationType('Members')
 	
 	def createEvent(self, event):

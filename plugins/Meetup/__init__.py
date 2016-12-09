@@ -25,7 +25,7 @@ class MeetupPlugin(Plugin):
 			}
 		]
 
-		ui.addTarget('Meetup', self.createEvent)
+		ui.addTarget(self.name, self.createEvent)
 		
 	def createEvent(self, event):
 		api = meetup.api.Client(self.getSetting('API Key'))

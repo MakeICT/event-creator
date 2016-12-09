@@ -15,7 +15,7 @@ class GoogleCalendarPlugin(Plugin):
 			}
 		]
 
-		ui.addTarget('Google Calendar', self.createEvent)
+		ui.addTarget(self.name, self.createEvent)
 		
 	def createEvent(self, event):
 		print(event)

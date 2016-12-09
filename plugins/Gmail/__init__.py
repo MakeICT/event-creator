@@ -15,7 +15,7 @@ class GmailPlugin(Plugin):
 			}
 		]
 
-		ui.addTarget('Gmail', self.createEvent)
+		ui.addTarget(self.name, self.createEvent)
 		
 	def createEvent(self, event):
 		print(event)
