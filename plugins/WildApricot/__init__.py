@@ -16,6 +16,9 @@ class WildApricotPlugin(QtCore.QObject):
 			},{
 				'name': 'Level IDs for members',
 				'type': 'text',
+			},{
+				'name': 'Registration URL format',
+				'type': 'text',
 			}
 		]
 
@@ -53,6 +56,7 @@ class WildApricotPlugin(QtCore.QObject):
 		}
 		
 		eventID = api.execute_request('Events', eventData)
+		event['registrationURL'] = self.getSetting('Registration URL format') % eventID
 
 		for rsvpType in event['prices']:
 			registrationTypeData = {
