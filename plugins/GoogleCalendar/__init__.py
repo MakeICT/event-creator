@@ -2,8 +2,12 @@
 
 import ui
 
-class GoogleCalendarPlugin:
+from ..Plugin import Plugin
+
+class GoogleCalendarPlugin(Plugin):
 	def __init__(self):
+		super().__init__('GoogleCalendar')
+
 		self.options = [
 			{
 				'name': 'API Key',

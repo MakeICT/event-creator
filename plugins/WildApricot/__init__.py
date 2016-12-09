@@ -4,11 +4,14 @@ import ui
 from PySide import QtCore
 
 from .WildApricotAPI import WaApiClient
+from ..Plugin import Plugin
 
 from config import settings
 
-class WildApricotPlugin(QtCore.QObject):
+class WildApricotPlugin(Plugin):
 	def __init__(self):
+		super().__init__('WildApricot')
+		
 		self.options = [
 			{
 				'name': 'API Key',
@@ -83,9 +86,6 @@ class WildApricotPlugin(QtCore.QObject):
 					registrationTypeData['Availability'] = 'Everyone'
 			
 			api.execute_request('EventRegistrationTypes', registrationTypeData)
-
-	def getSetting(self, setting):
-		return settings.value('plugin-WildApricot/%s' % setting)
 	
 def load():
 	return WildApricotPlugin()

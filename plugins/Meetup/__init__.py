@@ -2,8 +2,12 @@
 
 import ui
 
-class MeetupPlugin:
+from ..Plugin import Plugin
+
+class MeetupPlugin(Plugin):
 	def __init__(self):
+		super().__init__('Meetup')
+
 		self.options = [
 			{
 				'name': 'API Key',

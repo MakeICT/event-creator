@@ -2,8 +2,12 @@
 
 import ui
 
-class GmailPlugin:
+from ..Plugin import Plugin
+
+class GmailPlugin(Plugin):
 	def __init__(self):
+		super().__init__('Gmail')
+
 		self.options = [
 			{
 				'name': 'API Key',
