@@ -20,7 +20,7 @@ class MeetupPlugin(Plugin):
 				'name': 'Venue ID',
 				'type': 'text',
 			},{
-				'name': 'Official registration site',
+				'name': 'Use this as registration URL',
 				'type': 'yesno',
 			}
 		]
@@ -49,10 +49,8 @@ class MeetupPlugin(Plugin):
 			'publish_status': 'draft',
 		})
 		
-		if config.checkBool(self.getSetting('Official registration site')):
+		if config.checkBool(self.getSetting('Use this as registration URL')):
 			event['registrationURL'] = meetupEvent.event_url
 
-		return event
-		
 def load():
 	return MeetupPlugin()

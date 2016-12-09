@@ -22,6 +22,9 @@ class WildApricotPlugin(Plugin):
 			},{
 				'name': 'Registration URL format',
 				'type': 'text',
+			},{
+				'name': 'Use this as registration URL',
+				'type': 'yesno',
 			}
 		]
 
@@ -59,7 +62,6 @@ class WildApricotPlugin(Plugin):
 		}
 		
 		eventID = api.execute_request('Events', eventData)
-		event['registrationURL'] = self.getSetting('Registration URL format') % eventID
 
 		for rsvpType in event['prices']:
 			registrationTypeData = {
@@ -86,6 +88,11 @@ class WildApricotPlugin(Plugin):
 					registrationTypeData['Availability'] = 'Everyone'
 			
 			api.execute_request('EventRegistrationTypes', registrationTypeData)
+			
+		if config.checkBool(self.getSetting('Use this as registration URL')):
+			event['registrationURL'] = self.getSetting('Registration URL format') % eventID
+
+
 	
 def load():
 	return WildApricotPlugin()
