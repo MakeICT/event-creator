@@ -16,6 +16,7 @@ optionsDialogUI = None
 
 targets = []
 resources = []
+tagGroups = []
 
 populationTypes = ['Everybody']
 
@@ -48,6 +49,25 @@ def getMainWindow():
 	for resource in resources:
 		pass
 		#index = mainWindowUI.resourceGrid.count()
+		
+	for tagGroup in tagGroups:
+		tagGroup['checkboxes'] = []
+		tagGrid = QtGui.QGridLayout()
+		for tag in tagGroup['tags']:
+			index = tagGrid.count()
+			
+			checkbox = QtGui.QCheckBox(mainWindowUI.centralwidget)
+			checkbox.setText(tag)
+			tagGroup['checkboxes'].append(checkbox)
+			
+			tagGrid.addWidget(checkbox, index / 2, index % 2, 1, 1)
+
+		mainWindowUI.formLayout.insertRow(
+			mainWindowUI.formLayout.rowCount(),
+			tagGroup['name'],
+			tagGrid
+		)
+		
 	mainWindowUI.registrationURLLaunchButton.clicked.connect(_testRegistrationURL)
 	mainWindowUI.addPriceButton.clicked.connect(_showNewPriceWindow)
 	
@@ -129,6 +149,9 @@ def addResource(name, callback):
 	
 def addPopulationType(name):
 	populationTypes.append(name)
+	
+def addTagGroup(name, tags):
+	tagGroups.append({'name': name, 'tags': tags})
 
 def setDetails(event):
 	def setDateAndTime(dateTime):
@@ -136,15 +159,13 @@ def setDetails(event):
 		mainWindowUI.startTimeInput.setTime(dateTime)
 		
 	widgetLookup = {
-#		'title': mainWindowUI.titleInput.setText,
+		'title': mainWindowUI.titleInput.setText,
 #		'location': mainWindowUI.locationInput.setText,
-#		'startTime': setDateAndTime,
-#		'stopTime': mainWindowUI.stopTimeInput.setTime,
-#		'description': mainWindowUI.descriptionInput.setText,
+		'startTime': setDateAndTime,
+		'stopTime': mainWindowUI.stopTimeInput.setTime,
+		'description': mainWindowUI.descriptionInput.setText,
 		'registrationURL': mainWindowUI.registrationURLInput.setText,
-#		'registrationLimit': mainWindowUI.registrationLimitInput.setValue,
-#		'resources': [],
-#		'prices': [],
+		'registrationLimit': mainWindowUI.registrationLimitInput.setValue,
 	}
 	for k,v in event.items():
 		if k in widgetLookup:
@@ -219,7 +240,14 @@ def _publishClicked():
 				'description': rsvpType.description,
 				'availability': rsvpType.availability,
 			})
-		
+			
+		event['tags'] = {}
+		for tagGroup in tagGroups:
+			event['tags'][tagGroup['name']] = []
+			for checkbox in tagGroup['checkboxes']:
+				if checkbox.isChecked():
+					event['tags'][tagGroup['name']].append(checkbox.text())
+			
 		for plugin in settings.value('Plugin priority').split(','):
 			for target in targets:
 				if plugin == target['name']:

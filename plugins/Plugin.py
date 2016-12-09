@@ -7,5 +7,5 @@ class Plugin(QtCore.QObject):
 		super().__init__()
 		self.name = name
 		
-	def getSetting(self, setting):
-		return settings.value('plugin-%s/%s' % (self.name, setting))
+	def getSetting(self, setting, default=''):
+		return settings.value('plugin-%s/%s' % (self.name, setting), default)

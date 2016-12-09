@@ -14,12 +14,16 @@ class MakerspaceAuthorizationsPlugin(Plugin):
 				'type': 'text',
 			}
 		]
-
-		ui.addTarget(self.name, self.createEvent)
+		if self.getSetting('Authorization list') != '':
+			auths = self.getSetting('Authorization list').split(',')
+			auths.sort()
+			ui.addTagGroup('Required auth\'s', auths)
+		ui.addTarget(self.name, self.updateDescription)
 		
-	def createEvent(self, event):
-		print(event)
-		pass
+	def updateDescription(self, event):
+		auths = event['tags']['Required auth\'s']
+		if len(auths) > 0:
+			event['description'] += '\n\nRequired authorizations: ' + ','.join(auths)
 
 def load():
 	return MakerspaceAuthorizationsPlugin()
