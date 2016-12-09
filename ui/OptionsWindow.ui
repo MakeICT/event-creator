@@ -19,7 +19,7 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="General">
+     <widget class="QWidget" name="generalOptions">
       <attribute name="title">
        <string>General</string>
       </attribute>
@@ -53,7 +53,7 @@
          </item>
          <item>
           <property name="text">
-           <string>AIX specific equivalent of Central European Time (DFT) UTC+01:00</string>
+           <string>AIX specific equivalent of Central European Time (DFT) UTC+01:00</string>
           </property>
          </item>
          <item>
@@ -68,12 +68,12 @@
          </item>
          <item>
           <property name="text">
-           <string>Amazon Summer Time (Brazil) (AMST) UTC-03:00</string>
+           <string>Amazon Summer Time (Brazil) (AMST) UTC-03:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Amazon Time (Brazil) (AMT) UTC-04:00</string>
+           <string>Amazon Time (Brazil) (AMT) UTC-04:00</string>
           </property>
          </item>
          <item>
@@ -133,17 +133,17 @@
          </item>
          <item>
           <property name="text">
-           <string>Azores Standard Time (AZOT) UTC-01:00</string>
+           <string>Azores Standard Time (AZOT) UTC-01:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Azores Summer Time (AZOST) UTC+00:00</string>
+           <string>Azores Summer Time (AZOST) UTC+00:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Baker Island Time (BIT) UTC-12:00</string>
+           <string>Baker Island Time (BIT) UTC-12:00</string>
           </property>
          </item>
          <item>
@@ -158,12 +158,12 @@
          </item>
          <item>
           <property name="text">
-           <string>Bolivia Time (BOT) UTC-04:00</string>
+           <string>Bolivia Time (BOT) UTC-04:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Bougainville Standard Time (BST) UTC+11:00</string>
+           <string>Bougainville Standard Time (BST) UTC+11:00</string>
           </property>
          </item>
          <item>
@@ -178,12 +178,12 @@
          </item>
          <item>
           <property name="text">
-           <string>British Indian Ocean Time (BIOT) UTC+06:00</string>
+           <string>British Indian Ocean Time (BIOT) UTC+06:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Brunei Time (BDT) UTC+08:00</string>
+           <string>Brunei Time (BDT) UTC+08:00</string>
           </property>
          </item>
          <item>
@@ -198,12 +198,12 @@
          </item>
          <item>
           <property name="text">
-           <string>Central Daylight Time (North America) (CDT) UTC-05:00</string>
+           <string>Central Daylight Time (North America) (CDT) UTC-05:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Central European Summer Time (Cf. HAEC) (CEST) UTC+02:00</string>
+           <string>Central European Summer Time (Cf. HAEC) (CEST) UTC+02:00</string>
           </property>
          </item>
          <item>
@@ -213,27 +213,27 @@
          </item>
          <item>
           <property name="text">
-           <string>Central Indonesia Time (CIT) UTC+08:00</string>
+           <string>Central Indonesia Time (CIT) UTC+08:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Central Standard Time (Australia) (ACST) UTC+09:30</string>
+           <string>Central Standard Time (Australia) (ACST) UTC+09:30</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Central Standard Time (North America) (CST) UTC-06:00</string>
+           <string>Central Standard Time (North America) (CST) UTC-06:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Central Summer Time (Australia) (ACDT) UTC+10:30</string>
+           <string>Central Summer Time (Australia) (ACDT) UTC+10:30</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Central Western Standard Time (Australia) unofficial (CWST) UTC+08:45</string>
+           <string>Central Western Standard Time (Australia) unofficial (CWST) UTC+08:45</string>
           </property>
          </item>
          <item>
@@ -258,7 +258,7 @@
          </item>
          <item>
           <property name="text">
-           <string>Chile Summer Time (CLST) UTC-03:00</string>
+           <string>Chile Summer Time (CLST) UTC-03:00</string>
           </property>
          </item>
          <item>
@@ -273,37 +273,37 @@
          </item>
          <item>
           <property name="text">
-           <string>Choibalsan Standard Time (CHOT) UTC+08:00</string>
+           <string>Choibalsan Standard Time (CHOT) UTC+08:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Choibalsan Summer Time (CHOST) UTC+09:00</string>
+           <string>Choibalsan Summer Time (CHOST) UTC+09:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Christmas Island Time (CXT) UTC+07:00</string>
+           <string>Christmas Island Time (CXT) UTC+07:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Chuuk Time (CHUT) UTC+10:00</string>
+           <string>Chuuk Time (CHUT) UTC+10:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Clipperton Island Standard Time (CIST) UTC-08:00</string>
+           <string>Clipperton Island Standard Time (CIST) UTC-08:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Cocos Islands Time (CCT) UTC+06:30</string>
+           <string>Cocos Islands Time (CCT) UTC+06:30</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Colombia Summer Time (COST) UTC-04:00</string>
+           <string>Colombia Summer Time (COST) UTC-04:00</string>
           </property>
          </item>
          <item>
@@ -313,7 +313,7 @@
          </item>
          <item>
           <property name="text">
-           <string>Cook Island Time (CKT) UTC-10:00</string>
+           <string>Cook Island Time (CKT) UTC-10:00</string>
           </property>
          </item>
          <item>
@@ -323,22 +323,22 @@
          </item>
          <item>
           <property name="text">
-           <string>Cuba Daylight Time (CDT) UTC-04:00</string>
+           <string>Cuba Daylight Time (CDT) UTC-04:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Cuba Standard Time (CST) UTC-05:00</string>
+           <string>Cuba Standard Time (CST) UTC-05:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Davis Time (DAVT) UTC+07:00</string>
+           <string>Davis Time (DAVT) UTC+07:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Dumont d'Urville Time (DDUT) UTC+10:00</string>
+           <string>Dumont d'Urville Time (DDUT) UTC+10:00</string>
           </property>
          </item>
          <item>
@@ -348,22 +348,22 @@
          </item>
          <item>
           <property name="text">
-           <string>Easter Island Standard Time (EAST) UTC-06:00</string>
+           <string>Easter Island Standard Time (EAST) UTC-06:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Easter Island Summer Time (EASST) UTC-05:00</string>
+           <string>Easter Island Summer Time (EASST) UTC-05:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Eastern Caribbean Time (ECT) UTC-04:00</string>
+           <string>Eastern Caribbean Time (ECT) UTC-04:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Eastern Daylight Time (North America) (EDT) UTC-04:00</string>
+           <string>Eastern Daylight Time (North America) (EDT) UTC-04:00</string>
           </property>
          </item>
          <item>
@@ -393,17 +393,17 @@
          </item>
          <item>
           <property name="text">
-           <string>Eastern Standard Time (Australia) (AEST) UTC+10:00</string>
+           <string>Eastern Standard Time (Australia) (AEST) UTC+10:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Eastern Standard Time (North America) (EST) UTC-05:00</string>
+           <string>Eastern Standard Time (North America) (EST) UTC-05:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Eastern Summer Time (Australia) (AEDT) UTC+11:00</string>
+           <string>Eastern Summer Time (Australia) (AEDT) UTC+11:00</string>
           </property>
          </item>
          <item>
@@ -423,17 +423,17 @@
          </item>
          <item>
           <property name="text">
-           <string>Fernando de Noronha Time (FNT) UTC-02:00</string>
+           <string>Fernando de Noronha Time (FNT) UTC-02:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Fiji Time (FJT) UTC+12:00</string>
+           <string>Fiji Time (FJT) UTC+12:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>French Guiana Time (GFT) UTC-03:00</string>
+           <string>French Guiana Time (GFT) UTC-03:00</string>
           </property>
          </item>
          <item>
@@ -448,7 +448,7 @@
          </item>
          <item>
           <property name="text">
-           <string>Gambier Island Time (GIT) UTC-09:00</string>
+           <string>Gambier Island Time (GIT) UTC-09:00</string>
           </property>
          </item>
          <item>
@@ -458,12 +458,12 @@
          </item>
          <item>
           <property name="text">
-           <string>Georgia Standard Time (GET) UTC+04:00</string>
+           <string>Georgia Standard Time (GET) UTC+04:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Gilbert Island Time (GILT) UTC+12:00</string>
+           <string>Gilbert Island Time (GILT) UTC+12:00</string>
           </property>
          </item>
          <item>
@@ -478,7 +478,7 @@
          </item>
          <item>
           <property name="text">
-           <string>Guyana Time (GYT) UTC-04:00</string>
+           <string>Guyana Time (GYT) UTC-04:00</string>
           </property>
          </item>
          <item>
@@ -493,12 +493,12 @@
          </item>
          <item>
           <property name="text">
-           <string>Heard and McDonald Islands Time (HMT) UTC+05:00</string>
+           <string>Heard and McDonald Islands Time (HMT) UTC+05:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Heure Avancée d'Europe Centrale francised name for CEST (HAEC) UTC+02:00</string>
+           <string>Heure Avancée d'Europe Centrale francised name for CEST (HAEC) UTC+02:00</string>
           </property>
          </item>
          <item>
@@ -528,7 +528,7 @@
          </item>
          <item>
           <property name="text">
-           <string>Iran Daylight Time (IRDT) UTC+04:30</string>
+           <string>Iran Daylight Time (IRDT) UTC+04:30</string>
           </property>
          </item>
          <item>
@@ -573,12 +573,12 @@
          </item>
          <item>
           <property name="text">
-           <string>Khovd Standard Time (HOVT) UTC+07:00</string>
+           <string>Khovd Standard Time (HOVT) UTC+07:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Khovd Summer Time (HOVST) UTC+08:00</string>
+           <string>Khovd Summer Time (HOVST) UTC+08:00</string>
           </property>
          </item>
          <item>
@@ -588,7 +588,7 @@
          </item>
          <item>
           <property name="text">
-           <string>Kosrae Time (KOST) UTC+11:00</string>
+           <string>Kosrae Time (KOST) UTC+11:00</string>
           </property>
          </item>
          <item>
@@ -598,27 +598,27 @@
          </item>
          <item>
           <property name="text">
-           <string>Kyrgyzstan time (KGT) UTC+06:00</string>
+           <string>Kyrgyzstan time (KGT) UTC+06:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Line Islands Time (LINT) UTC+14:00</string>
+           <string>Line Islands Time (LINT) UTC+14:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Lord Howe Standard Time (LHST) UTC+10:30</string>
+           <string>Lord Howe Standard Time (LHST) UTC+10:30</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Lord Howe Summer Time (LHST) UTC+11:00</string>
+           <string>Lord Howe Summer Time (LHST) UTC+11:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Macquarie Island Station Time (MIST) UTC+11:00</string>
+           <string>Macquarie Island Station Time (MIST) UTC+11:00</string>
           </property>
          </item>
          <item>
@@ -638,17 +638,17 @@
          </item>
          <item>
           <property name="text">
-           <string>Maldives Time (MVT) UTC+05:00</string>
+           <string>Maldives Time (MVT) UTC+05:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Marquesas Islands Time (MART) UTC-09:30</string>
+           <string>Marquesas Islands Time (MART) UTC-09:30</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Marquesas Islands Time (MIT) UTC-09:30</string>
+           <string>Marquesas Islands Time (MIT) UTC-09:30</string>
           </property>
          </item>
          <item>
@@ -663,17 +663,17 @@
          </item>
          <item>
           <property name="text">
-           <string>Mawson Station Time (MAWT) UTC+05:00</string>
+           <string>Mawson Station Time (MAWT) UTC+05:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Middle European Summer Time Same zone as CEST (MEST) UTC+02:00</string>
+           <string>Middle European Summer Time Same zone as CEST (MEST) UTC+02:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Middle European Time Same zone as CET (MET) UTC+01:00</string>
+           <string>Middle European Time Same zone as CET (MET) UTC+01:00</string>
           </property>
          </item>
          <item>
@@ -683,12 +683,12 @@
          </item>
          <item>
           <property name="text">
-           <string>Mountain Daylight Time (North America) (MDT) UTC-06:00</string>
+           <string>Mountain Daylight Time (North America) (MDT) UTC-06:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Mountain Standard Time (North America) (MST) UTC-07:00</string>
+           <string>Mountain Standard Time (North America) (MST) UTC-07:00</string>
           </property>
          </item>
          <item>
@@ -703,7 +703,7 @@
          </item>
          <item>
           <property name="text">
-           <string>New Caledonia Time (NCT) UTC+11:00</string>
+           <string>New Caledonia Time (NCT) UTC+11:00</string>
           </property>
          </item>
          <item>
@@ -738,7 +738,7 @@
          </item>
          <item>
           <property name="text">
-           <string>Norfolk Time (NFT) UTC+11:00</string>
+           <string>Norfolk Time (NFT) UTC+11:00</string>
           </property>
          </item>
          <item>
@@ -753,12 +753,12 @@
          </item>
          <item>
           <property name="text">
-           <string>Pacific Daylight Time (North America) (PDT) UTC-07:00</string>
+           <string>Pacific Daylight Time (North America) (PDT) UTC-07:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Pacific Standard Time (North America) (PST) UTC-08:00</string>
+           <string>Pacific Standard Time (North America) (PST) UTC-08:00</string>
           </property>
          </item>
          <item>
@@ -768,17 +768,17 @@
          </item>
          <item>
           <property name="text">
-           <string>Papua New Guinea Time (PGT) UTC+10:00</string>
+           <string>Papua New Guinea Time (PGT) UTC+10:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Paraguay Summer Time (South America) (PYST) UTC-03:00</string>
+           <string>Paraguay Summer Time (South America) (PYST) UTC-03:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Paraguay Time (South America) (PYT) UTC-04:00</string>
+           <string>Paraguay Time (South America) (PYT) UTC-04:00</string>
           </property>
          </item>
          <item>
@@ -798,37 +798,37 @@
          </item>
          <item>
           <property name="text">
-           <string>Phoenix Island Time (PHOT) UTC+13:00</string>
+           <string>Phoenix Island Time (PHOT) UTC+13:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Pohnpei Standard Time (PONT) UTC+11:00</string>
+           <string>Pohnpei Standard Time (PONT) UTC+11:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Réunion Time (RET) UTC+04:00</string>
+           <string>Réunion Time (RET) UTC+04:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Rothera Research Station Time (ROTT) UTC-03:00</string>
+           <string>Rothera Research Station Time (ROTT) UTC-03:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Saint Pierre and Miquelon Daylight time (PMDT) UTC-02:00</string>
+           <string>Saint Pierre and Miquelon Daylight time (PMDT) UTC-02:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Saint Pierre and Miquelon Standard Time (PMST) UTC-03:00</string>
+           <string>Saint Pierre and Miquelon Standard Time (PMST) UTC-03:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Sakhalin Island time (SAKT) UTC+11:00</string>
+           <string>Sakhalin Island time (SAKT) UTC+11:00</string>
           </property>
          </item>
          <item>
@@ -848,7 +848,7 @@
          </item>
          <item>
           <property name="text">
-           <string>Showa Station Time (SYOT) UTC+03:00</string>
+           <string>Showa Station Time (SYOT) UTC+03:00</string>
           </property>
          </item>
          <item>
@@ -863,7 +863,7 @@
          </item>
          <item>
           <property name="text">
-           <string>Solomon Islands Time (SBT) UTC+11:00</string>
+           <string>Solomon Islands Time (SBT) UTC+11:00</string>
           </property>
          </item>
          <item>
@@ -888,17 +888,17 @@
          </item>
          <item>
           <property name="text">
-           <string>Suriname Time (SRT) UTC-03:00</string>
+           <string>Suriname Time (SRT) UTC-03:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Tahiti Time (TAHT) UTC-10:00</string>
+           <string>Tahiti Time (TAHT) UTC-10:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Tajikistan Time (TJT) UTC+05:00</string>
+           <string>Tajikistan Time (TJT) UTC+05:00</string>
           </property>
          </item>
          <item>
@@ -908,17 +908,17 @@
          </item>
          <item>
           <property name="text">
-           <string>Timor Leste Time (TLT) UTC+09:00</string>
+           <string>Timor Leste Time (TLT) UTC+09:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Tokelau Time (TKT) UTC+13:00</string>
+           <string>Tokelau Time (TKT) UTC+13:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Tonga Time (TOT) UTC+13:00</string>
+           <string>Tonga Time (TOT) UTC+13:00</string>
           </property>
          </item>
          <item>
@@ -928,42 +928,42 @@
          </item>
          <item>
           <property name="text">
-           <string>Turkmenistan Time (TMT) UTC+05:00</string>
+           <string>Turkmenistan Time (TMT) UTC+05:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Tuvalu Time (TVT) UTC+12:00</string>
+           <string>Tuvalu Time (TVT) UTC+12:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Ulaanbaatar Standard Time (ULAT) UTC+08:00</string>
+           <string>Ulaanbaatar Standard Time (ULAT) UTC+08:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Ulaanbaatar Summer Time (ULAST) UTC+09:00</string>
+           <string>Ulaanbaatar Summer Time (ULAST) UTC+09:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Uruguay Standard Time (UYT) UTC-03:00</string>
+           <string>Uruguay Standard Time (UYT) UTC-03:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Uruguay Summer Time (UYST) UTC-02:00</string>
+           <string>Uruguay Summer Time (UYST) UTC-02:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Uzbekistan Time (UZT) UTC+05:00</string>
+           <string>Uzbekistan Time (UZT) UTC+05:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Vanuatu Time (VUT) UTC+11:00</string>
+           <string>Vanuatu Time (VUT) UTC+11:00</string>
           </property>
          </item>
          <item>
@@ -978,12 +978,12 @@
          </item>
          <item>
           <property name="text">
-           <string>Volgograd Time (VOLT) UTC+04:00</string>
+           <string>Volgograd Time (VOLT) UTC+04:00</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Vostok Station Time (VOST) UTC+06:00</string>
+           <string>Vostok Station Time (VOST) UTC+06:00</string>
           </property>
          </item>
          <item>
@@ -1033,6 +1033,68 @@
          </item>
         </widget>
        </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Plugin priority</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QListWidget" name="pluginPriorityList">
+           <property name="sortingEnabled">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_2">
+           <item>
+            <spacer name="verticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QToolButton" name="pluginPriorityUp">
+             <property name="text">
+              <string>▲</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QToolButton" name="pluginPriorityDown">
+             <property name="text">
+              <string>▼</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
       </layout>
      </widget>
     </widget>
@@ -1058,8 +1120,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
+     <x>257</x>
+     <y>380</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -1074,8 +1136,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
+     <x>325</x>
+     <y>380</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>
