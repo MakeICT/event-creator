@@ -187,11 +187,7 @@ p, li { white-space: pre-wrap; }
        <layout class="QGridLayout" name="postToGrid"/>
       </item>
       <item row="7" column="1">
-       <layout class="QVBoxLayout" name="priceList">
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_2"/>
-        </item>
-       </layout>
+       <layout class="QVBoxLayout" name="priceList"/>
       </item>
       <item row="7" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -216,7 +212,7 @@ p, li { white-space: pre-wrap; }
          </spacer>
         </item>
         <item>
-         <widget class="QToolButton" name="toolButton">
+         <widget class="QToolButton" name="addPriceButton">
           <property name="text">
            <string>+</string>
           </property>

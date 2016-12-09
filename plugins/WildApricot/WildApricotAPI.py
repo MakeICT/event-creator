@@ -103,7 +103,6 @@ class WaApiClient(object):
 		request = urllib.request.Request(api_url, method=method)
 		if api_request_object is not None:
 			request.data = json.dumps(api_request_object).encode()
-			print(request.data)
 
 		request.add_header("Content-Type", "application/json")
 		request.add_header("Accept", "application/json")

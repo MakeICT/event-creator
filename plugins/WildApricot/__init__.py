@@ -14,22 +14,17 @@ class WildApricotPlugin(QtCore.QObject):
 				'name': 'API Key',
 				'type': 'text',
 			},{
-				'name': 'Client ID',
-				'type': 'text',
-			},{
-				'name': 'Client secret',
-				'type': 'text',
-			},{
-				'name': 'Customer ID',
+				'name': 'Level IDs for members',
 				'type': 'text',
 			}
 		]
 
 		ui.addTarget('WildApricot', self.createEvent)
-		
+		ui.addPopulationType('Members')
+	
 	def createEvent(self, event):
 		api = WaApiClient()
-		api.authenticate_with_apikey(self._getSetting('API Key'))
+		api.authenticate_with_apikey(self.getSetting('API Key'))
 
 		# @todo: add authorizations to description
 		if settings.value('timezone') is not None and settings.value('timezone') != '':
@@ -44,7 +39,7 @@ class WildApricotPlugin(QtCore.QObject):
 			"EndDate": event['stopTime'].toString(QtCore.Qt.ISODate) + timezoneOffset,
 			"Location": event['location'],
 			"RegistrationsLimit": event['registrationLimit'],
-			"RegistrationEnabled": False,
+			"RegistrationEnabled": True,
 			"StartTimeSpecified": True,
 			"EndTimeSpecified": True,
 			"Details": {
@@ -58,10 +53,34 @@ class WildApricotPlugin(QtCore.QObject):
 		}
 		
 		eventID = api.execute_request('Events', eventData)
-		print(eventID)
 
+		for rsvpType in event['prices']:
+			registrationTypeData = {
+				"EventId": eventID,
+				"Name": rsvpType['name'],
+				"BasePrice": rsvpType['price'],
+				"Description": rsvpType['description'],
+				"IsEnabled": True,
+				"GuestRegistrationPolicy": "Disabled",
+				"MultipleRegistrationAllowed": False,
+				"WaitlistBehaviour": "Disabled",
+				"UnavailabilityPolicy": "Show"
+			}
+			
+			for populationType in rsvpType['availability']:
+				if populationType == 'Members':
+					registrationTypeData['Availability'] = 'MembersOnly'
+					registrationTypeData['AvailableForMembershipLevels'] = []
+					
+					ids = self.getSetting('Level IDs for members').split(',')
+					for id in ids:
+						registrationTypeData['AvailableForMembershipLevels'].append({'Id': id})
+				else:
+					registrationTypeData['Availability'] = 'Everyone'
+			
+			api.execute_request('EventRegistrationTypes', registrationTypeData)
 
-	def _getSetting(self, setting):
+	def getSetting(self, setting):
 		return settings.value('plugin-WildApricot/%s' % setting)
 	
 def load():
