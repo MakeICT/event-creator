@@ -63,8 +63,10 @@ def showOptionsDialog():
 	optionsDialogUI.timezone.setCurrentIndex(optionsDialogUI.timezone.findText(settings.value('timezone')))
 	optionsDialogUI.timezone.currentIndexChanged[str].connect(partial(settings.setValue, 'timezone'))
 	
-	
+	loadedPlugins = []
 	for pluginName,plugin in plugins.loaded.items():
+		loadedPlugins.append(pluginName)
+		
 		tab = QtGui.QWidget()
 		layout = QtGui.QFormLayout(tab)
 		layout.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
@@ -82,6 +84,40 @@ def showOptionsDialog():
 			
 		optionsDialogUI.tabWidget.addTab(tab, pluginName)
 		
+	if settings.value('Plugin priority') is not None:
+		savedPriorities = settings.value('Plugin priority').split(',')
+		for p in savedPriorities:
+			optionsDialogUI.pluginPriorityList.addItem(p)
+			loadedPlugins.remove(p)
+		
+	for p in loadedPlugins:
+		optionsDialogUI.pluginPriorityList.addItem(p)
+		
+	def savePriorities():
+		priorityList = ''
+		for index in range(optionsDialogUI.pluginPriorityList.count()):
+			priorityList += optionsDialogUI.pluginPriorityList.item(index).text() + ','
+			
+		settings.setValue('Plugin priority', priorityList[:-1])
+		
+	def increasePriority():
+		row = optionsDialogUI.pluginPriorityList.currentRow()
+		if row > 0:
+			item = optionsDialogUI.pluginPriorityList.takeItem(row)
+			optionsDialogUI.pluginPriorityList.insertItem(row-1, item)
+			optionsDialogUI.pluginPriorityList.setCurrentRow(row-1)
+			savePriorities()
+		
+	def decreasePriority():
+		row = optionsDialogUI.pluginPriorityList.currentRow()
+		if row < optionsDialogUI.pluginPriorityList.count():
+			item = optionsDialogUI.pluginPriorityList.takeItem(row)
+			optionsDialogUI.pluginPriorityList.insertItem(row+1, item)
+			optionsDialogUI.pluginPriorityList.setCurrentRow(row+1)
+			savePriorities()
+		
+	optionsDialogUI.pluginPriorityUp.clicked.connect(increasePriority)
+	optionsDialogUI.pluginPriorityDown.clicked.connect(decreasePriority)
 	
 	dialog.show()
 

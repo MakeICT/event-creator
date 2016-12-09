@@ -7,7 +7,7 @@ from config import settings
 
 import ui
 
-dirs = ['WildApricot', 'GoogleCalendar', 'Facebook', 'Meetup', 'Gmail']
+dirs = ['WildApricot', 'GoogleCalendar', 'Facebook', 'Meetup', 'Gmail', 'MakerspaceAuthorizations']
 
 loaded = {}
 
