@@ -8,19 +8,26 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.events import EventFiringWebDriver, AbstractEventListener
 from selenium.common.exceptions import *
 
+driver = None
+
 try:
 	basePath = sys._MEIPASS
 except:
 	basePath = os.path.abspath('.')
 
-try:
-	if platform.system() == 'Linux':
-		driver = webdriver.Chrome('%s/chromedriver' % basePath)
-	else:
-		driver = webdriver.Chrome('%s/chromedriver.exe' % basePath)
-except:
-	print('Chrome driver failed. Trying Firefox... this is untested')
-	driver = webdriver.Firefox()
+def startSelenium():
+	global driver
+	if driver is None:
+		try:
+			if platform.system() == 'Linux':
+				driver = webdriver.Chrome('%s/chromedriver' % basePath)
+			else:
+				driver = webdriver.Chrome('%s/chromedriver.exe' % basePath)
+		except:
+			print('Chrome driver failed. Trying Firefox... this is untested')
+			driver = webdriver.Firefox()
+			
+	return driver
 
 def waitForID(id, timeout=9999):
 	try:
