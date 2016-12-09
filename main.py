@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+
 from PySide import QtCore, QtGui
 
 import plugins

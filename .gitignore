@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 ui/*.py
+settings.ini
 
 # Distribution / packaging
 env/
