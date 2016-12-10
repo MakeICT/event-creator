@@ -161,8 +161,8 @@ def setDetails(event):
 	widgetLookup = {
 		'title': mainWindowUI.titleInput.setText,
 #		'location': mainWindowUI.locationInput.setText,
-		'startTime': setDateAndTime,
-		'stopTime': mainWindowUI.stopTimeInput.setTime,
+#		'startTime': setDateAndTime,
+#		'stopTime': mainWindowUI.stopTimeInput.setTime,
 		'description': mainWindowUI.descriptionInput.setText,
 		'registrationURL': mainWindowUI.registrationURLInput.setText,
 		'registrationLimit': mainWindowUI.registrationLimitInput.setValue,
