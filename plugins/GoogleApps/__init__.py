@@ -38,7 +38,11 @@ class GoogleAppsPlugin(Plugin):
 			flow = OAuth2WebServerFlow(
 				client_id = self.getSetting('Client ID'),
 				client_secret = self.getSetting('Client secret'),
-				scope = 'https://www.googleapis.com/auth/calendar',
+				scope = [
+					'https://www.googleapis.com/auth/calendar',
+					'https://www.googleapis.com/auth/gmail.compose',
+					'https://www.googleapis.com/auth/gmail.send',
+				],
 				redirect_uri = 'urn:ietf:wg:oauth:2.0:oob',
 			)
 			

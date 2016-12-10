@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import httplib2
-import os
 
 from PySide import QtGui, QtCore
 
