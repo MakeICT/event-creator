@@ -1111,6 +1111,14 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>timezone</tabstop>
+  <tabstop>pluginPriorityList</tabstop>
+  <tabstop>pluginPriorityUp</tabstop>
+  <tabstop>pluginPriorityDown</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

@@ -324,6 +324,19 @@ p, li { white-space: pre-wrap; }
    </property>
   </action>
  </widget>
+ <tabstops>
+  <tabstop>titleInput</tabstop>
+  <tabstop>locationInput</tabstop>
+  <tabstop>dateInput</tabstop>
+  <tabstop>startTimeInput</tabstop>
+  <tabstop>stopTimeInput</tabstop>
+  <tabstop>descriptionInput</tabstop>
+  <tabstop>registrationURLInput</tabstop>
+  <tabstop>registrationURLLaunchButton</tabstop>
+  <tabstop>registrationLimitInput</tabstop>
+  <tabstop>addPriceButton</tabstop>
+  <tabstop>publishButton</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

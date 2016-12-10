@@ -264,6 +264,8 @@ def _publishClicked():
 class PriceSummaryListWidget(QtGui.QWidget):
 	def __init__(self, parent=None, valuesUI=None):
 		super().__init__(parent)
+		#@TODO: make price summary delete button work
+		#@TODO: make price summary edit button work
 	
 		if valuesUI is not None:
 			self.name = valuesUI.nameInput.text()
