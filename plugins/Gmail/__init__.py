@@ -18,16 +18,19 @@ class GmailPlugin(Plugin):
 
 		self.options = [
 			{
-				'name': 'Subject format',
-				'type': 'text',
-			},{
+#				'name': 'Subject format', #@TODO: allow user to format gmail subject string
+#				'type': 'text',
+#			},{
+#				'name': 'Sender', #@TODO: allow user to specify gmail FROM address
+#				'type': 'text',
+#			},{
 				'name': 'Destinations',
 				'type': 'text',
 			},{
 				'name': 'Date/Time format',
 				'type': 'text',
 #			},{
-#				'name': 'Leave as draft',
+#				'name': 'Leave as draft', #@TODO: allow gmail messages to be sent right away
 #				'type': 'yesno',
 			}
 		]

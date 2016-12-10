@@ -173,19 +173,6 @@ p, li { white-space: pre-wrap; }
         </property>
        </widget>
       </item>
-      <item row="8" column="1">
-       <layout class="QGridLayout" name="resourceGrid"/>
-      </item>
-      <item row="9" column="0">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>Post to</string>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="1">
-       <layout class="QGridLayout" name="postToGrid"/>
-      </item>
       <item row="7" column="1">
        <layout class="QVBoxLayout" name="priceList"/>
       </item>
@@ -249,6 +236,30 @@ p, li { white-space: pre-wrap; }
          </widget>
         </item>
        </layout>
+      </item>
+      <item row="8" column="1">
+       <layout class="QGridLayout" name="resourceGrid"/>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="Line" name="line">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QFormLayout" name="formLayout_2">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Post to</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <layout class="QGridLayout" name="postToGrid"/>
       </item>
      </layout>
     </item>

@@ -7,6 +7,8 @@ from config import settings
 
 import ui
 
+#@TODO: allow plugins to be loaded/reloaded on the fly from the plugins folder
+
 dirs = ['GoogleApps', 'WildApricot', 'GoogleCalendar', 'Facebook', 'Meetup', 'Gmail', 'MakerspaceAuthorizations']
 
 loaded = {}

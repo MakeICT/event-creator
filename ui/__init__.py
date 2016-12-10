@@ -32,6 +32,8 @@ def getMainWindow():
 
 	if len(targets) == 0:
 		mainWindowUI.postToGrid.addWidget(QtGui.QLabel('No targets :('))
+		
+	#@TODO: sort targets according to priority when adding them to UI
 	for target in targets:
 		index = mainWindowUI.postToGrid.count()
 		
@@ -62,16 +64,14 @@ def getMainWindow():
 			
 			tagGrid.addWidget(checkbox, index / 2, index % 2, 1, 1)
 
-		mainWindowUI.formLayout.insertRow(
-			mainWindowUI.formLayout.rowCount(),
-			tagGroup['name'],
-			tagGrid
-		)
+		mainWindowUI.formLayout.addRow(tagGroup['name'], tagGrid)
 		
 	mainWindowUI.registrationURLLaunchButton.clicked.connect(_testRegistrationURL)
 	mainWindowUI.addPriceButton.clicked.connect(_showNewPriceWindow)
 	
 	return mainWindow
+	
+#@TODO: allow plugins to add locations to dropdown
 
 def showOptionsDialog():
 	global optionsDialogUI, mainWindow
@@ -94,6 +94,8 @@ def showOptionsDialog():
 		for counter,option in enumerate(plugin.options):
 			label = QtGui.QLabel(option['name'], tab)
 			lineEdit = QtGui.QLineEdit(tab)
+			#@TODO: respect option['type'] setting to create different controls in settings dialog
+			
 			layout.setWidget(counter, QtGui.QFormLayout.LabelRole, label)
 			layout.setWidget(counter, QtGui.QFormLayout.FieldRole, lineEdit)
 			
@@ -205,6 +207,9 @@ def _publishClicked():
 		print('Do cancel...')
 		mainWindowUI.publishButton.setText('Publish')
 	else:
+		#@TODO: Move processing off UI thread
+		#@TODO: Show and update progress bar while processing
+		#@TODO: Make cancel button work in UI
 		if settings.value('Plugin priority') is None or settings.value('Plugin priority') == '':
 			QtGui.QMessageBox.warning(None, 'Options not configured', 'Plugin priority must be configured. Please see general options.')
 			return

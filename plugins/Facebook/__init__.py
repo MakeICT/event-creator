@@ -26,6 +26,8 @@ class FacebookPlugin(Plugin):
 				'name': 'Password',
 				'type': 'password',
 			}
+			#@TODO: Allow option for publishing FB events immediately
+			#@TODO: Allow option for FB plugin to overwrite the registration URL
 		]
 
 		ui.addTarget(self.name, self.createEvent)

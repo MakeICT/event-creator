@@ -3,22 +3,20 @@
 import httplib2
 
 from PySide import QtGui, QtCore
-
 from apiclient import discovery
-
-import ui
 
 from ..Plugin import Plugin
 from plugins import GoogleApps
-
 from config import settings
+
+import ui
 
 class GoogleCalendarPlugin(Plugin):
 	def __init__(self):
 		super().__init__('GoogleCalendar')
 		
 		self.options = [{
-			'name': 'Calendar ID',
+			'name': 'Calendar ID', #@TODO: Allow user to specify multiple calendar ID's
 			'type': 'text',
 		}]
 
@@ -33,6 +31,8 @@ class GoogleCalendarPlugin(Plugin):
 			timezoneOffset = settings.value('timezone').split(' UTC')[1]
 		else:
 			timezoneOffset = ''
+			
+		#@TODO: add link to registration URL to google calendar event
 
 		event = {
 			'summary': event['title'],

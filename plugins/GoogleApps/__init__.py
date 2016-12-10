@@ -34,6 +34,7 @@ class GoogleAppsPlugin(Plugin):
 		]
 		
 	def _getCredentials(self):
+		# @TODO: consider saving Google credentials to a file so authorization can persist across executions
 		if self.credentials is None or self.credentials.invalid:
 			flow = OAuth2WebServerFlow(
 				client_id = self.getSetting('Client ID'),

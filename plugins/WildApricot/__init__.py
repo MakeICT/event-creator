@@ -32,6 +32,7 @@ class WildApricotPlugin(Plugin):
 		ui.addPopulationType('Members')
 	
 	def createEvent(self, event):
+		#@TODO: open ticket with WildApricot so that we can have an API endpoint for enabling email reminders
 		api = WaApiClient()
 		api.authenticate_with_apikey(self.getSetting('API Key'))
 
@@ -40,7 +41,6 @@ class WildApricotPlugin(Plugin):
 			timezoneOffset = settings.value('timezone').split(' UTC')[1]
 		else:
 			timezoneOffset = ''
-
 		
 		eventData = {
 			"Name": 'TEST: ' + event['title'],
@@ -92,7 +92,5 @@ class WildApricotPlugin(Plugin):
 		if config.checkBool(self.getSetting('Use this as registration URL')):
 			event['registrationURL'] = self.getSetting('Registration URL format') % eventID
 
-
-	
 def load():
 	return WildApricotPlugin()
