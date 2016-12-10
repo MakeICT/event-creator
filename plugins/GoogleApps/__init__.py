@@ -43,6 +43,7 @@ class GoogleAppsPlugin(Plugin):
 					'https://www.googleapis.com/auth/calendar',
 					'https://www.googleapis.com/auth/gmail.compose',
 					'https://www.googleapis.com/auth/gmail.send',
+					'https://www.googleapis.com/auth/admin.directory.resource.calendar',
 				],
 				redirect_uri = 'urn:ietf:wg:oauth:2.0:oob',
 			)

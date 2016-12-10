@@ -15,7 +15,6 @@ optionsDialog = None
 optionsDialogUI = None
 
 targets = []
-resources = []
 tagGroups = []
 
 populationTypes = ['Everybody']
@@ -46,25 +45,8 @@ def getMainWindow():
 		
 	mainWindowUI.publishButton.clicked.connect(_publishClicked)
 	
-	if len(resources) == 0:
-		mainWindowUI.resourceGrid.addWidget(QtGui.QLabel('No resources :('))
-	for resource in resources:
-		pass
-		#index = mainWindowUI.resourceGrid.count()
-		
 	for tagGroup in tagGroups:
-		tagGroup['checkboxes'] = []
-		tagGrid = QtGui.QGridLayout()
-		for tag in tagGroup['tags']:
-			index = tagGrid.count()
-			
-			checkbox = QtGui.QCheckBox(mainWindowUI.centralwidget)
-			checkbox.setText(tag)
-			tagGroup['checkboxes'].append(checkbox)
-			
-			tagGrid.addWidget(checkbox, index / 2, index % 2, 1, 1)
-
-		mainWindowUI.formLayout.addRow(tagGroup['name'], tagGrid)
+		_layoutTagGroup(tagGroup)
 		
 	mainWindowUI.registrationURLLaunchButton.clicked.connect(_testRegistrationURL)
 	mainWindowUI.addPriceButton.clicked.connect(_showNewPriceWindow)
@@ -146,14 +128,45 @@ def showOptionsDialog():
 def addTarget(name, callback):
 	targets.append({'name': name, 'callback': callback})
 
-def addResource(name, callback):
-	pass
-	
 def addPopulationType(name):
 	populationTypes.append(name)
 	
 def addTagGroup(name, tags):
-	tagGroups.append({'name': name, 'tags': tags})
+	group = {'name': name, 'tags': tags}
+	tagGroups.append(group)
+	if mainWindowUI is not None:
+		_layoutTagGroup(group)
+	
+def _layoutTagGroup(tagGroup):
+	tagGroup['checkboxes'] = []
+	tagGrid = QtGui.QGridLayout()
+	for tag in tagGroup['tags']:
+		index = tagGrid.count()
+		
+		checkbox = QtGui.QCheckBox(mainWindowUI.centralwidget)
+		checkbox.setText(tag)
+		tagGroup['checkboxes'].append(checkbox)
+		
+		tagGrid.addWidget(checkbox, index / 2, index % 2, 1, 1)
+
+	mainWindowUI.tagForm.addRow(tagGroup['name'], tagGrid)
+		
+def removeTagGroup(name):
+	for group in tagGroups:
+		if group['name'] == name:
+			tagGroups.remove(group)
+			break
+			
+	if mainWindowUI is not None:
+		for i in range(mainWindowUI.tagForm.rowCount()):
+			labelItem = mainWindowUI.tagForm.itemAt(i, QtGui.QFormLayout.LabelRole)
+			gridItem = mainWindowUI.tagForm.itemAt(i,  QtGui.QFormLayout.FieldRole)
+			if labelItem is not None and name == labelItem.widget().text():
+				mainWindowUI.tagForm.takeAt(i).widget().deleteLater()
+				while gridItem.count() > 0:
+					gridItem.takeAt(0).widget().deleteLater()
+					
+				break
 
 def setDetails(event):
 	def setDateAndTime(dateTime):
@@ -229,15 +242,10 @@ def _publishClicked():
 			'description': mainWindowUI.descriptionInput.toPlainText(),
 			'registrationURL': mainWindowUI.registrationURLInput.text(),
 			'registrationLimit': mainWindowUI.registrationLimitInput.value(),
-			'resources': [],
 			'prices': [],
+			'tags': {},
 		}
 
-		for checkbox in _getChildren(mainWindowUI.resourceGrid):
-			if type(checkbox) == QtGui.QCheckBox:
-				if checkbox.isChecked():
-					event['resources'].append(checkbox.text())
-		
 		for rsvpType in _getChildren(mainWindowUI.priceList):
 			event['prices'].append({
 				'name': rsvpType.name,
@@ -246,7 +254,6 @@ def _publishClicked():
 				'availability': rsvpType.availability,
 			})
 			
-		event['tags'] = {}
 		for tagGroup in tagGroups:
 			event['tags'][tagGroup['name']] = []
 			for checkbox in tagGroup['checkboxes']:
