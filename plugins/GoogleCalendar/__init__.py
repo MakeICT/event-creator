@@ -16,9 +16,10 @@ class GoogleCalendarPlugin(Plugin):
 		super().__init__('GoogleCalendar')
 		
 		self.options = [{
-			'name': 'Calendar ID', #@TODO: Allow user to specify multiple calendar ID's
+			'name': 'Calendar ID', #@TODO: Allow user to specify multiple google calendar ID's
 			'type': 'text',
 		}]
+		#@TODO: Add option for "pre" event/setup event on Google Calendar (we will use this for checkins)
 
 		ui.addTarget(self.name, self.createEvent)
 		
