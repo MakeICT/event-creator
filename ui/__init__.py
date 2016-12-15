@@ -260,6 +260,8 @@ def _publishClicked():
 			'registrationLimit': mainWindowUI.registrationLimitInput.value(),
 			'prices': [],
 			'tags': {},
+			'isFree': True,
+			'priceDescription': '',
 		}
 
 		for rsvpType in _getChildren(mainWindowUI.priceList):
@@ -270,6 +272,25 @@ def _publishClicked():
 				'availability': rsvpType.availability,
 			})
 			
+		priceDescription = 'The price for this event is'
+		for i, priceGroup in enumerate(event['prices']):
+			if priceGroup['price'] > 0:
+				event['isFree'] = False
+				priceDescription += ' $%0.2f for %s' % (priceGroup['price'], priceGroup['name'])
+			else:
+				priceDescription += ' FREE for ' + priceGroup['name']
+				
+			if len(event['prices']) > 2:
+				if i < len(event['prices'])-1:
+					priceDescription += ','
+			if len(event['prices']) > 1 and i == len(event['prices'])-2:
+				priceDescription += ' and'
+
+		if event['isFree']:
+			event['priceDescription'] = 'This event is FREE!'
+		else:
+			event['priceDescription'] = priceDescription + '.'
+
 		for tagGroup in tagGroups:
 			event['tags'][tagGroup['name']] = []
 			for checkbox in tagGroup['checkboxes']:

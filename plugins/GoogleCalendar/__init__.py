@@ -50,10 +50,6 @@ class GoogleCalendarPlugin(Plugin):
 		self._setResourceObjects(response['items'])
 		
 	def createEvent(self, event):
-		credentials = GoogleApps.getCredentials()
-		http = credentials.authorize(httplib2.Http())
-		service = discovery.build('calendar', 'v3', http=http)
-		
 		if settings.value('timezone') is not None and settings.value('timezone') != '':
 			timezoneOffset = settings.value('timezone').split(' UTC')[1]
 		else:
@@ -73,22 +69,7 @@ class GoogleCalendarPlugin(Plugin):
 		else:
 			description = event['description']
 			
-		isFree = True
-		priceDescription = 'The price for this event is'
-		for i, priceGroup in enumerate(event['prices']):
-			if priceGroup['price'] > 0:
-				isFree = False
-				priceDescription += ' $%0.2d for %s' % (priceGroup['price'], priceGroup['name'])
-			else:
-				priceDescription += ' FREE for ' + priceGroup['name']
-				
-			if len(event['prices']) > 2 and i < len(event['prices'])-1:
-				priceDescription += ','
-
-		if isFree:
-			description += '\n\nThis event is FREE!'
-		else:
-			description += '\n\n' + priceDescription
+		description += '\n\n' + event['priceDescription']
 
 		eventData = {
 			'summary': event['title'],
@@ -99,6 +80,9 @@ class GoogleCalendarPlugin(Plugin):
 			'attendees': selectedResources
 		}
 		
+		credentials = GoogleApps.getCredentials()
+		http = credentials.authorize(httplib2.Http())
+		service = discovery.build('calendar', 'v3', http=http)
 		event = service.events().insert(calendarId=self.getSetting('Calendar ID', 'primary'), body=eventData).execute()
 		
 def load():
