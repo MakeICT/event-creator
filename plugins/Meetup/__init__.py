@@ -22,6 +22,12 @@ class MeetupPlugin(Plugin):
 			},{
 				'name': 'Use this as registration URL',
 				'type': 'yesno',
+			},{
+				'name': 'Title prepend',
+				'type': 'text',
+			},{
+				'name': 'Title append',
+				'type': 'text',
 			}
 		]
 		#@TODO: Allow option for publishing meetup events immediately
@@ -40,9 +46,19 @@ class MeetupPlugin(Plugin):
 			
 		description += event['description']
 		
+		prepend = self.getSetting('Title prepend', '')
+		append = self.getSetting('Title append', '')
+		if prepend != '':
+			title = prepend + ' ' + event['title']
+		else:
+			title = event['title']
+			
+		if append != '':
+			title += ' ' + append
+		
 		meetupEvent = api.CreateEvent({
 			'group_id': group.id,
-			'name': event['title'],
+			'name': title,
 			'description': description,
 			'time': event['startTime'].toTime_t() * 1000,
 			'duration': event['startTime'].msecsTo(event['stopTime']),
