@@ -40,7 +40,6 @@ class GoogleCalendarPlugin(Plugin):
 				resources.append(resource['resourceName'])
 			ui.addTagGroup('Resources', resources)
 	
-	#@TODO: Make this available through the UI
 	def refreshResources(self):
 		credentials = GoogleApps.getCredentials()
 		http = credentials.authorize(httplib2.Http())
