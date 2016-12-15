@@ -29,6 +29,7 @@ class GoogleCalendarPlugin(Plugin):
 
 		self._setResourceObjects(json.loads(self.getSetting('Resources', '[]')))
 		ui.addTarget(self.name, self.createEvent)
+		ui.addAction(self.name, 'Refresh resources', self.refreshResources)
 	
 	def _setResourceObjects(self, objs):
 		ui.removeTagGroup('Resources')

@@ -16,6 +16,7 @@ optionsDialogUI = None
 
 targets = []
 tagGroups = []
+actions = {}
 
 populationTypes = ['Everybody']
 
@@ -42,6 +43,15 @@ def getMainWindow():
 		
 		mainWindowUI.postToGrid.addWidget(checkbox, index / 2, index % 2, 1, 1)
 		mainWindowUI.progressBar.hide()
+		
+	for group,actionList in actions.items():
+		menu = QtGui.QMenu(group, mainWindowUI.menuActions)
+		mainWindowUI.menuActions.addMenu(menu)
+		for action in actionList:
+			menuAction = QtGui.QAction(mainWindow)
+			menuAction.triggered.connect(action['callback'])
+			menuAction.setText(action['name'])
+			menu.addAction(menuAction)		
 		
 	mainWindowUI.publishButton.clicked.connect(_publishClicked)
 	
@@ -125,6 +135,12 @@ def showOptionsDialog():
 	
 	dialog.show()
 
+def addAction(group, name, callback):
+	if group not in actions:
+		actions[group] = []
+		
+	actions[group].append({'name': name, 'callback': callback})
+
 def addTarget(name, callback):
 	targets.append({'name': name, 'callback': callback})
 
@@ -160,7 +176,7 @@ def removeTagGroup(name):
 	if mainWindowUI is not None:
 		for i in range(mainWindowUI.tagForm.rowCount()):
 			labelItem = mainWindowUI.tagForm.itemAt(i, QtGui.QFormLayout.LabelRole)
-			gridItem = mainWindowUI.tagForm.itemAt(i,  QtGui.QFormLayout.FieldRole)
+			gridItem = mainWindowUI.tagForm.itemAt(i, QtGui.QFormLayout.FieldRole)
 			if labelItem is not None and name == labelItem.widget().text():
 				mainWindowUI.tagForm.takeAt(i).widget().deleteLater()
 				while gridItem.count() > 0:
