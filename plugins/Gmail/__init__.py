@@ -51,21 +51,25 @@ class GmailPlugin(Plugin):
 			
 		dateTimeFormat = self.getSetting('Date/Time format', 'yyyy MMM dd - h:mm ap')
 
-		htmlBody = '<table>'
+		htmlBody = '<html><body><table>'
 		htmlBody += '<tr><td>Event:</td><td><strong>' + event['title'] + '</strong></td></tr>'
 		htmlBody += '<tr><td>Location:</td><td>' + event['location'] + '</td></tr>'
 		htmlBody += '<tr><td>Starting:</td><td>' + event['startTime'].toString(dateTimeFormat) + tzName + '</td></tr>'
 		htmlBody += '<tr><td>Ending:</td><td>' + event['stopTime'].toString(dateTimeFormat) + tzName + '</td></tr>'
 		htmlBody += '</table><br/>' + event['description']
+		htmlBody += '\n\n' + event['priceDescription'] + '</body></html>'
 			
-		subject = 'Event notice: ' + event['title'] + ' (' + event['startTime'].toString(dateTimeFormat) + tzname + ')'
+		subject = 'Event notice: ' + event['title'] + ' (' + event['startTime'].toString(dateTimeFormat) + tzName + ')'
 		
 		msg = self._createMessage(self.getSetting('Destinations'), subject, htmlBody)
 		draft = service.users().drafts().create(userId='me', body=msg).execute()
-		print(draft)
+		#draft['message']['id']
+		#draft['message']['threadId']
 	
 	def _createMessage(self, to, subject, body):
-		message = MIMEText(body)
+		body = body.replace('\n', '<br/>')
+		
+		message = MIMEText(body, 'html')
 		message['to'] = to
 		message['subject'] = subject
 		
