@@ -59,18 +59,41 @@ class GoogleCalendarPlugin(Plugin):
 		else:
 			timezoneOffset = ''
 			
-		#@TODO: add link to registration URL to google calendar event description
 		selectedResources = []
 		for resourceTag in event['tags']['Resources']:
 			for resource in self.resourceObjects:
 				if resourceTag == resource['resourceName']:
 					selectedResources.append({'email': resource['resourceEmail']})
 					break
-		
+					
+		if event['registrationURL'] != '':
+			description = '<strong>Register here:\n'
+			description += '<a href="' + event['registrationURL'] + '">' + event['registrationURL'] + '</a></strong>\n'
+			description += '<hr/>' + event['description']
+		else:
+			description = event['description']
+			
+		isFree = True
+		priceDescription = 'The price for this event is'
+		for i, priceGroup in enumerate(event['prices']):
+			if priceGroup['price'] > 0:
+				isFree = False
+				priceDescription += ' $%0.2d for %s' % (priceGroup['price'], priceGroup['name'])
+			else:
+				priceDescription += ' FREE for ' + priceGroup['name']
+				
+			if len(event['prices']) > 2 and i < len(event['prices'])-1:
+				priceDescription += ','
+
+		if isFree:
+			description += '\n\nThis event is FREE!'
+		else:
+			description += '\n\n' + priceDescription
+
 		eventData = {
 			'summary': event['title'],
 			'location': event['location'],
-			'description': event['description'],
+			'description': description,
 			'start': {'dateTime': event['startTime'].toString(QtCore.Qt.ISODate) + timezoneOffset},
 			'end': {'dateTime': event['stopTime'].toString(QtCore.Qt.ISODate) + timezoneOffset},
 			'attendees': selectedResources
