@@ -3,6 +3,7 @@
 __all__ = ["MainWindow","OptionsWindow", "NewPrice", "PriceSummaryWidget"]
 
 from functools import partial
+import time
 
 from PySide import QtCore, QtGui
 from . import *
@@ -142,8 +143,8 @@ def addAction(group, name, callback):
 		
 	actions[group].append({'name': name, 'callback': callback})
 
-def addTarget(name, callback):
-	targets.append({'name': name, 'callback': callback})
+def addTarget(name, plugin, callback):
+	targets.append({'name': name, 'plugin': plugin, 'callback': callback})
 
 def addPopulationType(name):
 	populationTypes.append(name)
@@ -266,10 +267,13 @@ def _publishClicked():
 		if settings.value('Plugin priority') is None or settings.value('Plugin priority') == '':
 			QtGui.QMessageBox.warning(None, 'Options not configured', 'Plugin priority must be configured. Please see general options.')
 			return
-
-		publishThread = PublishThread()
+			
+		enabledTargets = getEnabledTargets()
+		for target in getEnabledTargets():
+			target['plugin'].prepare()
+			
+		publishThread = PublishThread(enabledTargets)
 		publishThread.progressChanged.connect(mainWindowUI.progressBar.setValue)
-		publishThread.progressChanged.connect(print)
 		publishThread.eventUpdated.connect(setDetails)
 
 		publishThread.started.connect(partial(mainWindowUI.progressBar.setValue, 0))
@@ -278,17 +282,30 @@ def _publishClicked():
 		
 		publishThread.finished.connect(partial(mainWindowUI.publishButton.setText, 'Publish'))
 		publishThread.finished.connect(partial(mainWindowUI.progressBar.setEnabled, False))
+		
 		publishThread.start()
 	else:
 		publishThread.requestInterruption()
+		
+def getEnabledTargets():
+	enabledTargets = []
+	
+	for plugin in settings.value('Plugin priority').split(','):
+		for target in targets:
+			if plugin == target['name']:
+				if target['checkbox'].isChecked():
+					enabledTargets.append(target)
+				break
+	return enabledTargets
+
 
 class PublishThread(QtCore.QThread):
 	progressChanged = QtCore.Signal(object)
 	eventUpdated = QtCore.Signal(object)
 	
-	def __init__(self, parent=None):
-		super().__init__(parent)
-		
+	def __init__(self, targets):
+		super().__init__(None)
+		self.targets = targets
 		self.interruptRequested = False
 	
 	def isInterruptionRequested(self):
@@ -348,24 +365,21 @@ class PublishThread(QtCore.QThread):
 			for checkbox in tagGroup['checkboxes']:
 				if checkbox.isChecked():
 					event['tags'][tagGroup['name']].append(checkbox.text())
-			
-		callbacks = []
-		for plugin in settings.value('Plugin priority').split(','):
-			for target in targets:
-				if plugin == target['name']:
-					if target['checkbox'].isChecked():
-						callbacks.append(target['callback'])
-					break
-					
-		for i,callback in enumerate(callbacks):
+		
+		for i,target in enumerate(self.targets):
 			if self.isInterruptionRequested():
 				break
 			
 			try:
-				callback(event)
+				url = target['callback'](event)
+				if url is not None:
+					print(url)
+					QtGui.QDesktopServices.openUrl(url)
+					
 				self.eventUpdated.emit(event)
-				self.progressChanged.emit(100 * float(i+1)/len(callbacks))
+				self.progressChanged.emit(100 * float(i+1)/len(self.targets))
 			except Exception as exc:
+				#@TODO: Add option to plugins which allows it to halt processing of following plugins if current one fails
 				print(exc)
 				
 

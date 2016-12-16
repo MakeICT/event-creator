@@ -6,4 +6,4 @@ from PySide import QtCore
 settings = QtCore.QSettings('settings.ini', QtCore.QSettings.IniFormat)
 
 def checkBool(value):
-	return value not in [ False, 'False', 'false', 'F', 'f', 0, '0', None ]
+	return value not in [ False, 'False', 'false', 'F', 'f', 0, '0', '', None ]

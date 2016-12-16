@@ -7,6 +7,7 @@ from .WildApricotAPI import WaApiClient
 from ..Plugin import Plugin
 
 from config import settings
+import config
 
 class WildApricotPlugin(Plugin):
 	def __init__(self):
@@ -28,7 +29,7 @@ class WildApricotPlugin(Plugin):
 			}
 		]
 
-		ui.addTarget(self.name, self.createEvent)
+		ui.addTarget(self.name, self, self.createEvent)
 		ui.addPopulationType('Members')
 	
 	def createEvent(self, event):
@@ -92,7 +93,14 @@ class WildApricotPlugin(Plugin):
 			api.execute_request('EventRegistrationTypes', registrationTypeData)
 			
 		if config.checkBool(self.getSetting('Use this as registration URL')):
-			event['registrationURL'] = self.getSetting('Registration URL format') % eventID
+			event['registrationURL'] = self.getSetting('Registration URL format', '%s') % eventID
+			return event['registrationURL']
+			
+		if self.getSetting('Registration URL format', '') == '':
+			waEvent = api.execute_request('Events/%s' % eventID)
+			return waEvent['Url']
+		else:
+			return self.getSetting('Registration URL format', '%s') % eventID
 
 def load():
 	return WildApricotPlugin()

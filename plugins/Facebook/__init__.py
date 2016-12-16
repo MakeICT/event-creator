@@ -35,7 +35,7 @@ class FacebookPlugin(Plugin):
 			#@TODO: Allow option for FB plugin to overwrite the registration URL
 		]
 
-		ui.addTarget(self.name, self.createEvent)
+		ui.addTarget(self.name, self, self.createEvent)
 		
 	def setValue(self, obj, value):
 		self.checkForInterruption()
@@ -131,7 +131,6 @@ class FacebookPlugin(Plugin):
 
 		time.sleep(2)
 		return driver.current_url
-
 
 def load():
 	return FacebookPlugin()

@@ -2,8 +2,9 @@
 
 import httplib2
 import os
+import time
 
-from PySide import QtGui
+from PySide import QtGui, QtCore
 
 from apiclient import discovery
 from oauth2client import client
@@ -15,11 +16,11 @@ import ui
 
 from ..Plugin import Plugin
 
-class GoogleAppsPlugin(Plugin):
-	def __init__(self):
-		super().__init__('GoogleApps')
-		self.credentials = None
+credentials = None
 
+class GoogleAppsPlugin(Plugin):
+	def __init__(self, name='GoogleApps'):
+		super().__init__(name)
 		self.options = [
 			{
 				'name': 'Application name',
@@ -34,8 +35,9 @@ class GoogleAppsPlugin(Plugin):
 		]
 		
 	def _getCredentials(self):
+		global credentials
 		# @TODO: consider saving Google credentials to a file so authorization can persist across executions
-		if self.credentials is None or self.credentials.invalid:
+		if credentials is None or credentials.invalid:
 			flow = OAuth2WebServerFlow(
 				client_id = self.getSetting('Client ID'),
 				client_secret = self.getSetting('Client secret'),
@@ -53,12 +55,15 @@ class GoogleAppsPlugin(Plugin):
 			
 			QtGui.QDesktopServices.openUrl(authURI)
 			code = QtGui.QInputDialog.getText(None, 'Authorization', 'Enter the authorization code here:')
-			self.credentials = flow.step2_exchange(code[0])
-			
-		return self.credentials
+				
+			credentials = flow.step2_exchange(code[0])
+		
+		return credentials
+
+	def prepare(self):
+		instance._getCredentials()
 
 instance = GoogleAppsPlugin()
-
 def load():
 	return instance
 

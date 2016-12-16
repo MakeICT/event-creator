@@ -14,7 +14,7 @@ import ui
 
 from PySide import QtCore
 
-class GoogleCalendarPlugin(Plugin):
+class GoogleCalendarPlugin(GoogleApps.GoogleAppsPlugin):
 	def __init__(self):
 		super().__init__('GoogleCalendar')
 		
@@ -30,7 +30,7 @@ class GoogleCalendarPlugin(Plugin):
 		#@TODO: Add option for "pre" event/setup event on Google Calendar (we will use this for checkins)
 
 		self._setResourceObjects(json.loads(self.getSetting('Resources', '[]')))
-		ui.addTarget(self.name, self.createEvent)
+		ui.addTarget(self.name, self, self.createEvent)
 		ui.addAction(self.name, 'Refresh resources', self.refreshResources)
 	
 	def _setResourceObjects(self, objs):
@@ -83,12 +83,13 @@ class GoogleCalendarPlugin(Plugin):
 		}
 		
 		self.checkForInterruption()
-		credentials = GoogleApps.getCredentials()
-		http = credentials.authorize(httplib2.Http())
+		http = GoogleApps.getCredentials().authorize(httplib2.Http())
 		service = discovery.build('calendar', 'v3', http=http)
 
 		self.checkForInterruption()
 		event = service.events().insert(calendarId=self.getSetting('Calendar ID', 'primary'), body=eventData).execute()
+		
+		return event['htmlLink']
 		
 def load():
 	return GoogleCalendarPlugin()

@@ -16,3 +16,6 @@ class Plugin(QtCore.QObject):
 	def checkForInterruption(self):
 		if QtCore.QThread.currentThread().isInterruptionRequested():
 			raise Exception('Plugin exception: interruption requested')
+			
+	def prepare(self):
+		pass

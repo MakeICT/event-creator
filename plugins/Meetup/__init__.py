@@ -33,7 +33,7 @@ class MeetupPlugin(Plugin):
 		]
 		#@TODO: Allow option for publishing meetup events immediately
 		#@TODO: Download venue list and add them to the location dropdown in the UI
-		ui.addTarget(self.name, self.createEvent)
+		ui.addTarget(self.name, self, self.createEvent)
 		
 	def createEvent(self, event):
 		api = meetup.api.Client(self.getSetting('API Key'))
@@ -70,6 +70,8 @@ class MeetupPlugin(Plugin):
 		
 		if config.checkBool(self.getSetting('Use this as registration URL')):
 			event['registrationURL'] = meetupEvent.event_url
+			
+		return meetupEvent.event_url
 
 def load():
 	return MeetupPlugin()
