@@ -21,18 +21,21 @@ credentials = None
 class GoogleAppsPlugin(Plugin):
 	def __init__(self, name='GoogleApps'):
 		super().__init__(name)
-		self.options = [
-			{
-				'name': 'Application name',
-				'type': 'text',
-			},{
-				'name': 'Client ID',
-				'type': 'text',
-			},{
-				'name': 'Client secret',
-				'type': 'password',
-			}
-		]
+		if name == 'GoogleApps':
+			self.options = [
+				{
+					'name': 'Application name',
+					'type': 'text',
+				},{
+					'name': 'Client ID',
+					'type': 'text',
+				},{
+					'name': 'Client secret',
+					'type': 'password',
+				}
+			]
+			
+			ui.addAction(self.name, 'Authorize', self._getCredentials)
 		
 	def _getCredentials(self):
 		global credentials

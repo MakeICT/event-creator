@@ -4,6 +4,7 @@ __all__ = ["MainWindow","OptionsWindow", "NewPrice", "PriceSummaryWidget"]
 
 from functools import partial
 import time
+import json
 
 from PySide import QtCore, QtGui
 from . import *
@@ -56,6 +57,8 @@ def getMainWindow():
 			menu.addAction(menuAction)		
 		
 	mainWindowUI.publishButton.clicked.connect(_publishClicked)
+	mainWindowUI.actionSave_template.triggered.connect(_saveTemplate)
+	mainWindowUI.actionLoad_template.triggered.connect(_loadTemplate)
 	
 	for tagGroup in tagGroups:
 		_layoutTagGroup(tagGroup)
@@ -187,23 +190,70 @@ def removeTagGroup(name):
 				break
 
 def setDetails(event):
-	def setDateAndTime(dateTime):
-		mainWindowUI.dateInput.setDate(dateTime)
-		mainWindowUI.startTimeInput.setTime(dateTime)
+	def setLocation(location):
+		index = mainWindowUI.locationInput.currentIndex()
+		mainWindowUI.locationInput.setItemText(index, location)
 		
+	def setDateAndTime(dateTime):
+		date = QtCore.QDate.fromString(dateTime[:10], 'yyyy-MM-dd') # YYYY-MM-DDTHH:MM:SS
+		mainWindowUI.dateInput.setDateRange(date, date)
+		mainWindowUI.startTimeInput.setTime(QtCore.QTime.fromString(dateTime[11:], 'hh:mm:ss'))
+		
+	def setStopTime(dateTime):
+		mainWindowUI.stopTimeInput.setTime(QtCore.QTime.fromString(dateTime[11:], 'hh:mm:ss'))
+		
+	def setPrices(prices):
+		#@TODO: load prices from templates
+		pass
+		
+	def setTags(tags):
+		#@TODO: load tags from templates
+		pass
+
 	widgetLookup = {
 		'title': mainWindowUI.titleInput.setText,
-#		'location': mainWindowUI.locationInput.setText,
-#		'startTime': setDateAndTime,
-#		'stopTime': mainWindowUI.stopTimeInput.setTime,
+		'location': setLocation,
+		'startTime': setDateAndTime,
+		'stopTime': setStopTime,
 		'description': mainWindowUI.descriptionInput.setText,
 		'registrationURL': mainWindowUI.registrationURLInput.setText,
 		'registrationLimit': mainWindowUI.registrationLimitInput.setValue,
+		'prices': setPrices,
+		'tags': setTags,
 	}
 	for k,v in event.items():
 		if k in widgetLookup:
 			widgetLookup[k](v)
 
+lastTemplateFile = None
+def _loadTemplate():
+	global lastTemplateFile
+	
+	filename = QtGui.QFileDialog.getOpenFileName(mainWindow, 'Open template...', lastTemplateFile, 'Event Creater Templates (*.js)')[0]
+	if filename != '':
+		lastTemplateFile = filename
+		with open(filename) as infile:
+			data = infile.read()
+		
+		event = json.loads(data)
+			
+		setDetails(event)
+			
+	print(event)
+	
+def _saveTemplate():
+	global lastTemplateFile
+	
+	event = collectEventDetails()
+	event['startTime'] = event['startTime'].toString(QtCore.Qt.ISODate)
+	event['stopTime'] = event['stopTime'].toString(QtCore.Qt.ISODate)
+	
+	filename = QtGui.QFileDialog.getSaveFileName(mainWindow, 'Save template as...', lastTemplateFile, 'Event Creater Templates (*.js)')[0]
+	if filename != '':
+		lastTemplateFile = filename
+		with open(filename, 'w') as outfile:
+			json.dump(event, outfile, ensure_ascii=False)
+	
 def _testRegistrationURL():
 	global mainWindowUI
 	QtGui.QDesktopServices.openUrl(mainWindowUI.registrationURLInput.text())
@@ -298,7 +348,60 @@ def getEnabledTargets():
 				break
 	return enabledTargets
 
+def collectEventDetails():
+	date = mainWindowUI.dateInput.selectedDate()
+	startTime = mainWindowUI.startTimeInput.time()
+	stopTime = mainWindowUI.stopTimeInput.time()
+	
+	event = {
+		'title': mainWindowUI.titleInput.text(),
+		'location': mainWindowUI.locationInput.currentText(),
+		'startTime': QtCore.QDateTime(date, startTime),
+		'stopTime': QtCore.QDateTime(date, stopTime),
+		'description': mainWindowUI.descriptionInput.toPlainText(),
+		'registrationURL': mainWindowUI.registrationURLInput.text(),
+		'registrationLimit': mainWindowUI.registrationLimitInput.value(),
+		'prices': [],
+		'tags': {},
+		'isFree': True,
+		'priceDescription': '',
+	}
 
+	for rsvpType in _getChildren(mainWindowUI.priceList):
+		event['prices'].append({
+			'name': rsvpType.name,
+			'price': rsvpType.price,
+			'description': rsvpType.description,
+			'availability': rsvpType.availability,
+		})
+		
+	priceDescription = 'The price for this event is'
+	for i, priceGroup in enumerate(event['prices']):
+		if priceGroup['price'] > 0:
+			event['isFree'] = False
+			priceDescription += ' $%0.2f for %s' % (priceGroup['price'], priceGroup['name'])
+		else:
+			priceDescription += ' FREE for ' + priceGroup['name']
+			
+		if len(event['prices']) > 2:
+			if i < len(event['prices'])-1:
+				priceDescription += ','
+		if len(event['prices']) > 1 and i == len(event['prices'])-2:
+			priceDescription += ' and'
+
+	if event['isFree']:
+		event['priceDescription'] = 'This event is FREE!'
+	else:
+		event['priceDescription'] = priceDescription + '.'
+
+	for tagGroup in tagGroups:
+		event['tags'][tagGroup['name']] = []
+		for checkbox in tagGroup['checkboxes']:
+			if checkbox.isChecked():
+				event['tags'][tagGroup['name']].append(checkbox.text())
+				
+	return event
+	
 class PublishThread(QtCore.QThread):
 	progressChanged = QtCore.Signal(object)
 	eventUpdated = QtCore.Signal(object)
@@ -315,56 +418,7 @@ class PublishThread(QtCore.QThread):
 		self.interruptRequested = True
 	
 	def run(self):
-		date = mainWindowUI.dateInput.selectedDate()
-		startTime = mainWindowUI.startTimeInput.time()
-		stopTime = mainWindowUI.stopTimeInput.time()
-
-		event = {
-			'title': mainWindowUI.titleInput.text(),
-			'location': mainWindowUI.locationInput.currentText(),
-			'startTime': QtCore.QDateTime(date, startTime),
-			'stopTime': QtCore.QDateTime(date, stopTime),
-			'description': mainWindowUI.descriptionInput.toPlainText(),
-			'registrationURL': mainWindowUI.registrationURLInput.text(),
-			'registrationLimit': mainWindowUI.registrationLimitInput.value(),
-			'prices': [],
-			'tags': {},
-			'isFree': True,
-			'priceDescription': '',
-		}
-
-		for rsvpType in _getChildren(mainWindowUI.priceList):
-			event['prices'].append({
-				'name': rsvpType.name,
-				'price': rsvpType.price,
-				'description': rsvpType.description,
-				'availability': rsvpType.availability,
-			})
-			
-		priceDescription = 'The price for this event is'
-		for i, priceGroup in enumerate(event['prices']):
-			if priceGroup['price'] > 0:
-				event['isFree'] = False
-				priceDescription += ' $%0.2f for %s' % (priceGroup['price'], priceGroup['name'])
-			else:
-				priceDescription += ' FREE for ' + priceGroup['name']
-				
-			if len(event['prices']) > 2:
-				if i < len(event['prices'])-1:
-					priceDescription += ','
-			if len(event['prices']) > 1 and i == len(event['prices'])-2:
-				priceDescription += ' and'
-
-		if event['isFree']:
-			event['priceDescription'] = 'This event is FREE!'
-		else:
-			event['priceDescription'] = priceDescription + '.'
-
-		for tagGroup in tagGroups:
-			event['tags'][tagGroup['name']] = []
-			for checkbox in tagGroup['checkboxes']:
-				if checkbox.isChecked():
-					event['tags'][tagGroup['name']].append(checkbox.text())
+		event = collectEventDetails()
 		
 		for i,target in enumerate(self.targets):
 			if self.isInterruptionRequested():
