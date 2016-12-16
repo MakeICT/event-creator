@@ -206,7 +206,7 @@ def _testRegistrationURL():
 	global mainWindowUI
 	QtGui.QDesktopServices.openUrl(mainWindowUI.registrationURLInput.text())
 
-def _showNewPriceWindow():
+def _showNewPriceWindow(summaryWidget=None):
 	global mainWindow
 	dialog = QtGui.QDialog(mainWindow)
 	
@@ -216,16 +216,43 @@ def _showNewPriceWindow():
 	for group in populationTypes:
 		newPriceUI.restrictionList.addItem(group)
 		
-	newPriceUI.buttonBox.accepted.connect(partial(_addNewPrice, newPriceUI))
-	newPriceUI.buttonBox.rejected.connect(dialog.close)
-	
+	def _addNewPrice(valuesUI, reset):
+		if summaryWidget == None:
+			widget = PriceSummaryListWidget(None, valuesUI)
+			mainWindowUI.priceList.addWidget(widget)
+			widget.ui.editButton.clicked.connect(partial(_showNewPriceWindow, widget))
+		else:
+			summaryWidget.setValuesFromValuesUI(valuesUI)
+			dialog.close()
+			
+		if reset:
+			newPriceUI.nameInput.setText('')
+			newPriceUI.priceInput.setText('')
+			newPriceUI.descriptionInput.setText('')
+			for item in newPriceUI.restrictionList.selectedItems():
+				newPriceUI.restrictionList.setCurrentItem(item, QtGui.QItemSelectionModel.Clear)
+		
+	if summaryWidget is not None:
+		# we're editing
+		newPriceUI.saveButton.clicked.connect(partial(_addNewPrice, newPriceUI, False))
+		newPriceUI.saveAndClearButton.deleteLater()
+		newPriceUI.closeButton.setText('Cancel')
+			
+		for populationType in summaryWidget.availability:
+			widget = newPriceUI.restrictionList.findItems(populationType, QtCore.Qt.MatchExactly)[0]
+			newPriceUI.restrictionList.setCurrentItem(widget)
+			
+			newPriceUI.nameInput.setText(summaryWidget.name)
+			newPriceUI.priceInput.setText('%0.2f' % summaryWidget.price)
+			newPriceUI.descriptionInput.setText(summaryWidget.description)
+	else:
+		newPriceUI.saveButton.clicked.connect(partial(_addNewPrice, newPriceUI, False))
+		newPriceUI.saveAndClearButton.clicked.connect(partial(_addNewPrice, newPriceUI, True))
+		newPriceUI.saveButton.setText('Add')
+		newPriceUI.saveAndClearButton.setText('Add and clear')
+		
+	newPriceUI.closeButton.clicked.connect(dialog.close)
 	dialog.show()
-
-def _addNewPrice(valuesUI):
-	global mainWindowUI
-	
-	widget = PriceSummaryListWidget(None, valuesUI)
-	mainWindowUI.priceList.addWidget(widget)
 
 def _getChildren(parent):
 	for i in range(parent.count()):
@@ -308,31 +335,45 @@ def _publishClicked():
 class PriceSummaryListWidget(QtGui.QWidget):
 	def __init__(self, parent=None, valuesUI=None):
 		super().__init__(parent)
-		#@TODO: make price summary edit button work
-	
+		self.ui = PriceSummaryWidget.Ui_Form()
+		self.ui.setupUi(self)
+		self.ui.deleteButton.clicked.connect(self.removeMe)
+		
 		if valuesUI is not None:
-			self.name = valuesUI.nameInput.text()
-			self.price = float(valuesUI.priceInput.text())
-			self.description = valuesUI.descriptionInput.toPlainText()
-			self.availability = []
+			self.setValuesFromValuesUI(valuesUI)
+		
+	def setValuesFromValuesUI(self, valuesUI):
+		availability = []
+		for listItemWidget in valuesUI.restrictionList.selectedItems():
+			populationType = listItemWidget.text()
+			if populationType != 'Everybody':
+				availability.append(populationType)
+
+		if valuesUI.priceInput.text() == '':
+			price = 0
+		else:
+			price = float(valuesUI.priceInput.text())
 			
-			for listItemWidget in valuesUI.restrictionList.selectedItems():
-				populationType = listItemWidget.text()
-				if populationType != 'Everybody':
-					self.availability.append(populationType)
+		self.updateDetails(
+			valuesUI.nameInput.text(),
+			price,
+			valuesUI.descriptionInput.toPlainText(),
+			availability
+		)
 					
-		widgetUI = PriceSummaryWidget.Ui_Form()
-		widgetUI.setupUi(self)
+	def updateDetails(self, name, price, description, availability):
+		self.name = name
+		self.price = price
+		self.description = description
+		self.availability = availability
 		
-		widgetUI.nameLabel.setText(self.name)
-		widgetUI.priceLabel.setText('$%0.2f' % self.price)
-		
-		widgetUI.deleteButton.clicked.connect(self.removeMe)
+		self.ui.nameLabel.setText(self.name)
+		self.ui.priceLabel.setText('$%0.2f' % self.price)
 		
 		if len(self.availability) > 0:
-			widgetUI.iconLabel.setText('®')
+			self.ui.iconLabel.setText('®')
 		else:
-			widgetUI.iconLabel.setText(' ')
-
+			self.ui.iconLabel.setText(' ')
+			
 	def removeMe(self):
 		self.deleteLater()
