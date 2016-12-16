@@ -217,7 +217,15 @@ def setDetails(event):
 			widget.ui.editButton.clicked.connect(partial(_showNewPriceWindow, widget))
 		
 	def setTags(tags):
-		#@TODO: load tags from templates
+		for groupName,group in tags.items():
+			for tagGroup in tagGroups:
+				if tagGroup['name'] == groupName:
+					for b in tagGroup['checkboxes']:
+						if b.text() in group:
+							b.setChecked(True)
+						else:
+							b.setChecked(False)
+					break
 		pass
 
 	widgetLookup = {
