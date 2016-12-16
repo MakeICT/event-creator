@@ -14,6 +14,8 @@ mainWindowUI = None
 optionsDialog = None
 optionsDialogUI = None
 
+publishThread = None
+
 targets = []
 tagGroups = []
 actions = {}
@@ -42,7 +44,6 @@ def getMainWindow():
 		target['checkbox'] = checkbox
 		
 		mainWindowUI.postToGrid.addWidget(checkbox, index / 2, index % 2, 1, 1)
-		mainWindowUI.progressBar.hide()
 		
 	for group,actionList in actions.items():
 		menu = QtGui.QMenu(group, mainWindowUI.menuActions)
@@ -257,22 +258,46 @@ def _showNewPriceWindow(summaryWidget=None):
 def _getChildren(parent):
 	for i in range(parent.count()):
 		yield parent.itemAt(i).widget()
-
+		
 def _publishClicked():
-	if mainWindowUI.publishButton.text() == 'CANCEL':
-		print('Do cancel...')
-		mainWindowUI.publishButton.setText('Publish')
-	else:
-		#@TODO: Move processing off UI thread
-		#@TODO: Show and update progress bar while processing
-		#@TODO: Make cancel button work in UI
+	global publishThread
+	
+	if publishThread is None or not publishThread.isRunning():
 		if settings.value('Plugin priority') is None or settings.value('Plugin priority') == '':
 			QtGui.QMessageBox.warning(None, 'Options not configured', 'Plugin priority must be configured. Please see general options.')
 			return
 
-		print('Do publish...')
-		mainWindowUI.publishButton.setText('CANCEL')
+		publishThread = PublishThread()
+		publishThread.progressChanged.connect(mainWindowUI.progressBar.setValue)
+		publishThread.progressChanged.connect(print)
+		publishThread.eventUpdated.connect(setDetails)
 
+		publishThread.started.connect(partial(mainWindowUI.progressBar.setValue, 0))
+		publishThread.started.connect(partial(mainWindowUI.progressBar.setEnabled, True))
+		publishThread.started.connect(partial(mainWindowUI.publishButton.setText, 'CANCEL'))
+		
+		publishThread.finished.connect(partial(mainWindowUI.publishButton.setText, 'Publish'))
+		publishThread.finished.connect(partial(mainWindowUI.progressBar.setEnabled, False))
+		publishThread.start()
+	else:
+		publishThread.requestInterruption()
+
+class PublishThread(QtCore.QThread):
+	progressChanged = QtCore.Signal(object)
+	eventUpdated = QtCore.Signal(object)
+	
+	def __init__(self, parent=None):
+		super().__init__(parent)
+		
+		self.interruptRequested = False
+	
+	def isInterruptionRequested(self):
+		return self.interruptRequested
+	
+	def requestInterruption(self):
+		self.interruptRequested = True
+	
+	def run(self):
 		date = mainWindowUI.dateInput.selectedDate()
 		startTime = mainWindowUI.startTimeInput.time()
 		stopTime = mainWindowUI.stopTimeInput.time()
@@ -324,13 +349,25 @@ def _publishClicked():
 				if checkbox.isChecked():
 					event['tags'][tagGroup['name']].append(checkbox.text())
 			
+		callbacks = []
 		for plugin in settings.value('Plugin priority').split(','):
 			for target in targets:
 				if plugin == target['name']:
 					if target['checkbox'].isChecked():
-						target['callback'](event)
-						setDetails(event)
+						callbacks.append(target['callback'])
 					break
+					
+		for i,callback in enumerate(callbacks):
+			if self.isInterruptionRequested():
+				break
+			
+			try:
+				callback(event)
+				self.eventUpdated.emit(event)
+				self.progressChanged.emit(100 * float(i+1)/len(callbacks))
+			except Exception as exc:
+				print(exc)
+				
 
 class PriceSummaryListWidget(QtGui.QWidget):
 	def __init__(self, parent=None, valuesUI=None):

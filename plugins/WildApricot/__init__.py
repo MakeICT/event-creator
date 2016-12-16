@@ -32,11 +32,6 @@ class WildApricotPlugin(Plugin):
 		ui.addPopulationType('Members')
 	
 	def createEvent(self, event):
-		#@TODO: open ticket with WildApricot so that we can have an API endpoint for enabling email reminders
-		api = WaApiClient()
-		api.authenticate_with_apikey(self.getSetting('API Key'))
-
-		# @todo: add authorizations to description
 		if settings.value('timezone') is not None and settings.value('timezone') != '':
 			timezoneOffset = settings.value('timezone').split(' UTC')[1]
 		else:
@@ -61,6 +56,12 @@ class WildApricotPlugin(Plugin):
 			},
 		}
 		
+		#@TODO: open ticket with WildApricot so that we can have an API endpoint for enabling email reminders
+		self.checkForInterruption()
+		api = WaApiClient()
+		api.authenticate_with_apikey(self.getSetting('API Key'))
+
+		self.checkForInterruption()
 		eventID = api.execute_request('Events', eventData)
 
 		for rsvpType in event['prices']:
@@ -87,6 +88,7 @@ class WildApricotPlugin(Plugin):
 				else:
 					registrationTypeData['Availability'] = 'Everyone'
 			
+			self.checkForInterruption()
 			api.execute_request('EventRegistrationTypes', registrationTypeData)
 			
 		if config.checkBool(self.getSetting('Use this as registration URL')):

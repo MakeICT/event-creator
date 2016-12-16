@@ -12,6 +12,8 @@ from plugins import GoogleApps
 
 from config import settings
 
+from PySide import QtCore
+
 class GmailPlugin(Plugin):
 	def __init__(self):
 		super().__init__('Gmail')
@@ -38,10 +40,6 @@ class GmailPlugin(Plugin):
 		ui.addTarget(self.name, self.createDraftMessage)
 
 	def createDraftMessage(self, event):
-		credentials = GoogleApps.getCredentials()
-		http = credentials.authorize(httplib2.Http())
-		service = discovery.build('gmail', 'v1', http=http)
-		
 		if settings.value('timezone') is not None and settings.value('timezone') != '':
 			timezoneOffset = settings.value('timezone').split(' UTC')[1]
 			tzName = ' ' + settings.value('timezone').split(' ')[-2]
@@ -62,6 +60,13 @@ class GmailPlugin(Plugin):
 		subject = 'Event notice: ' + event['title'] + ' (' + event['startTime'].toString(dateTimeFormat) + tzName + ')'
 		
 		msg = self._createMessage(self.getSetting('Destinations'), subject, htmlBody)
+		
+		self.checkForInterruption()
+		credentials = GoogleApps.getCredentials()
+		http = credentials.authorize(httplib2.Http())
+		service = discovery.build('gmail', 'v1', http=http)
+
+		self.checkForInterruption()
 		draft = service.users().drafts().create(userId='me', body=msg).execute()
 		#draft['message']['id']
 		#draft['message']['threadId']

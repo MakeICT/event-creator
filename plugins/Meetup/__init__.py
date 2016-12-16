@@ -4,6 +4,7 @@ import meetup.api
 import ui
 
 from ..Plugin import Plugin
+import config
 
 class MeetupPlugin(Plugin):
 	def __init__(self):
@@ -56,6 +57,7 @@ class MeetupPlugin(Plugin):
 		if append != '':
 			title += ' ' + append
 		
+		self.checkForInterruption()
 		meetupEvent = api.CreateEvent({
 			'group_id': group.id,
 			'name': title,

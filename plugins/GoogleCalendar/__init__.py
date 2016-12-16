@@ -12,6 +12,8 @@ from config import settings
 
 import ui
 
+from PySide import QtCore
+
 class GoogleCalendarPlugin(Plugin):
 	def __init__(self):
 		super().__init__('GoogleCalendar')
@@ -80,9 +82,12 @@ class GoogleCalendarPlugin(Plugin):
 			'attendees': selectedResources
 		}
 		
+		self.checkForInterruption()
 		credentials = GoogleApps.getCredentials()
 		http = credentials.authorize(httplib2.Http())
 		service = discovery.build('calendar', 'v3', http=http)
+
+		self.checkForInterruption()
 		event = service.events().insert(calendarId=self.getSetting('Calendar ID', 'primary'), body=eventData).execute()
 		
 def load():

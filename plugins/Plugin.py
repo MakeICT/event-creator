@@ -12,3 +12,7 @@ class Plugin(QtCore.QObject):
 		
 	def saveSetting(self, setting, value):
 		return settings.setValue('plugin-%s/%s' % (self.name, setting), value)
+
+	def checkForInterruption(self):
+		if QtCore.QThread.currentThread().isInterruptionRequested():
+			raise Exception('Plugin exception: interruption requested')
