@@ -23,6 +23,7 @@ tagGroups = []
 actions = {}
 
 populationTypes = ['Everybody']
+lastTemplateFile = None
 
 from config import settings
 
@@ -205,8 +206,15 @@ def setDetails(event):
 		mainWindowUI.stopTimeInput.setTime(QtCore.QTime.fromString(dateTime[11:], 'hh:mm:ss'))
 		
 	def setPrices(prices):
-		#@TODO: load prices from templates
-		pass
+		while mainWindowUI.priceList.count() > 0:
+			w = mainWindowUI.priceList.takeAt(0).widget()
+			w.deleteLater()
+			
+		for p in prices:
+			widget = PriceSummaryListWidget()
+			widget.updateDetails(p['name'], p['price'], p['description'], p['availability'])
+			mainWindowUI.priceList.addWidget(widget)
+			widget.ui.editButton.clicked.connect(partial(_showNewPriceWindow, widget))
 		
 	def setTags(tags):
 		#@TODO: load tags from templates
@@ -227,7 +235,6 @@ def setDetails(event):
 		if k in widgetLookup:
 			widgetLookup[k](v)
 
-lastTemplateFile = None
 def _loadTemplate():
 	global lastTemplateFile
 	
@@ -240,8 +247,6 @@ def _loadTemplate():
 		loadedEvent = json.loads(data)
 			
 		setDetails(loadedEvent)
-			
-		print(loadedEvent)
 	
 def _saveTemplate():
 	global lastTemplateFile
@@ -292,13 +297,14 @@ def _showNewPriceWindow(summaryWidget=None):
 		newPriceUI.saveAndClearButton.deleteLater()
 		newPriceUI.closeButton.setText('Cancel')
 			
+		newPriceUI.nameInput.setText(summaryWidget.name)
+		newPriceUI.priceInput.setText('%0.2f' % summaryWidget.price)
+		newPriceUI.descriptionInput.setText(summaryWidget.description)
+
 		for populationType in summaryWidget.availability:
 			widget = newPriceUI.restrictionList.findItems(populationType, QtCore.Qt.MatchExactly)[0]
 			newPriceUI.restrictionList.setCurrentItem(widget)
 			
-			newPriceUI.nameInput.setText(summaryWidget.name)
-			newPriceUI.priceInput.setText('%0.2f' % summaryWidget.price)
-			newPriceUI.descriptionInput.setText(summaryWidget.description)
 	else:
 		newPriceUI.saveButton.clicked.connect(partial(_addNewPrice, newPriceUI, False))
 		newPriceUI.saveAndClearButton.clicked.connect(partial(_addNewPrice, newPriceUI, True))
