@@ -192,8 +192,6 @@ def removeTagGroup(name):
 
 def setDetails(event):
 	def setLocation(location):
-		#@TODO: load location from templates
-		# why doesn't this work?
 		index = mainWindowUI.locationInput.currentIndex()
 		mainWindowUI.locationInput.setItemText(index, location)
 		
@@ -226,7 +224,6 @@ def setDetails(event):
 						else:
 							b.setChecked(False)
 					break
-		pass
 
 	widgetLookup = {
 		'title': mainWindowUI.titleInput.setText,
