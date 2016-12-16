@@ -191,6 +191,8 @@ def removeTagGroup(name):
 
 def setDetails(event):
 	def setLocation(location):
+		#@TODO: load location from templates
+		# why doesn't this work?
 		index = mainWindowUI.locationInput.currentIndex()
 		mainWindowUI.locationInput.setItemText(index, location)
 		
@@ -235,11 +237,11 @@ def _loadTemplate():
 		with open(filename) as infile:
 			data = infile.read()
 		
-		event = json.loads(data)
+		loadedEvent = json.loads(data)
 			
-		setDetails(event)
+		setDetails(loadedEvent)
 			
-	print(event)
+		print(loadedEvent)
 	
 def _saveTemplate():
 	global lastTemplateFile
