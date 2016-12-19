@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__all__ = ["MainWindow","OptionsWindow", "NewPrice", "PriceSummaryWidget"]
+__all__ = ["MainWindow","OptionsWindow", "NewPrice", "PriceSummaryWidget", "About"]
 
 from functools import partial
 import time
@@ -13,6 +13,7 @@ from . import MainWindow
 from . import OptionsWindow
 from . import NewPrice
 from . import PriceSummaryWidget
+from . import About
 
 from plugins import Interruption
 
@@ -40,6 +41,7 @@ def getMainWindow():
 	mainWindowUI = MainWindow.Ui_MainWindow()
 	mainWindowUI.setupUi(mainWindow)
 	mainWindowUI.actionOptions.triggered.connect(showOptionsDialog)
+	mainWindowUI.actionAbout.triggered.connect(showAboutDialog)
 
 	if len(targets) == 0:
 		mainWindowUI.postToGrid.addWidget(QtGui.QLabel('No targets :('))
@@ -83,6 +85,15 @@ def getMainWindow():
 def setPlugins(plugins):
 	global loadedPlugins
 	loadedPlugins = plugins
+
+def showAboutDialog():
+	dialog = QtGui.QDialog(mainWindow)
+	
+	dialogUI = About.Ui_Dialog()
+	dialogUI.setupUi(dialog)
+	
+	dialog.show()
+
 
 def showOptionsDialog():
 	global optionsDialogUI, mainWindow, loadedPlugins
@@ -213,7 +224,7 @@ def setDetails(event):
 	def setDateAndTime(dateTime):
 		if isinstance(dateTime, str):
 			date = QtCore.QDate.fromString(dateTime[:10], 'yyyy-MM-dd')
-			mainWindowUI.dateInput.setDateRange(date, date)
+			mainWindowUI.dateInput.setSelectedDate(date)
 			mainWindowUI.startTimeInput.setTime(QtCore.QTime.fromString(dateTime[11:], 'hh:mm:ss'))
 		
 	def setStopTime(dateTime):
