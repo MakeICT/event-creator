@@ -93,4 +93,3 @@ class GoogleCalendarPlugin(GoogleApps.GoogleAppsPlugin):
 		
 def load():
 	return GoogleCalendarPlugin()
-

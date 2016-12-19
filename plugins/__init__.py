@@ -16,7 +16,7 @@ def loadAllFromPath(base='plugins'):
 	global loaded
 	pluginDirs = []
 	for p in os.listdir(base):
-		if p[:2] != '__' and os.path.isdir(os.path.join(base, p)) and p != 'GoogleCalendar':
+		if p[:2] != '__' and os.path.isdir(os.path.join(base, p)):
 			pluginDirs.append(p)
 
 	leftover = len(pluginDirs) + 1 # add 1 to make sure it's ran at least once
