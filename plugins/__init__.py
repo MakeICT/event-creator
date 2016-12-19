@@ -14,28 +14,28 @@ loaded = {}
 
 def loadAllFromPath(base='plugins'):
 	global loaded
-	dirs = []
+	pluginDirs = []
 	for p in os.listdir(base):
-		if p[:2] != '__' and os.path.isdir(os.path.join(base, p)):
-			dirs.append(p)
+		if p[:2] != '__' and os.path.isdir(os.path.join(base, p)) and p != 'GoogleCalendar':
+			pluginDirs.append(p)
 
-	leftover = len(dirs) + 1 # add 1 to make sure it's ran at least once
-	while len(dirs) > 0 and len(dirs) != leftover:
-		leftover = len(dirs)
-		for p in dirs:
-			path = os.path.join(base, p)
+	leftover = len(pluginDirs) + 1 # add 1 to make sure it's ran at least once
+	while len(pluginDirs) > 0 and len(pluginDirs) != leftover:
+		leftover = len(pluginDirs)
+		for p in list(pluginDirs):
 			print('Loading plugin: %s' % p)
 			try:
+				path = os.path.join(base, p)
 				mod = SourceFileLoader("plugins.%s" % p, os.path.join(path, "__init__.py")).load_module()
 				plugin = mod.load()
 				loaded[plugin.name] = plugin
-				dirs.remove(p)
+				pluginDirs.remove(p)
 			except Exception as exc:
 				print('Failed to load plugin: ' + p)
 				print(exc)
 				
-	if len(dirs) > 0:
-		print('Failed to load plugins: %s' % dirs)
+	if len(pluginDirs) > 0:
+		print('Failed to load plugins: %s' % pluginDirs)
 		
 	return loaded
 		
