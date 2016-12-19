@@ -117,8 +117,9 @@ def showOptionsDialog():
 	if settings.value('Plugin priority') is not None:
 		savedPriorities = settings.value('Plugin priority').split(',')
 		for p in savedPriorities:
-			optionsDialogUI.pluginPriorityList.addItem(p)
-			del loadedPlugins[p]
+			if p in loadedPlugins:
+				optionsDialogUI.pluginPriorityList.addItem(p)
+				del loadedPlugins[p]
 		
 	for p in loadedPlugins:
 		optionsDialogUI.pluginPriorityList.addItem(p)
