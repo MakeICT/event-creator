@@ -12,8 +12,6 @@ from plugins import GoogleApps
 
 from config import settings
 
-from PySide import QtCore
-
 class GmailPlugin(GoogleApps.GoogleAppsPlugin):
 	def __init__(self):
 		super().__init__('Gmail')

@@ -3,11 +3,11 @@
 import httplib2
 import json
 
-from PySide import QtGui, QtCore
 from apiclient import discovery
 
 from plugins import Plugin
 from plugins import GoogleApps
+
 from config import settings
 
 import ui
@@ -93,3 +93,4 @@ class GoogleCalendarPlugin(GoogleApps.GoogleAppsPlugin):
 		
 def load():
 	return GoogleCalendarPlugin()
+
