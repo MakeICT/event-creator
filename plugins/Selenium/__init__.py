@@ -32,7 +32,7 @@ class SeleniumPlugin(Plugin):
 					if platform.system() == 'Linux':
 						driverPath = os.path.join(basePath, 'chromedriver')
 					else:
-						driverPath = os.path.join(basePath, 'chromeDriver.exe')
+						driverPath = os.path.join(basePath, 'chromedriver.exe')
 				
 				driver = webdriver.Chrome(driverPath)
 			except:
