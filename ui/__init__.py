@@ -202,8 +202,12 @@ def removeTagGroup(name):
 
 def setDetails(event):
 	def setLocation(location):
-		index = mainWindowUI.locationInput.currentIndex()
-		mainWindowUI.locationInput.setItemText(index, location)
+		for i in range(mainWindowUI.locationInput.count()):
+			if location == mainWindowUI.locationInput.itemText(i):
+				mainWindowUI.locationInput.setCurrentIndex(i)
+				return
+
+		mainWindowUI.locationInput.addItem(location)
 		
 	def setDateAndTime(dateTime):
 		if isinstance(dateTime, str):
