@@ -17,9 +17,12 @@ import ui
 from plugins import Plugin
 
 credentials = None
+instance = None
 
 class GoogleAppsPlugin(Plugin):
 	def __init__(self, name='GoogleApps'):
+		global instance
+		
 		super().__init__(name)
 		self.options = [
 			{
@@ -34,7 +37,8 @@ class GoogleAppsPlugin(Plugin):
 			}
 		]
 		
-		if name == 'GoogleApps':
+		if name == 'GoogleApps' and instance is None:
+			instance = self
 			ui.addAction(self.name, 'Authorize', self._getCredentials)
 		
 	def _getCredentials(self):
@@ -66,8 +70,10 @@ class GoogleAppsPlugin(Plugin):
 	def prepare(self):
 		instance._getCredentials()
 
-instance = GoogleAppsPlugin()
 def load():
+	global instance
+	if instance is None:
+		instance = GoogleAppsPlugin()
 	return instance
 
 def getCredentials():
