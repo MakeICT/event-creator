@@ -37,7 +37,7 @@ exe = EXE(
 	a.binaries,
 	a.zipfiles,
 	a.datas,
-	name='makeict-event-creator-app-v%s-%s' % (version, platformExt),
+	name='event-creator-v%s-%s' % (version, platformExt),
 	debug=True,
 	strip=False,
 	upx=True,
