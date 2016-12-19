@@ -5,11 +5,16 @@ __all__ = ["MainWindow","OptionsWindow", "NewPrice", "PriceSummaryWidget"]
 from functools import partial
 import time
 import json
+import os
+import traceback
 
 from PySide import QtCore, QtGui
-from . import *
+from . import MainWindow
+from . import OptionsWindow
+from . import NewPrice
+from . import PriceSummaryWidget
 
-import plugins
+from plugins import Interruption
 
 mainWindow = None
 mainWindowUI = None
@@ -21,6 +26,7 @@ publishThread = None
 targets = []
 tagGroups = []
 actions = {}
+loadedPlugins = {}
 
 populationTypes = ['Everybody']
 lastTemplateFile = None
@@ -67,12 +73,19 @@ def getMainWindow():
 	mainWindowUI.registrationURLLaunchButton.clicked.connect(_testRegistrationURL)
 	mainWindowUI.addPriceButton.clicked.connect(_showNewPriceWindow)
 	
+	if os.path.exists('default.js'):
+		_loadTemplate('default.js')
+	
 	return mainWindow
 	
 #@TODO: allow plugins to add locations to dropdown
 
+def setPlugins(plugins):
+	global loadedPlugins
+	loadedPlugins = plugins
+
 def showOptionsDialog():
-	global optionsDialogUI, mainWindow
+	global optionsDialogUI, mainWindow, loadedPlugins
 	dialog = QtGui.QDialog(mainWindow)
 	
 	optionsDialogUI = OptionsWindow.Ui_Dialog()
@@ -81,10 +94,7 @@ def showOptionsDialog():
 	optionsDialogUI.timezone.setCurrentIndex(optionsDialogUI.timezone.findText(settings.value('timezone')))
 	optionsDialogUI.timezone.currentIndexChanged[str].connect(partial(settings.setValue, 'timezone'))
 	
-	loadedPlugins = []
-	for pluginName,plugin in plugins.loaded.items():
-		loadedPlugins.append(pluginName)
-		
+	for pluginName, plugin in loadedPlugins.items():
 		tab = QtGui.QWidget()
 		layout = QtGui.QFormLayout(tab)
 		layout.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
@@ -108,7 +118,7 @@ def showOptionsDialog():
 		savedPriorities = settings.value('Plugin priority').split(',')
 		for p in savedPriorities:
 			optionsDialogUI.pluginPriorityList.addItem(p)
-			loadedPlugins.remove(p)
+			del loadedPlugins[p]
 		
 	for p in loadedPlugins:
 		optionsDialogUI.pluginPriorityList.addItem(p)
@@ -196,12 +206,14 @@ def setDetails(event):
 		mainWindowUI.locationInput.setItemText(index, location)
 		
 	def setDateAndTime(dateTime):
-		date = QtCore.QDate.fromString(dateTime[:10], 'yyyy-MM-dd') # YYYY-MM-DDTHH:MM:SS
-		mainWindowUI.dateInput.setDateRange(date, date)
-		mainWindowUI.startTimeInput.setTime(QtCore.QTime.fromString(dateTime[11:], 'hh:mm:ss'))
+		if isinstance(dateTime, str):
+			date = QtCore.QDate.fromString(dateTime[:10], 'yyyy-MM-dd')
+			mainWindowUI.dateInput.setDateRange(date, date)
+			mainWindowUI.startTimeInput.setTime(QtCore.QTime.fromString(dateTime[11:], 'hh:mm:ss'))
 		
 	def setStopTime(dateTime):
-		mainWindowUI.stopTimeInput.setTime(QtCore.QTime.fromString(dateTime[11:], 'hh:mm:ss'))
+		if isinstance(dateTime, str):
+			mainWindowUI.stopTimeInput.setTime(QtCore.QTime.fromString(dateTime[11:], 'hh:mm:ss'))
 		
 	def setPrices(prices):
 		while mainWindowUI.priceList.count() > 0:
@@ -240,31 +252,42 @@ def setDetails(event):
 		if k in widgetLookup:
 			widgetLookup[k](v)
 
-def _loadTemplate():
+def _loadTemplate(filename=None):
 	global lastTemplateFile
 	
-	filename = QtGui.QFileDialog.getOpenFileName(mainWindow, 'Open template...', lastTemplateFile, 'Event Creater Templates (*.js)')[0]
+	if filename is None:
+		filename = QtGui.QFileDialog.getOpenFileName(mainWindow, 'Open template...', lastTemplateFile, 'Event Creater Templates (*.js)')[0]
+		
 	if filename != '':
 		lastTemplateFile = filename
 		with open(filename) as infile:
 			data = infile.read()
 		
 		loadedEvent = json.loads(data)
-			
+		today = QtCore.QDateTime.currentDateTime().toString('yyyy-MM-dd')
+		loadedEvent['startTime'] = today + 'T' + loadedEvent['startTime'][11:]
+		loadedEvent['stopTime'] = today + 'T' + loadedEvent['stopTime'][11:]
+		
 		setDetails(loadedEvent)
 	
 def _saveTemplate():
 	global lastTemplateFile
 	
-	event = collectEventDetails()
-	event['startTime'] = event['startTime'].toString(QtCore.Qt.ISODate)
-	event['stopTime'] = event['stopTime'].toString(QtCore.Qt.ISODate)
-	
 	filename = QtGui.QFileDialog.getSaveFileName(mainWindow, 'Save template as...', lastTemplateFile, 'Event Creater Templates (*.js)')[0]
 	if filename != '':
+		if '.' not in filename:
+			filename += '.js'
+			
+		event = collectEventDetails()
+		del event['priceDescription']
+		del event['isFree']
+
+		event['startTime'] = event['startTime'].toString(QtCore.Qt.ISODate)
+		event['stopTime'] = event['stopTime'].toString(QtCore.Qt.ISODate)
+		
 		lastTemplateFile = filename
 		with open(filename, 'w') as outfile:
-			json.dump(event, outfile, ensure_ascii=False)
+			json.dump(event, outfile, sort_keys=True, indent=4, ensure_ascii=False)
 	
 def _testRegistrationURL():
 	global mainWindowUI
@@ -348,6 +371,7 @@ def _publishClicked():
 		
 		publishThread.start()
 	else:
+		mainWindowUI.publishButton.setText('Cancelling...')
 		publishThread.requestInterruption()
 		
 def getEnabledTargets():
@@ -445,9 +469,11 @@ class PublishThread(QtCore.QThread):
 					
 				self.eventUpdated.emit(event)
 				self.progressChanged.emit(100 * float(i+1)/len(self.targets))
+			except Interruption as exc:
+				pass
 			except Exception as exc:
 				#@TODO: Add option to plugins which allows it to halt processing of following plugins if current one fails
-				print(exc)
+				print(traceback.format_exc())
 				
 
 class PriceSummaryListWidget(QtGui.QWidget):

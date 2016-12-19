@@ -3,7 +3,7 @@
 import meetup.api
 import ui
 
-from ..Plugin import Plugin
+from plugins import Plugin
 import config
 
 class MeetupPlugin(Plugin):

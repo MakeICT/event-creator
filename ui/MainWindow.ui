@@ -287,7 +287,6 @@ p, li { white-space: pre-wrap; }
     <property name="title">
      <string>Settings</string>
     </property>
-    <addaction name="actionReload"/>
     <addaction name="actionOptions"/>
    </widget>
    <widget class="QMenu" name="menuHelp">

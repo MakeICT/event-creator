@@ -2,7 +2,7 @@
 
 import ui
 
-from ..Plugin import Plugin
+from plugins import Plugin
 
 class MakerspaceAuthorizationsPlugin(Plugin):
 	def __init__(self):

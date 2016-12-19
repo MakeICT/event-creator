@@ -4,7 +4,7 @@ import ui
 from PySide import QtCore
 
 from .WildApricotAPI import WaApiClient
-from ..Plugin import Plugin
+from plugins import Plugin
 
 from config import settings
 import config

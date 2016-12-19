@@ -14,7 +14,7 @@ from oauth2client.file import Storage
 
 import ui
 
-from ..Plugin import Plugin
+from plugins import Plugin
 
 credentials = None
 
@@ -34,7 +34,7 @@ class GoogleAppsPlugin(Plugin):
 					'type': 'password',
 				}
 			]
-			
+
 			ui.addAction(self.name, 'Authorize', self._getCredentials)
 		
 	def _getCredentials(self):

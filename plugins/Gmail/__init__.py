@@ -7,7 +7,7 @@ import base64
 from email.mime.text import MIMEText
 from apiclient import discovery
 
-from ..Plugin import Plugin
+from plugins import Plugin
 from plugins import GoogleApps
 
 from config import settings

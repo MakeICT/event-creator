@@ -5,29 +5,41 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.events import EventFiringWebDriver, AbstractEventListener
 from selenium.common.exceptions import *
+
+from plugins import Plugin
 
 driver = None
 
-try:
-	basePath = sys._MEIPASS
-except:
-	basePath = os.path.abspath('.')
-
-def startSelenium():
-	global driver
-	if driver is None:
-		try:
-			if platform.system() == 'Linux':
-				driver = webdriver.Chrome('%s/chromedriver' % basePath)
-			else:
-				driver = webdriver.Chrome('%s/chromedriver.exe' % basePath)
-		except:
-			print('Chrome driver failed. Trying Firefox... this is untested')
-			driver = webdriver.Firefox()
+class SeleniumPlugin(Plugin):
+	def __init__(self, name='Selenium'):
+		super().__init__(name)
+		self.options = [
+			{
+				'name': 'Driver path',
+				'type': 'text',
+			}
+		]
 			
-	return driver
+	def start(self):
+		global driver
+		
+		if driver is None:
+			driverPath = self.getSetting('Driver path')
+			try:
+				if driverPath == '':
+					basePath = os.path.dirname(__file__)
+					if platform.system() == 'Linux':
+						driverPath = os.path.join(basePath, 'chromedriver')
+					else:
+						driverPath = os.path.join(basePath, 'chromeDriver.exe')
+				
+				driver = webdriver.Chrome(driverPath)
+			except:
+				print('Chrome driver failed to load from (%s). Trying Firefox...' % driverPath)
+				driver = webdriver.Firefox()
+				
+		return driver
 
 def waitForID(id, timeout=9999):
 	try:
@@ -100,3 +112,18 @@ def switchToMain():
 	driver.switch_to_default_content()
 	driver.switch_to.frame(waitForID('sandboxFrame'))
 	driver.switch_to.frame(waitForID('userHtmlFrame'))
+	
+def goto(url):
+	global driver
+	try:
+		driver.get(url)
+	except (NoSuchWindowException, WebDriverException):
+		driver = None
+		driver = start()
+
+instance = SeleniumPlugin()
+def start():
+	return instance.start()
+
+def load():
+	return instance

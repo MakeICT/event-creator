@@ -6,7 +6,7 @@ import json
 from PySide import QtGui, QtCore
 from apiclient import discovery
 
-from ..Plugin import Plugin
+from plugins import Plugin
 from plugins import GoogleApps
 from config import settings
 
