@@ -2,15 +2,15 @@
 __pycache__/
 *.py[cod]
 *$py.class
-ui/*.py
-!ui/__init__.py
-settings.ini
-default.js
-plugins/Selenium/chromedriver*
-plugins/GoogleApps/credentials.dat
+src/ui/*.py
+!src/ui/__init__.py
+src/settings.ini
+src/default.js
+src/plugins/Selenium/chromedriver*
+src/plugins/GoogleApps/credentials.dat
 
 # Distribution / packaging
 env/
 build/
 dist/
-logs/
+src/logs/

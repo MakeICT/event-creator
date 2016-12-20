@@ -2,15 +2,17 @@
 
 import platform
 
-version = '2.0'
+version = '2.1'
 
 if platform.system() == 'Linux':
 	platformExt = 'linux.bin'
 else:
 	platformExt = 'windows.exe'
-	
+
+binaryName = 'event-creator-v%s-%s' % (version, platformExt)
+
 a = Analysis(
-	['main.py'],
+	['src/main.py'],
 	pathex=[],
 	binaries=None,
 	datas=[],
@@ -37,9 +39,11 @@ exe = EXE(
 	a.binaries,
 	a.zipfiles,
 	a.datas,
-	name='event-creator-v%s-%s' % (version, platformExt),
+	name=binaryName,
 	debug=True,
 	strip=False,
 	upx=True,
-	console=True
+	console=False
 )
+
+print(binaryName)
