@@ -17,6 +17,7 @@ import ui
 from plugins import Plugin
 from . import codeReceiver
 
+credentialsPath = os.path.join(os.path.dirname(__file__), 'credentials.dat')
 credentials = None
 instance = None
 waitForAuthDialog = None
@@ -41,12 +42,21 @@ class GoogleAppsPlugin(Plugin):
 		
 		if name == 'GoogleApps' and instance is None:
 			instance = self
-			ui.addAction(self.name, 'Authorize', self._getCredentials)
+			ui.addAction(self.name, 'Reauthorize', self.reauthorize)
+		
+	def reauthorize(self):
+		global credentials
+		
+		if os.path.exists(credentialsPath):
+			os.remove(credentialsPath)
+		self._getCredentials()
 		
 	def _getCredentials(self, callback=None):
 		global credentials
 		
-		# @TODO: consider saving Google credentials to a file so authorization can persist across executions
+		storage = Storage(credentialsPath)
+		credentials = storage.get()
+		
 		if credentials is None or credentials.invalid:
 			flow = OAuth2WebServerFlow(
 				client_id = self.getSetting('Client ID'),
