@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import os, sys
-import logging, datetime
+import datetime
+
+import logging
+import Logger
 
 from PySide import QtCore, QtGui
 
@@ -11,24 +14,6 @@ from config import settings
 
 QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_X11InitThreads)
 app = QtGui.QApplication(sys.argv)
-
-logLevels = {
-	'Critical': logging.CRITICAL,
-	'Error': logging.ERROR,
-	'Warning': logging.WARNING,
-	'Info': logging.INFO,
-	'Debug': logging.DEBUG,
-}
-
-if not os.path.exists('logs'):
-    os.makedirs('logs')
-    
-logFile = os.path.join('logs', '{0:%Y-%m-%d_%H%M%S}.log'.format(datetime.datetime.now()))
-logging.basicConfig(
-	format='%(levelname)-8s %(asctime)s %(message)s',
-	filename=logFile,
-	level=logLevels[settings.value('logLevel', 'Debug')]
-)
 
 logging.debug('Logging started')
 

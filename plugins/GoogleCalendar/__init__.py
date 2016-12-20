@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 import httplib2
 import json
 
@@ -33,6 +35,7 @@ def load():
 
 			resourceJSON = self.getSetting('Resources')
 			if resourceJSON != '':
+				logging.debug('Loading resources from settings')
 				self._setResourceObjects(json.loads(resourceJSON))
 		
 		def _setResourceObjects(self, objs):
@@ -46,6 +49,8 @@ def load():
 		
 		def refreshResources(self):
 			def credentialsReceived(credentials):
+				logging.debug('Downloading resources')
+				
 				http = credentials.authorize(httplib2.Http())
 				service = discovery.build('admin', 'directory_v1', http=http)
 
@@ -96,5 +101,4 @@ def load():
 			
 			return event['htmlLink']
 		
-#def load():
 	return GoogleCalendarPlugin()

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 import httplib2
 import base64
 import ui
@@ -39,6 +41,7 @@ def load():
 			ui.addTarget(self.name, self, self.createDraftMessage)
 
 		def createDraftMessage(self, event):
+			logging.debug('Creating draft message')
 			if settings.value('timezone') is not None and settings.value('timezone') != '':
 				timezoneOffset = settings.value('timezone').split(' UTC')[1]
 				tzName = ' ' + settings.value('timezone').split(' ')[-2]
@@ -61,13 +64,13 @@ def load():
 			msg = self._createMessage(self.getSetting('Destinations'), subject, htmlBody)
 
 			self.checkForInterruption()
-			#http = GoogleApps.getCredentials().authorize(httplib2.Http())
-			http = GoogleApps.credentials.authorize(httplib2.Http())
+			http = GoogleApps.getCredentials().authorize(httplib2.Http())
 			service = discovery.build('gmail', 'v1', http=http)
 
 			self.checkForInterruption()
 			draft = service.users().drafts().create(userId='me', body=msg).execute()
 			
+			logging.debug('Draft created: ' + draft['message']['id'])
 			return 'https://mail.google.com/mail/#drafts?compose=%s' % draft['message']['id']
 			
 		def _createMessage(self, to, subject, body):

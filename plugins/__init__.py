@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import logging
 import os, sys
 import importlib
 import traceback
@@ -25,7 +26,7 @@ def loadAllFromPath(base='plugins'):
 		leftover = len(pluginDirs)
 		modules = {}
 		for p in list(pluginDirs):
-			print('Loading plugin module: %s...' % p)
+			logging.debug('Loading plugin module: %s...' % p)
 			path = os.path.join(base, p)
 			mod = SourceFileLoader("plugins.%s" % p, os.path.join(path, "__init__.py")).load_module()
 			modules[p] = mod
@@ -33,12 +34,12 @@ def loadAllFromPath(base='plugins'):
 			pluginDirs.remove(p)
 			
 		for name, mod in modules.items():
-			print('Initializing plugin: %s...' % name)
+			logging.debug('Initializing plugin: %s...' % name)
 			plugin = mod.load()
 			loaded[plugin.name] = plugin
 
 	if len(pluginDirs) > 0:
-		print('Failed to load plugins: %s' % pluginDirs)
+		logging.error('Failed to load plugin modules: %s' % pluginDirs)
 	
 	return loaded
 		
@@ -48,7 +49,11 @@ class Plugin(QtCore.QObject):
 		self.name = name
 		
 	def getSetting(self, setting, default=''):
-		return settings.value('plugin-%s/%s' % (self.name, setting), default)
+		value = settings.value('plugin-%s/%s' % (self.name, setting), default)
+		if value == '':
+			value = default
+			
+		return value
 		
 	def saveSetting(self, setting, value):
 		return settings.setValue('plugin-%s/%s' % (self.name, setting), value)
@@ -57,9 +62,10 @@ class Plugin(QtCore.QObject):
 		if QtCore.QThread.currentThread().isInterruptionRequested():
 			raise Interruption(self)
 			
-	def prepare(self):
-		pass
-
+	def prepare(self, callback=None):
+		if callback:
+			callback()
+		
 class DependencyMissingException(Exception):
 	pass
 	

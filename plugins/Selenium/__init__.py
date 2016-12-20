@@ -1,3 +1,5 @@
+import logging
+
 import time, re, os, sys, platform
 
 from selenium import webdriver
@@ -36,14 +38,14 @@ class SeleniumPlugin(Plugin):
 				
 				driver = webdriver.Chrome(driverPath)
 			except:
-				print('Chrome driver failed to load from (%s). Trying Firefox...' % driverPath)
+				logging.debug('Chrome driver failed to load from (%s). Trying Firefox...' % driverPath)
 				driver = webdriver.Firefox()
 				
 		return driver
 
 def waitForID(id, timeout=9999):
 	try:
-		print('\tfind %s' % id)
+		logging.debug('find %s' % id)
 		return WebDriverWait(driver, timeout).until(
 			EC.presence_of_element_located((By.ID, id))
 		)
@@ -52,7 +54,7 @@ def waitForID(id, timeout=9999):
 	
 def waitForXPath(xpath, timeout=9999):
 	try:
-		print('\tfind %s' % xpath)
+		logging.debug('find %s' % xpath)
 		return WebDriverWait(driver, timeout).until(
 			EC.presence_of_element_located((By.XPATH, xpath))
 		)
@@ -61,7 +63,7 @@ def waitForXPath(xpath, timeout=9999):
 	
 def checkWhenReady(id, timeout=9999):
 	try:
-		print('\tfind %s' % id)
+		logging.debug('find %s' % id)
 		obj = waitForID(id, timeout)
 		if not obj.is_selected():
 			click(obj)
@@ -70,7 +72,7 @@ def checkWhenReady(id, timeout=9999):
 		
 def uncheckWhenReady(id, timeout=9999):
 	try:
-		print('\tfind %s' % id)
+		logging.debug('find %s' % id)
 		obj = waitForID(id, timeout)
 		if obj.is_selected():
 			click(obj)
@@ -107,7 +109,7 @@ def createNewTab(url=None):
 		driver.get(url)
 		
 def switchToMain():
-	print('Switch to main tab')
+	logging.debug('Switch to main tab')
 	driver.switch_to.window(driver.window_handles[0])
 	driver.switch_to_default_content()
 	driver.switch_to.frame(waitForID('sandboxFrame'))

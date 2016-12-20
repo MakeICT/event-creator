@@ -2,6 +2,8 @@ r"""
 Adapted from: https://github.com/WildApricot/ApiSamples/blob/master/python/WaApi.py
 """
 
+import logging
+
 import datetime
 import urllib.request
 import urllib.response

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 import time
 import html2text
 import re
@@ -8,7 +10,6 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
-
 
 import ui
 
@@ -57,40 +58,39 @@ def load():
 
 			Selenium.goto(self.getSetting('Events page URL', 'https://facebook.com/events'))
 			if self.getSetting('Email') is not None and self.getSetting('Password') is not None:
-				print('Attempting auto login...')
+				logging.debug('Attempting auto login...')
 				self.setValue(Selenium.waitForID('email'), self.getSetting('Email'))
 				self.setValue(Selenium.waitForID('pass'), self.getSetting('Password'))
 				self.click(Selenium.waitForID('u_0_1'))
 			else:
-				print('Please login...')
+				logging.debug('Please login...')
 				
-			print('Adding event')
+			logging.debug('Adding event')
 			self.click(Selenium.waitForXPath('//*[@data-testid="event-create-button"]'))
 
-			print('Setting title')
+			logging.debug('Setting title')
 			self.setValue(Selenium.waitForXPath('//*[@placeholder="Add a short, clear name"]'), event['title'])
 			
-			print('Setting location')
+			logging.debug('Setting location')
 			if '1500 E Douglas' not in event['location']:
 				self.setValue(Selenium.waitForXPath('//*[@placeholder="Include a place or address"]'), event['location'])
 			
-			print('Setting start time')
-			print(event['startTime'])
+			logging.debug('Setting start time')
 			self.setValue(Selenium.waitForXPath('//input[@placeholder="mm/dd/yyyy"]'), event['startTime'].toString('M/d/yyyy'))
 			self.setValue(Selenium.waitForXPath('//span[@aria-label="hours"]/preceding-sibling::input'), event['startTime'].toString('h a').split(' ')[0]) # have to add the am/pm for a 12-hour clock
 			self.setValue(Selenium.waitForXPath('//span[@aria-label="minutes"]/preceding-sibling::input'), event['startTime'].toString('mm'))
 			self.setValue(Selenium.waitForXPath('//span[@aria-label="meridiem"]/preceding-sibling::input'), event['startTime'].toString('a'))
 			
-			print('Adding end time')
+			logging.debug('Adding end time')
 			self.click(Selenium.waitForXPath('//*[@data-tooltip-content="Time zone set by the location"]/following-sibling::a'))
 			
-			print('Setting end time')
+			logging.debug('Setting end time')
 			self.setValue(Selenium.waitForXPath('(//input[@placeholder="mm/dd/yyyy"])[2]'), event['stopTime'].toString('M/d/yyyy'))
 			self.setValue(Selenium.waitForXPath('(//span[@aria-label="hours"])[2]/preceding-sibling::input'), event['stopTime'].toString('h a').split(' ')[0])
 			self.setValue(Selenium.waitForXPath('(//span[@aria-label="minutes"])[2]/preceding-sibling::input'), event['stopTime'].toString('mm'))
 			self.setValue(Selenium.waitForXPath('(//span[@aria-label="meridiem"])[2]/preceding-sibling::input'), event['stopTime'].toString('a'))
 			
-			print('Set category')
+			logging.debug('Set category')
 			self.click(Selenium.waitForXPath('//div/a[contains(.,"Select Category")]'))
 			self.click(Selenium.waitForXPath('//*[@data-section="Learning"]/a'))
 			if 'class' in event['title'].lower():
@@ -98,22 +98,30 @@ def load():
 			else:
 				self.click(Selenium.waitForXPath('//*[@data-parent="Learning" and contains(., "Workshop")]'))
 
-			print('Setting description')
+			logging.debug('Setting description')
 			self.setValue(Selenium.waitForXPath('//div[@contenteditable="true"]'), description)
 			time.sleep(2)
 
-			if event['registrationURL'] is not None:
-				print('Set ticket URL')
+			if event['registrationURL'] is not None and event['registrationURL'] != '':
+				logging.debug('Set ticket URL')
 				self.setValue(Selenium.waitForXPath('//*[@placeholder="Add a link to your ticketing website"]'), event['registrationURL'])
 
-			print('Saving...')
+			logging.debug('Saving...')
+			oldURL = driver.current_url
 			if self.getSetting('Publish immediately'):
 				self.click(Selenium.waitForXPath('//button[contains("Publish")]'))
 			else:
 				self.click(Selenium.waitForXPath('//button[contains(.,"Publish")]/following-sibling::div/a'))
 				self.click(Selenium.waitForXPath('//a[contains(.,"Save Draft")]')) 
 
-			time.sleep(2)
-			return driver.current_url
+			logging.debug('Waiting for page to load')
+			waitCount = 0
+			while driver.current_url == oldURL and waitCount < 20:
+				time.sleep(0.5)
+				waitCount -= 1
+				
+			url = driver.current_url
+			driver.close()
+			return url
 
 	return FacebookPlugin()

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 import ui
 from PySide import QtCore
 
@@ -59,10 +61,13 @@ class WildApricotPlugin(Plugin):
 		
 		#@TODO: open ticket with WildApricot so that we can have an API endpoint for enabling email reminders
 		self.checkForInterruption()
+
+		logging.debug('Connecting to API')
 		api = WaApiClient()
 		api.authenticate_with_apikey(self.getSetting('API Key'))
 
 		self.checkForInterruption()
+		logging.debug('Creating event')
 		eventID = api.execute_request('Events', eventData)
 
 		for rsvpType in event['prices']:
@@ -90,17 +95,20 @@ class WildApricotPlugin(Plugin):
 					registrationTypeData['Availability'] = 'Everyone'
 			
 			self.checkForInterruption()
+
+			logging.debug('Adding registration type: ' + rsvpType['name'])
 			api.execute_request('EventRegistrationTypes', registrationTypeData)
-			
-		if config.checkBool(self.getSetting('Use this as registration URL')):
-			event['registrationURL'] = self.getSetting('Registration URL format', '%s') % eventID
-			return event['registrationURL']
 			
 		if self.getSetting('Registration URL format', '') == '':
 			waEvent = api.execute_request('Events/%s' % eventID)
-			return waEvent['Url']
+			registerURL = waEvent['Details']['Url']
 		else:
-			return self.getSetting('Registration URL format', '%s') % eventID
+			registerURL = self.getSetting('Registration URL format', '%s') % eventID
+
+		if config.checkBool(self.getSetting('Use this as registration URL')):
+			event['registrationURL'] = registerURL
+		
+		return registerURL
 
 def load():
 	return WildApricotPlugin()

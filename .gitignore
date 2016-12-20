@@ -7,9 +7,10 @@ ui/*.py
 settings.ini
 default.js
 plugins/Selenium/chromedriver*
+plugins/GoogleApps/credentials.dat
 
 # Distribution / packaging
 env/
 build/
 dist/
-
+logs/

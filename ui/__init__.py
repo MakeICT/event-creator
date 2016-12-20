@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 __all__ = ["MainWindow","OptionsWindow", "NewPrice", "PriceSummaryWidget", "About"]
 
 from functools import partial
@@ -167,18 +169,22 @@ def showOptionsDialog():
 	dialog.show()
 
 def addAction(group, name, callback):
+	logging.debug('Adding action: %s' % name)
 	if group not in actions:
 		actions[group] = []
 		
 	actions[group].append({'name': name, 'callback': callback})
 
 def addTarget(name, plugin, callback):
+	logging.debug('Adding target: %s (%s)' % (name, plugin))
 	targets.append({'name': name, 'plugin': plugin, 'callback': callback})
 
 def addPopulationType(name):
+	logging.debug('Adding population type: %s' % name)
 	populationTypes.append(name)
 	
 def addTagGroup(name, tags):
+	logging.debug('Adding tag group: %s' % name)
 	group = {'name': name, 'tags': tags}
 	tagGroups.append(group)
 	if mainWindowUI is not None:
@@ -199,6 +205,7 @@ def _layoutTagGroup(tagGroup):
 	mainWindowUI.tagForm.addRow(tagGroup['name'], tagGrid)
 		
 def removeTagGroup(name):
+	logging.debug('Removing tag group: %s' % name)
 	for group in tagGroups:
 		if group['name'] == name:
 			tagGroups.remove(group)
@@ -269,6 +276,7 @@ def setDetails(event):
 	}
 	for k,v in event.items():
 		if k in widgetLookup:
+			logging.debug('Updating %s: %s' % (k, v))
 			widgetLookup[k](v)
 
 def _loadTemplate(filename=None):
@@ -278,6 +286,7 @@ def _loadTemplate(filename=None):
 		filename = QtGui.QFileDialog.getOpenFileName(mainWindow, 'Open template...', lastTemplateFile, 'Event Creater Templates (*.js)')[0]
 		
 	if filename != '':
+		logging.debug('Loading template: ' + filename)
 		lastTemplateFile = filename
 		with open(filename) as infile:
 			data = infile.read()
@@ -297,6 +306,8 @@ def _saveTemplate():
 		if '.' not in filename:
 			filename += '.js'
 			
+		logging.debug('Saving template: ' + filename)
+		
 		event = collectEventDetails()
 		del event['priceDescription']
 		del event['isFree']
@@ -374,9 +385,7 @@ def _publishClicked():
 			return
 			
 		enabledTargets = getEnabledTargets()
-		for target in getEnabledTargets():
-			target['plugin'].prepare()
-			
+
 		publishThread = PublishThread(enabledTargets)
 		publishThread.progressChanged.connect(mainWindowUI.progressBar.setValue)
 		publishThread.eventUpdated.connect(setDetails)
@@ -387,9 +396,21 @@ def _publishClicked():
 		
 		publishThread.finished.connect(partial(mainWindowUI.publishButton.setText, 'Publish'))
 		publishThread.finished.connect(partial(mainWindowUI.progressBar.setEnabled, False))
-		
-		publishThread.start()
+
+		targetsToPrep = list(enabledTargets)
+		def prepareNextTarget(*args):
+			if len(targetsToPrep) > 0:
+				target = targetsToPrep.pop()
+				logging.debug('Preparing plugin: %s' % target['name'])
+				target['plugin'].prepare(prepareNextTarget)
+			else:
+				logging.debug('Initiating publish request')
+				publishThread.start()
+				logging.debug('Thread started?')
+				
+		prepareNextTarget()
 	else:
+		logging.debug('Cancelling publish request')
 		mainWindowUI.publishButton.setText('Cancelling...')
 		publishThread.requestInterruption()
 		
@@ -474,25 +495,27 @@ class PublishThread(QtCore.QThread):
 		self.interruptRequested = True
 	
 	def run(self):
+		logging.debug('Publish thread started')
 		event = collectEventDetails()
 		
 		for i,target in enumerate(self.targets):
 			if self.isInterruptionRequested():
 				break
 			
+			logging.debug('Sending event to plugin: ' + target['name'])
 			try:
 				url = target['callback'](event)
 				if url is not None:
-					print(url)
+					logging.info('Received URL from plugin: ' + url)
 					QtGui.QDesktopServices.openUrl(url)
 					
 				self.eventUpdated.emit(event)
 				self.progressChanged.emit(100 * float(i+1)/len(self.targets))
 			except Interruption as exc:
-				pass
+				logging.debug('Plugin interrupted')
 			except Exception as exc:
 				#@TODO: Add option to plugins which allows it to halt processing of following plugins if current one fails
-				print(traceback.format_exc())
+				logging.critical(traceback.format_exc())
 				
 
 class PriceSummaryListWidget(QtGui.QWidget):

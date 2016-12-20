@@ -1,3 +1,5 @@
+import logging
+
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 from PySide import QtCore
@@ -11,6 +13,8 @@ waitThread = None
 class CodeHandler(BaseHTTPRequestHandler):
 	def do_GET(self):
 		global code, server
+
+		logging.debug('Received: ' + self.path)
 
 		code = self.path.split('=')[1]
 		
@@ -32,6 +36,7 @@ class WaitThread(QtCore.QThread):
 		global server
 		server = HTTPServer(('', self.port), CodeHandler)
 		server.allow_reuse_address = 1
+		logging.debug('Waiting for request')
 		server.handle_request()
 		
 		if code != 'CANCEL':
@@ -48,4 +53,5 @@ def cancel():
 	global server
 
 	if server is not None:
+		logging.debug('Sending CANCEL request')
 		urllib.request.urlopen('http://%s:%s/action=CANCEL' % server.server_address)

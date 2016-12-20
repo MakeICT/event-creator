@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import logging
 import httplib2
 import os
 import time
@@ -18,7 +19,6 @@ from plugins import Plugin
 from . import codeReceiver
 
 credentialsPath = os.path.join(os.path.dirname(__file__), 'credentials.dat')
-credentials = None
 instance = None
 waitForAuthDialog = None
 
@@ -40,27 +40,36 @@ class GoogleAppsPlugin(Plugin):
 			}
 		]
 		
+		self.waitingForCredentials = False
+		
 		if name == 'GoogleApps' and instance is None:
 			instance = self
 			ui.addAction(self.name, 'Reauthorize', self.reauthorize)
 		
 	def reauthorize(self):
-		global credentials
+#		global credentials
 		
 		if os.path.exists(credentialsPath):
+			logging.debug('Deleting credentials')
 			os.remove(credentialsPath)
+
 		self._getCredentials()
 		
 	def _getCredentials(self, callback=None):
-		global credentials
+#		global credentials
+		
+		self.waitingForCredentials = True
 		
 		storage = Storage(credentialsPath)
 		credentials = storage.get()
 		
 		if credentials is None or credentials.invalid:
+			logging.debug('Missing or bad credentials. Authorization required')
+
 			flow = OAuth2WebServerFlow(
 				client_id = self.getSetting('Client ID'),
 				client_secret = self.getSetting('Client secret'),
+				prompt = 'consent',
 				scope = [
 					'https://www.googleapis.com/auth/calendar',
 					'https://www.googleapis.com/auth/gmail.compose',
@@ -78,15 +87,22 @@ class GoogleAppsPlugin(Plugin):
 			def codeReceived(code):
 				dialog.hide()				
 				credentials = flow.step2_exchange(code)
+				storage.put(credentials)
 				if callback is not None:
 					callback(credentials)
+				self.waitingForCredentials = False
 			
 			codeReceiver.waitForCode(codeReceived)
-		elif callback is not None:
-			callback(credentials)
-
-	def prepare(self):
-		instance._getCredentials()
+		else:
+			if callback is not None:
+				callback(credentials)
+				
+			self.waitingForCredentials = False
+			
+		return credentials
+			
+	def prepare(self, callback=None):
+		instance._getCredentials(callback)
 		
 def showWaitForCodeDialog():
 	global waitForAuthDialog
