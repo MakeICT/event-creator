@@ -5,13 +5,11 @@ __pycache__/
 ui/*.py
 !ui/__init__.py
 settings.ini
+default.js
+plugins/Selenium/chromedriver*
 
 # Distribution / packaging
 env/
 build/
 dist/
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
 
