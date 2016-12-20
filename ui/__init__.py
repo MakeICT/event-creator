@@ -105,6 +105,9 @@ def showOptionsDialog():
 	optionsDialogUI.timezone.setCurrentIndex(optionsDialogUI.timezone.findText(settings.value('timezone')))
 	optionsDialogUI.timezone.currentIndexChanged[str].connect(partial(settings.setValue, 'timezone'))
 	
+	optionsDialogUI.logLevel.setCurrentIndex(optionsDialogUI.logLevel.findText(settings.value('logLevel', 'Debug')))
+	optionsDialogUI.logLevel.currentIndexChanged[str].connect(partial(settings.setValue, 'logLevel'))
+	
 	for pluginName, plugin in loadedPlugins.items():
 		tab = QtGui.QWidget()
 		layout = QtGui.QFormLayout(tab)
