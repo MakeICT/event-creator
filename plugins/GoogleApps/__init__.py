@@ -19,6 +19,7 @@ from . import codeReceiver
 
 credentials = None
 instance = None
+waitForAuthDialog = None
 
 class GoogleAppsPlugin(Plugin):
 	def __init__(self, name='GoogleApps'):
@@ -42,8 +43,9 @@ class GoogleAppsPlugin(Plugin):
 			instance = self
 			ui.addAction(self.name, 'Authorize', self._getCredentials)
 		
-	def _getCredentials(self):
+	def _getCredentials(self, callback=None):
 		global credentials
+		
 		# @TODO: consider saving Google credentials to a file so authorization can persist across executions
 		if credentials is None or credentials.invalid:
 			flow = OAuth2WebServerFlow(
@@ -55,27 +57,47 @@ class GoogleAppsPlugin(Plugin):
 					'https://www.googleapis.com/auth/gmail.send',
 					'https://www.googleapis.com/auth/admin.directory.resource.calendar',
 				],
-				#redirect_uri = 'urn:ietf:wg:oauth:2.0:oob',
 				redirect_uri = 'http://localhost:8080/',
 			)
 			
 			# bug in google code and encoding chars?
 			authURI = flow.step1_get_authorize_url().replace('%3A', ':').replace('%2F', '/')
-			
 			QtGui.QDesktopServices.openUrl(authURI)
-			#code = QtGui.QInputDialog.getText(None, 'Authorization', 'Enter the authorization code here:')
-			#QtGui.QMessageBox.information(None, 'Authorization required...', 'Please authorize in the web browser')
-			dialog = QtGui.QDialog(None)
-			dialog.show()
-			code = codeReceiver.waitForCode()
-			dialog.hide()
-				
-			credentials = flow.step2_exchange(code)
-		
-		return credentials
+			
+			dialog = showWaitForCodeDialog()
+			def codeReceived(code):
+				dialog.hide()				
+				credentials = flow.step2_exchange(code)
+				if callback is not None:
+					callback(credentials)
+			
+			codeReceiver.waitForCode(codeReceived)
+		elif callback is not None:
+			callback(credentials)
 
 	def prepare(self):
 		instance._getCredentials()
+		
+def showWaitForCodeDialog():
+	global waitForAuthDialog
+	
+	if waitForAuthDialog is None:
+		waitForAuthDialog = QtGui.QDialog(None)
+		waitForAuthDialog.setWindowTitle('Authorization required...')
+		waitForAuthDialog.setModal(True)
+		
+		layout = QtGui.QVBoxLayout()
+		layout.addWidget(QtGui.QLabel('A window requesting authorization will appear in your browser.\n\nPlease accept the authorization to continue.'))
+		buttonBox = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Cancel)
+		layout.addWidget(buttonBox)
+		waitForAuthDialog.setLayout(layout)
+		
+		buttonBox.rejected.connect(codeReceiver.cancel)
+		buttonBox.rejected.connect(waitForAuthDialog.close)
+			
+	waitForAuthDialog.show()
+	
+	return waitForAuthDialog
 
 def load():
 	global instance
@@ -83,5 +105,5 @@ def load():
 		instance = GoogleAppsPlugin()
 	return instance
 
-def getCredentials():
-	return instance._getCredentials()
+def getCredentials(callback=None):
+	return instance._getCredentials(callback)

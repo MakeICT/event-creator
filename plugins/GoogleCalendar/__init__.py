@@ -28,9 +28,12 @@ def load():
 			]
 			#@TODO: Add option for "pre" event/setup event on Google Calendar (we will use this for checkins)
 
-			self._setResourceObjects(json.loads(self.getSetting('Resources', '[]')))
 			ui.addTarget(self.name, self, self.createEvent)
 			ui.addAction(self.name, 'Refresh resources', self.refreshResources)
+
+			resourceJSON = self.getSetting('Resources')
+			if resourceJSON != '':
+				self._setResourceObjects(json.loads(resourceJSON))
 		
 		def _setResourceObjects(self, objs):
 			ui.removeTagGroup('Resources')
@@ -42,13 +45,16 @@ def load():
 				ui.addTagGroup('Resources', resources)
 		
 		def refreshResources(self):
-			credentials = GoogleApps.getCredentials()
-			http = credentials.authorize(httplib2.Http())
-			service = discovery.build('admin', 'directory_v1', http=http)
+			def credentialsReceived(credentials):
+				http = credentials.authorize(httplib2.Http())
+				service = discovery.build('admin', 'directory_v1', http=http)
 
-			response = service.resources().calendars().list(customer='my_customer').execute()
-			self.saveSetting('Resources', json.dumps(response['items']))
-			self._setResourceObjects(response['items'])
+				response = service.resources().calendars().list(customer='my_customer').execute()
+				self.saveSetting('Resources', json.dumps(response['items']))
+				self._setResourceObjects(response['items'])
+
+			GoogleApps.getCredentials(credentialsReceived)
+			
 			
 		def createEvent(self, event):
 			if settings.value('timezone') is not None and settings.value('timezone') != '':
