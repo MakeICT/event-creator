@@ -15,6 +15,7 @@ from oauth2client.file import Storage
 import ui
 
 from plugins import Plugin
+from . import codeReceiver
 
 credentials = None
 instance = None
@@ -54,16 +55,22 @@ class GoogleAppsPlugin(Plugin):
 					'https://www.googleapis.com/auth/gmail.send',
 					'https://www.googleapis.com/auth/admin.directory.resource.calendar',
 				],
-				redirect_uri = 'urn:ietf:wg:oauth:2.0:oob',
+				#redirect_uri = 'urn:ietf:wg:oauth:2.0:oob',
+				redirect_uri = 'http://localhost:8080/',
 			)
 			
 			# bug in google code and encoding chars?
 			authURI = flow.step1_get_authorize_url().replace('%3A', ':').replace('%2F', '/')
 			
 			QtGui.QDesktopServices.openUrl(authURI)
-			code = QtGui.QInputDialog.getText(None, 'Authorization', 'Enter the authorization code here:')
+			#code = QtGui.QInputDialog.getText(None, 'Authorization', 'Enter the authorization code here:')
+			#QtGui.QMessageBox.information(None, 'Authorization required...', 'Please authorize in the web browser')
+			dialog = QtGui.QDialog(None)
+			dialog.show()
+			code = codeReceiver.waitForCode()
+			dialog.hide()
 				
-			credentials = flow.step2_exchange(code[0])
+			credentials = flow.step2_exchange(code)
 		
 		return credentials
 
