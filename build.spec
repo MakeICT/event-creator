@@ -2,37 +2,44 @@
 
 import platform
 
-version = '1.6'
+version = '2.0'
+
 if platform.system() == 'Linux':
-     platformExt = 'linux.bin'
+	platformExt = 'linux.bin'
 else:
-     platformExt = 'windows.exe'
+	platformExt = 'windows.exe'
+	
+a = Analysis(
+	['main.py'],
+	pathex=[],
+	binaries=None,
+	datas=[],
+	hiddenimports=[
+		'httplib2',
+		'apiclient',
+		'html2text',
+		'meetup', 'meetup.api', 'requests', 'requests.packages', 'requests.packages.urllib3',
+		'selenium', 'selenium.webdriver', 'selenium.webdriver.support', 'selenium.webdriver.support.expected_conditions',
+		'email', 'email.mime', 'email.mime.text',
+	],
+	hookspath=[],
+	runtime_hooks=[],
+	excludes=[],
+	win_no_prefer_redirects=False,
+	win_private_assemblies=False,
+	cipher=None
+)
 
-block_cipher = None
-
-a = Analysis(['main.py'],
-             pathex=['./'],
-             binaries=None,
-             datas=[
-				('chromedriver', '.'),
-				('chromedriver.exe', '.'),
-             ],
-             hiddenimports=[],
-             hookspath=[],
-             runtime_hooks=[],
-             excludes=[],
-             win_no_prefer_redirects=False,
-             win_private_assemblies=False,
-             cipher=block_cipher)
-pyz = PYZ(a.pure, a.zipped_data,
-             cipher=block_cipher)
-exe = EXE(pyz,
-          a.scripts,
-          a.binaries,
-          a.zipfiles,
-          a.datas,
-          name='makeict-event-creator-app-v%s-%s' % (version, platformExt),
-          debug=True,
-          strip=False,
-          upx=True,
-          console=True )
+pyz = PYZ(a.pure, a.zipped_data)
+exe = EXE(
+	pyz,
+	a.scripts,
+	a.binaries,
+	a.zipfiles,
+	a.datas,
+	name='event-creator-v%s-%s' % (version, platformExt),
+	debug=True,
+	strip=False,
+	upx=True,
+	console=True
+)
