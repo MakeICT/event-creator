@@ -29,9 +29,6 @@ class GoogleAppsPlugin(Plugin):
 		super().__init__(name)
 		self.options = [
 			{
-				'name': 'Application name',
-				'type': 'text',
-			},{
 				'name': 'Client ID',
 				'type': 'text',
 			},{
