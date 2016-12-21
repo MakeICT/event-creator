@@ -37,15 +37,11 @@ class GoogleAppsPlugin(Plugin):
 			}
 		]
 		
-		self.waitingForCredentials = False
-		
 		if name == 'GoogleApps' and instance is None:
 			instance = self
 			ui.addAction(self.name, 'Reauthorize', self.reauthorize)
 		
 	def reauthorize(self):
-#		global credentials
-		
 		if os.path.exists(credentialsPath):
 			logging.debug('Deleting credentials')
 			os.remove(credentialsPath)
@@ -53,10 +49,6 @@ class GoogleAppsPlugin(Plugin):
 		self._getCredentials()
 		
 	def _getCredentials(self, callback=None):
-#		global credentials
-		
-		self.waitingForCredentials = True
-		
 		storage = Storage(credentialsPath)
 		credentials = storage.get()
 		
@@ -87,15 +79,12 @@ class GoogleAppsPlugin(Plugin):
 				storage.put(credentials)
 				if callback is not None:
 					callback(credentials)
-				self.waitingForCredentials = False
 			
 			codeReceiver.waitForCode(codeReceived)
 		else:
 			if callback is not None:
 				callback(credentials)
 				
-			self.waitingForCredentials = False
-			
 		return credentials
 			
 	def prepare(self, callback=None):
