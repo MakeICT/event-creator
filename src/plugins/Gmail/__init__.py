@@ -56,6 +56,9 @@ def load():
 			htmlBody += '<tr><td>Location:</td><td>' + event['location'] + '</td></tr>'
 			htmlBody += '<tr><td>Starting:</td><td>' + event['startTime'].toString(dateTimeFormat) + tzName + '</td></tr>'
 			htmlBody += '<tr><td>Ending:</td><td>' + event['stopTime'].toString(dateTimeFormat) + tzName + '</td></tr>'
+			if event['registrationURL'] is not None and event['registrationURL'] != '':
+				htmlBody += '<tr><td>Register:</td><td>' + event['registrationURL'] + '</td></tr>'
+				
 			htmlBody += '</table><br/>' + event['description']
 			htmlBody += '\n\n' + event['priceDescription'] + '</body></html>'
 				
