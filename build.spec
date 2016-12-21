@@ -40,7 +40,7 @@ exe = EXE(
 	a.zipfiles,
 	a.datas,
 	name=binaryName,
-	debug=True,
+	debug=False,
 	strip=False,
 	upx=True,
 	console=False

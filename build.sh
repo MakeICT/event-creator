@@ -1,8 +1,7 @@
 #!/bin/bash
-echo "*** Building Binary"
-binary=$(pyinstaller build.spec)
 
-if [ $? -eq 0 ]; then
+function makePackage(){
+	binary=$1
 	echo
 	echo "*** Copying plugins..."
 	rm -rf dist/plugins
@@ -19,15 +18,33 @@ if [ $? -eq 0 ]; then
 	echo
 	echo "*** Zipping..."
 	cd dist
-	zip ${binary%.*}.zip $binary plugins/
+	zip -r ${binary%.*}.zip $binary plugins/
 	cd ..
 	
 	echo
 	echo "*** Done!"
-	exit 0
+}
+
+echo "*** Building Linux binary"
+linuxBinary=$(pyinstaller build.spec)
+if [ $? -eq 0 ]; then
+	makePackage $linuxBinary
 else
 	echo
 	echo "*** Build failed :("
-	
-	exit 1
 fi
+
+echo
+echo "*** Building Windows binary"
+windowsBinary=$(wine pyinstaller build.spec)
+if [ $? -eq 0 ]; then
+	makePackage $windowsBinary
+else
+	echo
+	echo "*** Build failed :("
+fi
+echo
+echo "*** Zipping combined package..."
+cd dist
+zip -r ${linuxBinary%-*}-all.zip $linuxBinary $windowsBinary plugins/
+cd ..
