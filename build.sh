@@ -5,7 +5,7 @@ function makePackage(){
 	echo
 	echo "*** Zipping $zip..."
 	cd dist
-	zip -r $zip plugins/ $*
+	zip -r $zip plugins/ README.md LICENSE.md $*
 	cd ..
 }
 
@@ -34,6 +34,8 @@ echo "*** Copying plugins..."
 rm -rf dist/plugins
 mkdir dist/plugins
 cp -R src/plugins dist/
+cp README.md dist/
+cp LICENSE.md dist/
 
 echo
 echo "*** Cleaning up..."
@@ -46,9 +48,17 @@ rm -rf dist/plugins/GoogleApps/credentials.dat
 echo
 echo "*** Bundling..."
 if [ $# -eq 0 ] || [ "$1" == "linux" ]; then
-	makePackage ${linuxBinary%.*}.zip $linuxBinary
+	makePackage $linuxBinary.zip $linuxBinary
 fi
 if [ $# -eq 0 ] || [ "$1" == "windows" ]; then
 	makePackage ${windowsBinary%.*}.zip $windowsBinary
 fi
-makePackage ${linuxBinary%-*}-all.zip $linuxBinary $windowsBinary
+
+windowsBinary=event-creator-v2.1.2-windows.exe
+if [ $# -eq 0 ] || [ "$1" == "linux" ]; then
+	combinedZip=${linuxBinary%-*}-all.zip
+	makePackage  $linuxBinary $windowsBinary
+else
+	combinedZip=${windowsBinary%-*}-all.zip
+fi
+makePackage $combinedZip $linuxBinary $windowsBinary

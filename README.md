@@ -38,6 +38,8 @@ To add support for a new calendar or service, you should create a plugin. Plugin
 
 ## History
 ### v2.1
+* Error messages on publishing errors
+* Simple form validation
 * Proper logging
 * Presistent Google apps credentials
 * Improved Google apps authentication workflow

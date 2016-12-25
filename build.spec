@@ -5,7 +5,7 @@ import platform
 version = '2.1.2'
 
 if platform.system() == 'Linux':
-	platformExt = 'linux.bin'
+	platformExt = 'linux'
 else:
 	platformExt = 'windows.exe'
 
