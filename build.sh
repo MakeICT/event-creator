@@ -9,19 +9,24 @@ function makePackage(){
 	cd ..
 }
 
-echo "*** Building Linux binary"
-linuxBinary=$(pyinstaller build.spec)
-echo 
-if [ $? -ne 0 ]; then
-	echo "*** Build failed :("
-	exit 1
+if [ $# -eq 0 ] || [ "$1" == "linux" ]; then
+	echo "*** Building Linux binary"
+	linuxBinary=$(pyinstaller build.spec)
+	if [ $? -ne 0 ]; then
+		echo 
+		echo "*** Build failed :("
+		exit 1
+	fi
 fi
 
-echo "*** Building Windows binary"
-windowsBinary=$(wine pyinstaller build.spec | tr -d "[:space:]")
-if [ $? -ne 0 ]; then
-	echo "*** Build failed :("
-	exit 1
+if [ $# -eq 0 ] || [ "$1" == "windows" ]; then
+	echo "*** Building Windows binary"
+	windowsBinary=$(wine pyinstaller build.spec | tr -d "[:space:]")
+	if [ $? -ne 0 ]; then
+		echo 
+		echo "*** Build failed :("
+		exit 1
+	fi
 fi
 
 echo
@@ -38,6 +43,12 @@ rm -rf dist/plugins/*/__pycache__/
 rm -rf dist/plugins/GoogleApps/credentials.dat
 
 
-makePackage ${linuxBinary%.*}.zip $linuxBinary
-makePackage ${windowsBinary%.*}.zip $windowsBinary
+echo
+echo "*** Bundling..."
+if [ $# -eq 0 ] || [ "$1" == "linux" ]; then
+	makePackage ${linuxBinary%.*}.zip $linuxBinary
+fi
+if [ $# -eq 0 ] || [ "$1" == "windows" ]; then
+	makePackage ${windowsBinary%.*}.zip $windowsBinary
+fi
 makePackage ${linuxBinary%-*}-all.zip $linuxBinary $windowsBinary
