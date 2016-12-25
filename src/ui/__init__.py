@@ -375,7 +375,14 @@ def _showNewPriceWindow(summaryWidget=None):
 def _getChildren(parent):
 	for i in range(parent.count()):
 		yield parent.itemAt(i).widget()
-		
+
+def _handlePublishError(msg, target):
+	QtGui.QMessageBox.critical(None, 'Publish error', '%s: %s' % (target['name'], msg))
+	
+def _targetComplete(percentage, target):
+	mainWindowUI.progressBar.setValue(percentage)
+	target['checkbox'].setChecked(False)
+
 def _publishClicked():
 	global publishThread
 	
@@ -387,7 +394,7 @@ def _publishClicked():
 		enabledTargets = getEnabledTargets()
 
 		publishThread = PublishThread(enabledTargets)
-		publishThread.progressChanged.connect(mainWindowUI.progressBar.setValue)
+		publishThread.progressChanged.connect(_targetComplete)
 		publishThread.eventUpdated.connect(setDetails)
 
 		publishThread.started.connect(partial(mainWindowUI.progressBar.setValue, 0))
@@ -396,6 +403,8 @@ def _publishClicked():
 		
 		publishThread.finished.connect(partial(mainWindowUI.publishButton.setText, 'Publish'))
 		publishThread.finished.connect(partial(mainWindowUI.progressBar.setEnabled, False))
+
+		publishThread.errorOccurred.connect(_handlePublishError)
 
 		targetsToPrep = list(enabledTargets)
 		def prepareNextTarget(*args):
@@ -480,8 +489,10 @@ def collectEventDetails():
 	return event
 	
 class PublishThread(QtCore.QThread):
-	progressChanged = QtCore.Signal(object)
+	progressChanged = QtCore.Signal(int, object)
+	errorOccurred = QtCore.Signal(str, object)
 	eventUpdated = QtCore.Signal(object)
+	errorOccurred = QtCore.Signal(str, object)
 	
 	def __init__(self, targets):
 		super().__init__(None)
@@ -510,12 +521,13 @@ class PublishThread(QtCore.QThread):
 					QtGui.QDesktopServices.openUrl(url)
 					
 				self.eventUpdated.emit(event)
-				self.progressChanged.emit(100 * float(i+1)/len(self.targets))
+				self.progressChanged.emit(100 * float(i+1)/len(self.targets), target)
 			except Interruption as exc:
 				logging.debug('Plugin interrupted')
 			except Exception as exc:
-				#@TODO: Add option to plugins which allows it to halt processing of following plugins if current one fails
 				logging.critical(traceback.format_exc())
+				self.errorOccurred.emit('%s' % exc, target)
+				break
 				
 
 class PriceSummaryListWidget(QtGui.QWidget):
