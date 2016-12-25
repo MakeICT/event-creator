@@ -2,7 +2,7 @@
 
 import platform
 
-version = '2.1.1'
+version = '2.1.2'
 
 if platform.system() == 'Linux':
 	platformExt = 'linux.bin'
@@ -47,7 +47,7 @@ exe = EXE(
 	debug=False,
 	strip=False,
 	upx=True,
-	console=False
+	console=True
 )
 
 print(binaryName)

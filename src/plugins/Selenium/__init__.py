@@ -28,19 +28,16 @@ class SeleniumPlugin(Plugin):
 		
 		if driver is None:
 			driverPath = self.getSetting('Driver path')
-			try:
-				if driverPath == '':
-					basePath = os.path.dirname(__file__)
-					if platform.system() == 'Linux':
-						driverPath = os.path.join(basePath, 'chromedriver')
-					else:
-						driverPath = os.path.join(basePath, 'chromedriver.exe')
-				
-				driver = webdriver.Chrome(driverPath)
-			except:
-				logging.debug('Chrome driver failed to load from (%s). Trying Firefox...' % driverPath)
-				driver = webdriver.Firefox()
-				
+			if driverPath == '':
+				basePath = os.path.dirname(__file__)
+				if platform.system() == 'Linux':
+					driverPath = os.path.join(basePath, 'chromedriver')
+				else:
+					driverPath = os.path.join(basePath, 'chromedriver.exe')
+			
+			logging.debug('Looking for driver in: %s' % driverPath)
+			driver = webdriver.Chrome(driverPath)
+			
 		return driver
 
 def waitForID(id, timeout=9999):
