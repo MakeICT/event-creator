@@ -11,6 +11,7 @@ src/plugins/GoogleApps/credentials.dat
 
 # Distribution / packaging
 env/
+venv/
 build/
 dist/
 src/logs/
