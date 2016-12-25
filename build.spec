@@ -11,11 +11,15 @@ else:
 
 binaryName = 'event-creator-v%s-%s' % (version, platformExt)
 
+# meetup bug: when freezing, api spec files aren't distributed automatically
+import meetup
+meetupAPIspecs = os.path.join(os.path.dirname(meetup.__file__), 'api_specification', '*.json')
+
 a = Analysis(
 	['src/main.py'],
 	pathex=[],
 	binaries=None,
-	datas=[],
+	datas=[(meetupAPIspecs, 'meetup/api_specification')],
 	hiddenimports=[
 		'httplib2',
 		'apiclient',
