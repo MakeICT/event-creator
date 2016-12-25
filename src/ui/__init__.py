@@ -376,8 +376,8 @@ def _getChildren(parent):
 	for i in range(parent.count()):
 		yield parent.itemAt(i).widget()
 
-def _handlePublishError(msg, target):
-	QtGui.QMessageBox.critical(None, 'Publish error', '%s: %s' % (target['name'], msg))
+def _handlePublishError(msg):
+	QtGui.QMessageBox.critical(None, 'Publish error', msg)
 	
 def _targetComplete(percentage, target):
 	mainWindowUI.progressBar.setValue(percentage)
@@ -490,9 +490,8 @@ def collectEventDetails():
 	
 class PublishThread(QtCore.QThread):
 	progressChanged = QtCore.Signal(int, object)
-	errorOccurred = QtCore.Signal(str, object)
+	errorOccurred = QtCore.Signal(str)
 	eventUpdated = QtCore.Signal(object)
-	errorOccurred = QtCore.Signal(str, object)
 	
 	def __init__(self, targets):
 		super().__init__(None)
@@ -508,6 +507,17 @@ class PublishThread(QtCore.QThread):
 	def run(self):
 		logging.debug('Publish thread started')
 		event = collectEventDetails()
+		
+		try:
+			if event['title'] == '':
+				raise Exception('Event title must be set')
+			if event['location'] == '':
+				raise Exception('Event location must be set')
+			if event['description'] == '':
+				raise Exception('Event description must be set')
+		except Exception as exc:
+			self.errorOccurred.emit('%s' % exc)
+			return
 		
 		for i,target in enumerate(self.targets):
 			if self.isInterruptionRequested():
@@ -526,7 +536,7 @@ class PublishThread(QtCore.QThread):
 				logging.debug('Plugin interrupted')
 			except Exception as exc:
 				logging.critical(traceback.format_exc())
-				self.errorOccurred.emit('%s' % exc, target)
+				self.errorOccurred.emit('%s: %s' % (target['name'], exc))
 				break
 				
 
