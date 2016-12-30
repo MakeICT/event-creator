@@ -41,7 +41,7 @@ class WildApricotPlugin(Plugin):
 			timezoneOffset = ''
 		
 		eventData = {
-			"Name": 'TEST: ' + event['title'],
+			"Name": event['title'],
 			"StartDate": event['startTime'].toString(QtCore.Qt.ISODate) + timezoneOffset,
 			"EndDate": event['stopTime'].toString(QtCore.Qt.ISODate) + timezoneOffset,
 			"Location": event['location'],
