@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import logging
-
 import meetup.api
 import ui
 
@@ -31,6 +29,9 @@ class MeetupPlugin(Plugin):
 			},{
 				'name': 'Title append',
 				'type': 'text',
+			},{
+				'name': 'Allow RSVP',
+				'type': 'yesno',
 			}
 		]
 		#@TODO: Allow option for publishing meetup events immediately
@@ -58,6 +59,9 @@ class MeetupPlugin(Plugin):
 			
 		if append != '':
 			title += ' ' + append
+		rsvp_limit = 1;
+		if config.checkBool(self.getSetting("Allow RSVP")):
+			rsvp_limit=0
 		
 		self.checkForInterruption()
 		meetupEvent = api.CreateEvent({
@@ -68,6 +72,7 @@ class MeetupPlugin(Plugin):
 			'duration': event['startTime'].msecsTo(event['stopTime']),
 			'venue_id': self.getSetting('Venue ID'),
 			'publish_status': 'draft',
+			'rsvp_limit': rsvp_limit
 		})
 		
 		if config.checkBool(self.getSetting('Use this as registration URL')):
