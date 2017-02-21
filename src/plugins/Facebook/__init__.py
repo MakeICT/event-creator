@@ -12,7 +12,6 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 
 import ui
-
 def load():
 	from plugins import Selenium
 	
@@ -61,7 +60,7 @@ def load():
 				logging.debug('Attempting auto login...')
 				self.setValue(Selenium.waitForID('email'), self.getSetting('Email'))
 				self.setValue(Selenium.waitForID('pass'), self.getSetting('Password'))
-				self.click(Selenium.waitForID('u_0_1'))
+				self.click(Selenium.waitForXPath('//input[@value="Log In"]'))
 			else:
 				logging.debug('Please login...')
 				
@@ -90,14 +89,6 @@ def load():
 			self.setValue(Selenium.waitForXPath('(//span[@aria-label="minutes"])[2]/preceding-sibling::input'), event['stopTime'].toString('mm'))
 			self.setValue(Selenium.waitForXPath('(//span[@aria-label="meridiem"])[2]/preceding-sibling::input'), event['stopTime'].toString('a'))
 			
-			logging.debug('Set category')
-			self.click(Selenium.waitForXPath('//div/a[contains(.,"Select Category")]'))
-			self.click(Selenium.waitForXPath('//*[@data-section="Learning"]/a'))
-			if 'class' in event['title'].lower():
-				self.click(Selenium.waitForXPath('//*[@data-parent="Learning" and contains(., "Class")]'))
-			else:
-				self.click(Selenium.waitForXPath('//*[@data-parent="Learning" and contains(., "Workshop")]'))
-
 			logging.debug('Setting description')
 			self.setValue(Selenium.waitForXPath('//div[@contenteditable="true"]'), description)
 			time.sleep(2)
