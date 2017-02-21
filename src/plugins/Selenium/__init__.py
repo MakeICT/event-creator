@@ -10,6 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import *
 
 from plugins import Plugin
+import config
 
 driver = None
 
@@ -20,6 +21,9 @@ class SeleniumPlugin(Plugin):
 			{
 				'name': 'Driver path',
 				'type': 'text',
+			},{
+				'name': 'Use chromedriver',
+				'type': 'yesno',
 			}
 		]
 			
@@ -30,13 +34,20 @@ class SeleniumPlugin(Plugin):
 			driverPath = self.getSetting('Driver path')
 			if driverPath == '':
 				basePath = os.path.dirname(__file__)
-				if platform.system() == 'Linux':
+				if config.checkBool(self.getSetting('Use chromedriver')):
 					driverPath = os.path.join(basePath, 'chromedriver')
 				else:
-					driverPath = os.path.join(basePath, 'chromedriver.exe')
+					driverPath = os.path.join(basePath, 'geckodriver')
 			
+				if platform.system() != 'Linux':
+					driverPath += '.exe'
+
 			logging.debug('Looking for driver in: %s' % driverPath)
-			driver = webdriver.Chrome(driverPath)
+			if config.checkBool(self.getSetting('Use chromedriver')):
+				driver = webdriver.Chrome(driverPath)
+			else:
+				os.environ["PATH"] += os.pathsep + basePath
+				driver = webdriver.Firefox()
 			
 		return driver
 
