@@ -2,7 +2,7 @@
 
 import platform
 
-version = '2.1.3'
+version = '2.1.4'
 
 if platform.system() == 'Linux':
 	platformExt = 'linux'

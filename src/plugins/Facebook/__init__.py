@@ -60,7 +60,7 @@ def load():
 				logging.debug('Attempting auto login...')
 				self.setValue(Selenium.waitForID('email'), self.getSetting('Email'))
 				self.setValue(Selenium.waitForID('pass'), self.getSetting('Password'))
-				self.click(Selenium.waitForXPath('//input[@value="Log In"]'))
+				Selenium.waitForID('pass'), self.getSetting('Password').submit()
 			else:
 				logging.debug('Please login...')
 				
