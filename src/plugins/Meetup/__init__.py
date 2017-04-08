@@ -74,7 +74,8 @@ class MeetupPlugin(Plugin):
 			'duration': event['startTime'].msecsTo(event['stopTime']),
 			'venue_id': self.getSetting('Venue ID'),
 			'publish_status': 'draft',
-			'rsvp_limit': rsvp_limit
+			'rsvp_limit': rsvp_limit,
+			'waitlisting': 'off'
 		})
 		
 		if config.checkBool(self.getSetting('Use this as registration URL')):
