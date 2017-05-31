@@ -64,9 +64,8 @@ class MeetupPlugin(Plugin):
 		rsvp_limit = 1;
 		if config.checkBool(self.getSetting("Allow RSVP")):
 			rsvp_limit=0
-		
-		self.checkForInterruption()
-		meetupEvent = api.CreateEvent({
+
+		meetup_details = {
 			'group_id': group.id,
 			'name': title,
 			'description': description,
@@ -75,8 +74,14 @@ class MeetupPlugin(Plugin):
 			'venue_id': self.getSetting('Venue ID'),
 			'publish_status': 'draft',
 			'rsvp_limit': rsvp_limit,
-			'waitlisting': 'off'
-		})
+			'guest_limit': 0,
+			'waitlisting': 'off',
+		}
+		if event['registrationURL'] != '':
+			meetup_details['question_0'] = "This event requires external registration. Please follow the link in the event description to register for this class. Registering on Meetup does not reserve your spot for this event."
+		
+		self.checkForInterruption()
+		meetupEvent = api.CreateEvent(meetup_details)
 		
 		if config.checkBool(self.getSetting('Use this as registration URL')):
 			event['registrationURL'] = meetupEvent.event_url
