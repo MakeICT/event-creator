@@ -137,10 +137,11 @@ def showOptionsDialog():
 		for p in savedPriorities:
 			if p in loadedPlugins:
 				optionsDialogUI.pluginPriorityList.addItem(p)
-				del loadedPlugins[p]
+				#del loadedPlugins[p]
 		
 	for p in loadedPlugins:
-		optionsDialogUI.pluginPriorityList.addItem(p)
+		if not p in savedPriorities:
+			optionsDialogUI.pluginPriorityList.addItem(p)
 		
 	def savePriorities():
 		priorityList = ''
