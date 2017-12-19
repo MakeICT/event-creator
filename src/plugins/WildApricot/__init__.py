@@ -40,7 +40,7 @@ class WildApricotPlugin(Plugin):
 		# else:
 		# 	timezoneOffset = ''
 
-		tags = ["InstructorName:" + event['instructorName'], "InstructorEmail:"+event['instructorEmail']]
+		tags = ["instructor_name:" + event['instructorName'], "instructor_email:"+event['instructorEmail']]
 		
 		eventData = {
 			"Name": event['title'],
