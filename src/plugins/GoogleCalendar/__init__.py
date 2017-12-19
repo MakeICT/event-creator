@@ -62,11 +62,14 @@ def load():
 			
 			
 		def createEvent(self, event):
-			if settings.value('timezone') is not None and settings.value('timezone') != '':
-				timezoneOffset = settings.value('timezone').split(' UTC')[1]
-			else:
-				timezoneOffset = ''
-				
+			# if settings.value('timezone') is not None and settings.value('timezone') != '':
+			# 	timezoneOffset = settings.value('timezone').split(' UTC')[1]
+			# else:
+			# 	timezoneOffset = ''
+
+			timezone = settings.value('timezone')
+
+
 			selectedResources = []
 			for resourceTag in event['tags']['Resources']:
 				for resource in self.resourceObjects:
@@ -87,8 +90,10 @@ def load():
 				'summary': event['title'],
 				'location': event['location'],
 				'description': description,
-				'start': {'dateTime': event['startTime'].toString(QtCore.Qt.ISODate) + timezoneOffset},
-				'end': {'dateTime': event['stopTime'].toString(QtCore.Qt.ISODate) + timezoneOffset},
+				# 'start': {'dateTime': event['startTime'].toString(QtCore.Qt.ISODate) + timezoneOffset},
+				# 'end': {'dateTime': event['stopTime'].toString(QtCore.Qt.ISODate) + timezoneOffset},
+				'start': {'dateTime': event['startTime'].toString(QtCore.Qt.ISODate), 'timeZone':timezone},
+				'end': {'dateTime': event['stopTime'].toString(QtCore.Qt.ISODate), 'timeZone':timezone},
 				'attendees': selectedResources
 			}
 			

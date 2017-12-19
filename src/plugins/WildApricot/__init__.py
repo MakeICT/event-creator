@@ -35,10 +35,12 @@ class WildApricotPlugin(Plugin):
 		ui.addPopulationType('Members')
 	
 	def createEvent(self, event):
-		if settings.value('timezone') is not None and settings.value('timezone') != '':
-			timezoneOffset = settings.value('timezone').split(' UTC')[1]
-		else:
-			timezoneOffset = ''
+		# if settings.value('timezone') is not None and settings.value('timezone') != '':
+		# 	timezoneOffset = settings.value('timezone').split(' UTC')[1]
+		# else:
+		# 	timezoneOffset = ''
+
+		tags = ["InstructorName:" + event['instructorName'], "InstructorEmail:"+event['instructorEmail']]
 		
 		eventData = {
 			"Name": event['title'],
@@ -57,6 +59,7 @@ class WildApricotPlugin(Plugin):
 				"SendEmailCopy": False,
 				"WaitListBehaviour": "Disabled",
 			},
+			"Tags":tags
 		}
 		
 		#@TODO: open ticket with WildApricot so that we can have an API endpoint for enabling email reminders

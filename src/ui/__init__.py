@@ -451,6 +451,9 @@ def collectEventDetails():
 		'tags': {},
 		'isFree': True,
 		'priceDescription': '',
+		'instructorName':mainWindowUI.instructorNameInput.text(),
+		'instructorEmail':mainWindowUI.instructorEmailInput.text(),
+
 	}
 
 	for rsvpType in _getChildren(mainWindowUI.priceList):
