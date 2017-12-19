@@ -110,7 +110,9 @@ def showOptionsDialog():
 	optionsDialogUI.logLevel.setCurrentIndex(optionsDialogUI.logLevel.findText(settings.value('logLevel', 'Debug')))
 	optionsDialogUI.logLevel.currentIndexChanged[str].connect(partial(settings.setValue, 'logLevel'))
 	
+	print(loadedPlugins.items())
 	for pluginName, plugin in loadedPlugins.items():
+		print(pluginName)
 		tab = QtGui.QWidget()
 		layout = QtGui.QFormLayout(tab)
 		layout.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
@@ -273,6 +275,8 @@ def setDetails(event):
 		'registrationLimit': mainWindowUI.registrationLimitInput.setValue,
 		'prices': setPrices,
 		'tags': setTags,
+		'instructorEmail': mainWindowUI.instructorEmailInput.setText,
+		'instructorName': mainWindowUI.instructorNameInput.setText,
 	}
 	for k,v in event.items():
 		if k in widgetLookup:
@@ -453,7 +457,6 @@ def collectEventDetails():
 		'priceDescription': '',
 		'instructorName':mainWindowUI.instructorNameInput.text(),
 		'instructorEmail':mainWindowUI.instructorEmailInput.text(),
-
 	}
 
 	for rsvpType in _getChildren(mainWindowUI.priceList):

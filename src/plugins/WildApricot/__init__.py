@@ -44,8 +44,8 @@ class WildApricotPlugin(Plugin):
 		
 		eventData = {
 			"Name": event['title'],
-			"StartDate": event['startTime'].toString(QtCore.Qt.ISODate) + timezoneOffset,
-			"EndDate": event['stopTime'].toString(QtCore.Qt.ISODate) + timezoneOffset,
+			"StartDate": event['startTime'].toString(QtCore.Qt.ISODate),
+			"EndDate": event['stopTime'].toString(QtCore.Qt.ISODate),
 			"Location": event['location'],
 			"RegistrationsLimit": event['registrationLimit'],
 			"RegistrationEnabled": True,
