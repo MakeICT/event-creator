@@ -49,14 +49,37 @@ def getMainWindow():
 		mainWindowUI.postToGrid.addWidget(QtGui.QLabel('No targets :('))
 		
 	#@TODO: sort targets according to priority when adding them to UI
+
+	if settings.value('Plugin priority') is not None:
+		savedPriorities = settings.value('Plugin priority').split(',')
+
+		print('targets:',targets)
+
+		addedTargets = []
+	
+		for p in savedPriorities:
+			print('priority: ',p)
+			index = mainWindowUI.postToGrid.count()
+			#if p.strip() in [target['name'] for target in targets]:
+			for target in targets:
+				if target['name'] == p.strip():
+					checkbox = QtGui.QCheckBox(mainWindowUI.centralwidget)
+					checkbox.setText(p)
+					target['checkbox'] = checkbox
+					
+					mainWindowUI.postToGrid.addWidget(checkbox, index / 2, index % 2, 1, 1)
+
+					addedTargets.append(p)
+
 	for target in targets:
-		index = mainWindowUI.postToGrid.count()
-		
-		checkbox = QtGui.QCheckBox(mainWindowUI.centralwidget)
-		checkbox.setText(target['name'])
-		target['checkbox'] = checkbox
-		
-		mainWindowUI.postToGrid.addWidget(checkbox, index / 2, index % 2, 1, 1)
+		if not target['name'] in addedTargets:
+			index = mainWindowUI.postToGrid.count()
+			
+			checkbox = QtGui.QCheckBox(mainWindowUI.centralwidget)
+			checkbox.setText(target['name'])
+			target['checkbox'] = checkbox
+			
+			mainWindowUI.postToGrid.addWidget(checkbox, index / 2, index % 2, 1, 1)
 		
 	for group,actionList in actions.items():
 		menu = QtGui.QMenu(group, mainWindowUI.menuActions)
