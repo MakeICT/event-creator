@@ -50,12 +50,12 @@ def getMainWindow():
 		
 	#@TODO: sort targets according to priority when adding them to UI
 
+	addedTargets = []
+
 	if settings.value('Plugin priority') is not None:
 		savedPriorities = settings.value('Plugin priority').split(',')
 
 		print('targets:',targets)
-
-		addedTargets = []
 	
 		for p in savedPriorities:
 			print('priority: ',p)
@@ -154,7 +154,8 @@ def showOptionsDialog():
 			lineEdit.textEdited.connect(partial(settings.setValue, settingName))
 			
 		optionsDialogUI.tabWidget.addTab(tab, pluginName)
-		
+	
+	savedPriorities = []
 	if settings.value('Plugin priority') is not None:
 		savedPriorities = settings.value('Plugin priority').split(',')
 		for p in savedPriorities:
