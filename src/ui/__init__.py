@@ -469,19 +469,19 @@ def collectEventDetails():
 	stopTime = mainWindowUI.stopTimeInput.time()
 	
 	event = {
-		'title': mainWindowUI.titleInput.text(),
-		'location': mainWindowUI.locationInput.currentText(),
+		'title': mainWindowUI.titleInput.text().strip(),
+		'location': mainWindowUI.locationInput.currentText().strip(),
 		'startTime': QtCore.QDateTime(date, startTime),
 		'stopTime': QtCore.QDateTime(date, stopTime),
-		'description': mainWindowUI.descriptionInput.toPlainText(),
-		'registrationURL': mainWindowUI.registrationURLInput.text(),
+		'description': mainWindowUI.descriptionInput.toPlainText().strip(),
+		'registrationURL': mainWindowUI.registrationURLInput.text().strip(),
 		'registrationLimit': mainWindowUI.registrationLimitInput.value(),
 		'prices': [],
 		'tags': {},
 		'isFree': True,
 		'priceDescription': '',
-		'instructorName':mainWindowUI.instructorNameInput.text(),
-		'instructorEmail':mainWindowUI.instructorEmailInput.text(),
+		'instructorName':mainWindowUI.instructorNameInput.text().strip(),
+		'instructorEmail':mainWindowUI.instructorEmailInput.text().strip(),
 	}
 
 	for rsvpType in _getChildren(mainWindowUI.priceList):
