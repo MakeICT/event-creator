@@ -49,14 +49,37 @@ def getMainWindow():
 		mainWindowUI.postToGrid.addWidget(QtGui.QLabel('No targets :('))
 		
 	#@TODO: sort targets according to priority when adding them to UI
+
+	addedTargets = []
+
+	if settings.value('Plugin priority') is not None:
+		savedPriorities = settings.value('Plugin priority').split(',')
+
+		print('targets:',targets)
+	
+		for p in savedPriorities:
+			print('priority: ',p)
+			index = mainWindowUI.postToGrid.count()
+			#if p.strip() in [target['name'] for target in targets]:
+			for target in targets:
+				if target['name'] == p.strip():
+					checkbox = QtGui.QCheckBox(mainWindowUI.centralwidget)
+					checkbox.setText(p)
+					target['checkbox'] = checkbox
+					
+					mainWindowUI.postToGrid.addWidget(checkbox, index / 2, index % 2, 1, 1)
+
+					addedTargets.append(p)
+
 	for target in targets:
-		index = mainWindowUI.postToGrid.count()
-		
-		checkbox = QtGui.QCheckBox(mainWindowUI.centralwidget)
-		checkbox.setText(target['name'])
-		target['checkbox'] = checkbox
-		
-		mainWindowUI.postToGrid.addWidget(checkbox, index / 2, index % 2, 1, 1)
+		if not target['name'] in addedTargets:
+			index = mainWindowUI.postToGrid.count()
+			
+			checkbox = QtGui.QCheckBox(mainWindowUI.centralwidget)
+			checkbox.setText(target['name'])
+			target['checkbox'] = checkbox
+			
+			mainWindowUI.postToGrid.addWidget(checkbox, index / 2, index % 2, 1, 1)
 		
 	for group,actionList in actions.items():
 		menu = QtGui.QMenu(group, mainWindowUI.menuActions)
@@ -110,7 +133,9 @@ def showOptionsDialog():
 	optionsDialogUI.logLevel.setCurrentIndex(optionsDialogUI.logLevel.findText(settings.value('logLevel', 'Debug')))
 	optionsDialogUI.logLevel.currentIndexChanged[str].connect(partial(settings.setValue, 'logLevel'))
 	
+	print(loadedPlugins.items())
 	for pluginName, plugin in loadedPlugins.items():
+		print(pluginName)
 		tab = QtGui.QWidget()
 		layout = QtGui.QFormLayout(tab)
 		layout.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
@@ -129,16 +154,18 @@ def showOptionsDialog():
 			lineEdit.textEdited.connect(partial(settings.setValue, settingName))
 			
 		optionsDialogUI.tabWidget.addTab(tab, pluginName)
-		
+	
+	savedPriorities = []
 	if settings.value('Plugin priority') is not None:
 		savedPriorities = settings.value('Plugin priority').split(',')
 		for p in savedPriorities:
 			if p in loadedPlugins:
 				optionsDialogUI.pluginPriorityList.addItem(p)
-				del loadedPlugins[p]
+				#del loadedPlugins[p]
 		
 	for p in loadedPlugins:
-		optionsDialogUI.pluginPriorityList.addItem(p)
+		if not p in savedPriorities:
+			optionsDialogUI.pluginPriorityList.addItem(p)
 		
 	def savePriorities():
 		priorityList = ''
@@ -273,6 +300,8 @@ def setDetails(event):
 		'registrationLimit': mainWindowUI.registrationLimitInput.setValue,
 		'prices': setPrices,
 		'tags': setTags,
+		'instructorEmail': mainWindowUI.instructorEmailInput.setText,
+		'instructorName': mainWindowUI.instructorNameInput.setText,
 	}
 	for k,v in event.items():
 		if k in widgetLookup:
@@ -440,17 +469,19 @@ def collectEventDetails():
 	stopTime = mainWindowUI.stopTimeInput.time()
 	
 	event = {
-		'title': mainWindowUI.titleInput.text(),
-		'location': mainWindowUI.locationInput.currentText(),
+		'title': mainWindowUI.titleInput.text().strip(),
+		'location': mainWindowUI.locationInput.currentText().strip(),
 		'startTime': QtCore.QDateTime(date, startTime),
 		'stopTime': QtCore.QDateTime(date, stopTime),
-		'description': mainWindowUI.descriptionInput.toPlainText(),
-		'registrationURL': mainWindowUI.registrationURLInput.text(),
+		'description': mainWindowUI.descriptionInput.toPlainText().strip(),
+		'registrationURL': mainWindowUI.registrationURLInput.text().strip(),
 		'registrationLimit': mainWindowUI.registrationLimitInput.value(),
 		'prices': [],
 		'tags': {},
 		'isFree': True,
 		'priceDescription': '',
+		'instructorName':mainWindowUI.instructorNameInput.text().strip(),
+		'instructorEmail':mainWindowUI.instructorEmailInput.text().strip(),
 	}
 
 	for rsvpType in _getChildren(mainWindowUI.priceList):

@@ -42,12 +42,15 @@ def load():
 
 		def createDraftMessage(self, event):
 			logging.debug('Creating draft message')
-			if settings.value('timezone') is not None and settings.value('timezone') != '':
-				timezoneOffset = settings.value('timezone').split(' UTC')[1]
-				tzName = ' ' + settings.value('timezone').split(' ')[-2]
-			else:
-				timezoneOffset = ''
-				tzName = ''
+			# if settings.value('timezone') is not None and settings.value('timezone') != '':
+			# 	timezoneOffset = settings.value('timezone').split(' UTC')[1]
+			# 	tzName = ' ' + settings.value('timezone').split(' ')[-2]
+			# else:
+			# 	timezoneOffset = ''
+			# 	tzName = ''
+
+			timezoneOffset=''
+			tzName=''
 				
 			dateTimeFormat = self.getSetting('Date/Time format', 'yyyy MMM dd - h:mm ap')
 

@@ -148,3 +148,45 @@ class WaApiClient(object):
 			return decoded[list(decoded.keys())[0]]
 		else:
 			return decoded
+
+
+
+
+	def _make_api_request(self, request_string, api_request_object=None, method=None):
+		try:	
+			return self.execute_request(request_string, api_request_object, method)
+		except urllib.error.HTTPError as e:
+		    print('The server couldn\'t fulfill the request.')
+		    print('Error code: ', e.code)
+		except urllib.error.URLError as e:
+		    print('We failed to reach a server.')
+		    print('Reason: ', e.reason)
+		return False
+	
+	def GetEventByID(self, event_id):
+		event = self._make_api_request('Events/'+str(event_id))
+		return event
+
+	def SetEventAccessControl(self, event_id, restricted=False, any_level=True, any_group=True, group_ids=[], level_ids=[]):
+		event = self.GetEventByID(event_id)
+		if restricted:
+			event["AccessLevel"] = "Restricted"
+			event["Details"]["AccessControl"]["AccessLevel"] = "Restricted"
+			event["Details"]["AccessControl"]["AvailableForAnyLevel"] = any_level
+			event["Details"]["AccessControl"]["AvailableForAnyGroup"] = any_group
+			groups=[]
+			for group_id in group_ids:
+				groups.append({'Id':group_id})
+			event["Details"]["AccessControl"]["AvailableForGroups"] = groups
+			levels=[]
+			for levels_id in level_ids:
+				levels.append({'Id':level_id})
+			event["Details"]["AccessControl"]["AvailableForLevels"] = levels
+		else:
+			event["AccessLevel"] = ""
+			event["Details"]["AccessControl"]["AccessLevel"] = ""
+			event["Details"]["AccessControl"]["AvailableForAnyLevel"] = True
+			event["Details"]["AccessControl"]["AvailableForAnyGroup"] = True
+			event["Details"]["AccessControl"]["AvailableForGroups"] = []
+			event["Details"]["AccessControl"]["AvailableForLevels"] = []
+		response = self._make_api_request('https://api.wildapricot.org/v2.1/accounts/84576/Events/%d' %(event_id), event, method="PUT")

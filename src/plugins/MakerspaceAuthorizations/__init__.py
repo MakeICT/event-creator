@@ -27,8 +27,19 @@ class MakerspaceAuthorizationsPlugin(Plugin):
 		logging.debug('Adding authorizations to description')
 		
 		auths = event['tags']['Required auth\'s']
+
+		auth_tag = "Required authorizations:"
+
+		if auth_tag in event['description']:
+			print ("Already has authorizations in description; removing!")
+			description = event['description'].split('\n')
+			for piece in reversed(description):
+				if auth_tag in piece:
+					description.remove(piece)
+			event['description'] = '\n'.join(description)
+
 		if len(auths) > 0:
-			event['description'] += '\n\nRequired authorizations: ' + ','.join(auths)
+			event['description'] += '\n' + auth_tag + ','.join(auths)
 
 def load():
 	return MakerspaceAuthorizationsPlugin()
