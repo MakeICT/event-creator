@@ -128,7 +128,7 @@ class WildApricotPlugin(Plugin):
 			self.checkForInterruption()
 
 			logging.debug('Adding auth group requirements')
-			api.SetEventAccessControl(eventID, restricted=True, any_level=True, any_group=False, group_ids=auth_ids, level_ids=[])
+			api.SetEventAccessControl(eventID, restricted=True, any_level=False, any_group=False, group_ids=auth_ids, level_ids=[])
 			
 		if self.getSetting('Registration URL format', '') == '':
 			waEvent = api.execute_request('Events/%s' % eventID)
