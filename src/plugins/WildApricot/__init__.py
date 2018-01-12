@@ -108,27 +108,27 @@ class WildApricotPlugin(Plugin):
 		if config.checkBool(self.getSetting('Enable group-based authorizations')):
 			auths = event['tags']['Required auth\'s']
 			auth_map = {'Woodshop':416232,
-				'Metalshop':416231,
-				'Forge':420386,
-				'LaserCutter':416230,
-				'Mig welding':420387, 
-				'Tig welding':420388, 
-				'Stick welding':420389, 
-				'Manual mill':420390,			
-				'Plasma':420391, 
-				'Metal lathes':420392, 
-				'CNC Plasma':420393, 
-				'Intro Tormach':420394, 
-				'Full Tormach':420395}
+						'Metalshop':416231,
+						'Forge':420386,
+						'LaserCutter':416230,
+						'Mig welding':420387, 
+						'Tig welding':420388, 
+						'Stick welding':420389, 
+						'Manual mill':420390,			
+						'Plasma':420391, 
+						'Metal lathes':420392, 
+						'CNC Plasma':420393, 
+						'Intro Tormach':420394, 
+						'Full Tormach':420395}
 			auth_ids=[]
 			if len(auths) > 0:
 				for auth in auths:
 					auth_ids.append(auth_map[auth])
 
-			self.checkForInterruption()
+					self.checkForInterruption()
 
-			logging.debug('Adding auth group requirements')
-			api.SetEventAccessControl(eventID, restricted=True, any_level=True, any_group=False, group_ids=auth_ids, level_ids=[])
+					logging.debug('Adding auth group requirements')
+					api.SetEventAccessControl(eventID, restricted=True, any_level=False, any_group=False, group_ids=auth_ids, level_ids=[])
 			
 		if self.getSetting('Registration URL format', '') == '':
 			waEvent = api.execute_request('Events/%s' % eventID)
