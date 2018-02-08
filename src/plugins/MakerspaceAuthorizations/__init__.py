@@ -21,7 +21,7 @@ class MakerspaceAuthorizationsPlugin(Plugin):
 			auths.sort()
 			ui.addTagGroup('Required auth\'s', auths)
 			
-		ui.addTarget(self.name, self, self.updateDescription)
+		# ui.addTarget(self.name, self, self.updateDescription)
 		
 	def updateDescription(self, event):
 		logging.debug('Adding authorizations to description')

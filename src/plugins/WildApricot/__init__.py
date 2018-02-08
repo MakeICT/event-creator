@@ -44,6 +44,8 @@ class WildApricotPlugin(Plugin):
 		# 	timezoneOffset = ''
 
 		tags = ["instructor_name:" + event['instructorName'], "instructor_email:"+event['instructorEmail']]
+
+		description = '<p>' + event['instructorDescription'] + '</p><p>' + event['description'] + '</p><p>' + event['authorizationDescription'] + '</p>'
 		
 		eventData = {
 			"Name": event['title'],
@@ -55,7 +57,7 @@ class WildApricotPlugin(Plugin):
 			"StartTimeSpecified": True,
 			"EndTimeSpecified": True,
 			"Details": {
-				"DescriptionHtml": event['description'],
+				"DescriptionHtml": description,
 				"AccessControl": { "AccessLevel": "Public" },
 				"GuestRegistrationSettings": { "CreateContactMode": "CreateContactForAllGuests" },
 				"PaymentMethod": "OnlineOnly",

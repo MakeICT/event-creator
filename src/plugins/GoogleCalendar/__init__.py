@@ -83,7 +83,9 @@ def load():
 				description += '<hr/>' + event['description']
 			else:
 				description = event['description']
-				
+			
+			description = event['instructorDescription'] + '\n\n' + description
+			description += '\n\n' + event['authorizationDescription']
 			description += '\n\n' + event['priceDescription']
 
 			eventData = {

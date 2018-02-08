@@ -2,7 +2,7 @@
 
 import logging
 
-__all__ = ["MainWindow","OptionsWindow", "NewPrice", "PriceSummaryWidget", "About"]
+__all__ = ["MainWindow","OptionsWindow", "NewPrice", "PriceSummaryWidget", "About", "ReviewWindow"]
 
 from functools import partial
 import time
@@ -16,6 +16,7 @@ from . import OptionsWindow
 from . import NewPrice
 from . import PriceSummaryWidget
 from . import About
+from . import ReviewWindow
 
 from plugins import Interruption
 
@@ -132,7 +133,10 @@ def showOptionsDialog():
 	
 	optionsDialogUI.logLevel.setCurrentIndex(optionsDialogUI.logLevel.findText(settings.value('logLevel', 'Debug')))
 	optionsDialogUI.logLevel.currentIndexChanged[str].connect(partial(settings.setValue, 'logLevel'))
-	
+
+	optionsDialogUI.OpenPluginURLs.setText(settings.value('Open Plugin URLs'))
+	optionsDialogUI.OpenPluginURLs.textEdited[str].connect(partial(settings.setValue, 'Open Plugin URLs'))
+
 	print(loadedPlugins.items())
 	for pluginName, plugin in loadedPlugins.items():
 		print(pluginName)
@@ -401,6 +405,38 @@ def _showNewPriceWindow(summaryWidget=None):
 	newPriceUI.closeButton.clicked.connect(dialog.close)
 	dialog.show()
 
+def _showReviewWindow():
+	global mainWindow
+	dialog = QtGui.QDialog(mainWindow)
+	
+	reviewUI = ReviewWindow.Ui_Dialog()
+	reviewUI.setupUi(dialog)
+
+
+	event = collectEventDetails()
+	reviewUI.titleDisplay.setText(event['title'])
+	reviewUI.locationDisplay.setText(event['location'])
+	reviewUI.startTimeDisplay.setText(event['startTime'].toString())
+	reviewUI.stopTimeDisplay.setText(event['stopTime'].toString())
+	reviewUI.descriptionDisplay.setPlainText(event['description'])
+	reviewUI.registrationURLDisplay.setText(event['registrationURL'])
+	
+	# reviewUI.Display.setText(event['startTime'])
+	
+	reviewUI.registrationLimitDisplay.setText(str(event['registrationLimit']))
+	reviewUI.instructorNameDisplay.setText(event['instructorName'])
+	reviewUI.instructorEmailDisplay.setText(event['instructorEmail'])
+
+	tag_text = ""
+	for tagGroup in event['tags']:
+		tag_text += tagGroup + ':' + ','.join(event['tags'][tagGroup]) + '\n'
+
+	reviewUI.tagDisplay.setPlainText(tag_text)
+
+	result = dialog.exec_()
+
+	return result
+
 def _getChildren(parent):
 	for i in range(parent.count()):
 		yield parent.itemAt(i).widget()
@@ -420,33 +456,37 @@ def _publishClicked():
 			QtGui.QMessageBox.warning(None, 'Options not configured', 'Plugin priority must be configured. Please see general options.')
 			return
 			
-		enabledTargets = getEnabledTargets()
 
-		publishThread = PublishThread(enabledTargets)
-		publishThread.progressChanged.connect(_targetComplete)
-		publishThread.eventUpdated.connect(setDetails)
+		confirmed = _showReviewWindow()
 
-		publishThread.started.connect(partial(mainWindowUI.progressBar.setValue, 0))
-		publishThread.started.connect(partial(mainWindowUI.progressBar.setEnabled, True))
-		publishThread.started.connect(partial(mainWindowUI.publishButton.setText, 'CANCEL'))
-		
-		publishThread.finished.connect(partial(mainWindowUI.publishButton.setText, 'Publish'))
-		publishThread.finished.connect(partial(mainWindowUI.progressBar.setEnabled, False))
+		if confirmed:
+			enabledTargets = getEnabledTargets()
 
-		publishThread.errorOccurred.connect(_handlePublishError)
+			publishThread = PublishThread(enabledTargets)
+			publishThread.progressChanged.connect(_targetComplete)
+			publishThread.eventUpdated.connect(setDetails)
 
-		targetsToPrep = list(enabledTargets)
-		def prepareNextTarget(*args):
-			if len(targetsToPrep) > 0:
-				target = targetsToPrep.pop()
-				logging.debug('Preparing plugin: %s' % target['name'])
-				target['plugin'].prepare(prepareNextTarget)
-			else:
-				logging.debug('Initiating publish request')
-				publishThread.start()
-				logging.debug('Thread started?')
-				
-		prepareNextTarget()
+			publishThread.started.connect(partial(mainWindowUI.progressBar.setValue, 0))
+			publishThread.started.connect(partial(mainWindowUI.progressBar.setEnabled, True))
+			publishThread.started.connect(partial(mainWindowUI.publishButton.setText, 'CANCEL'))
+			
+			publishThread.finished.connect(partial(mainWindowUI.publishButton.setText, 'Publish'))
+			publishThread.finished.connect(partial(mainWindowUI.progressBar.setEnabled, False))
+
+			publishThread.errorOccurred.connect(_handlePublishError)
+
+			targetsToPrep = list(enabledTargets)
+			def prepareNextTarget(*args):
+				if len(targetsToPrep) > 0:
+					target = targetsToPrep.pop()
+					logging.debug('Preparing plugin: %s' % target['name'])
+					target['plugin'].prepare(prepareNextTarget)
+				else:
+					logging.debug('Initiating publish request')
+					publishThread.start()
+					logging.debug('Thread started?')
+					
+			prepareNextTarget()
 	else:
 		logging.debug('Cancelling publish request')
 		mainWindowUI.publishButton.setText('Cancelling...')
@@ -482,6 +522,8 @@ def collectEventDetails():
 		'priceDescription': '',
 		'instructorName':mainWindowUI.instructorNameInput.text().strip(),
 		'instructorEmail':mainWindowUI.instructorEmailInput.text().strip(),
+		'pre-requisites':[],
+		'resources':[],
 	}
 
 	for rsvpType in _getChildren(mainWindowUI.priceList):
@@ -511,11 +553,25 @@ def collectEventDetails():
 	else:
 		event['priceDescription'] = priceDescription + '.'
 
+	event['instructorDescription'] = 'Instructor: ' + event['instructorName']
+
 	for tagGroup in tagGroups:
 		event['tags'][tagGroup['name']] = []
 		for checkbox in tagGroup['checkboxes']:
 			if checkbox.isChecked():
 				event['tags'][tagGroup['name']].append(checkbox.text())
+
+	auths = event['tags']['Required auth\'s']
+
+	if auths:
+		event['authorizationDescription'] = "Required authorizations: "
+
+		if len(auths) > 0:
+			event['authorizationDescription'] += ','.join(auths)
+
+	else:
+		event['authorizationDescription'] = None
+
 				
 	return event
 	
@@ -557,7 +613,7 @@ class PublishThread(QtCore.QThread):
 			logging.debug('Sending event to plugin: ' + target['name'])
 			try:
 				url = target['callback'](event)
-				if url is not None:
+				if url is not None and settings.value('Open Plugin URLs') == 1:
 					logging.info('Received URL from plugin: ' + url)
 					QtGui.QDesktopServices.openUrl(url)
 					
