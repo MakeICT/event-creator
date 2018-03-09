@@ -45,8 +45,11 @@ class WildApricotPlugin(Plugin):
 
 		tags = ["instructor_name:" + event['instructorName'], "instructor_email:"+event['instructorEmail']]
 
-		description = '<p>' + event['instructorDescription'] + '</p><p>' + event['description'] + '</p><p>' + event['authorizationDescription'] + '</p>'
+		description = '<p>' + event['instructorDescription'] + '</p><p>' + event['description'] + '</p>'
 		
+		if event['authorizationDescription']:
+			description += '<p>' + event['authorizationDescription'] + '</p>'
+			
 		eventData = {
 			"Name": event['title'],
 			"StartDate": event['startTime'].toString(QtCore.Qt.ISODate),

@@ -65,7 +65,8 @@ def load():
 
 			htmlBody += '\n\n' + event['instructorDescription']
 			htmlBody += '\n\n' + event['description']
-			htmlBody += '\n\n' + event['authorizationDescription']
+			if event['authorizationDescription']:
+				htmlBody += '\n\n' + event['authorizationDescription']
 			htmlBody += '\n\n' + event['priceDescription'] + '</body></html>'
 				
 			subject = 'Event notice: ' + event['title'] + ' (' + event['startTime'].toString(dateTimeFormat) + tzName + ')'

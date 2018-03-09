@@ -85,7 +85,8 @@ def load():
 				description = event['description']
 			
 			description = event['instructorDescription'] + '\n\n' + description
-			description += '\n\n' + event['authorizationDescription']
+			if event['authorizationDescription']:
+				description += '\n\n' + event['authorizationDescription']
 			description += '\n\n' + event['priceDescription']
 
 			eventData = {
