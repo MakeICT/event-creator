@@ -47,7 +47,7 @@ class SeleniumPlugin(Plugin):
 				driver = webdriver.Chrome(driverPath)
 			else:
 				os.environ["PATH"] += os.pathsep + basePath
-				driver = webdriver.Firefox()
+				driver = webdriver.Firefox(executable_path=driverPath)
 			
 		return driver
 
