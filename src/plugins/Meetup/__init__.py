@@ -34,6 +34,9 @@ class MeetupPlugin(Plugin):
 			},{
 				'name': 'Allow RSVP',
 				'type': 'yesno',
+			},{
+				'name': 'Post as draft',
+				'type': 'yesno',
 			}
 		]
 		#@TODO: Allow option for publishing meetup events immediately
@@ -45,12 +48,15 @@ class MeetupPlugin(Plugin):
 		group = api.GetGroup({'urlname': self.getSetting('Group name')})
 		
 		if event['registrationURL'] != '':
-			description = 'To register for this event, please visit <a href="%s">%s</a>' % (event['registrationURL'], event['registrationURL'])
-			description += '\n\n'
+			description = '<p>To register for this event, please visit <a href="%s">%s</a></p><p><br></p>' % (event['registrationURL'], event['registrationURL'])
+			# description += '\n\n'
 		else:
 			description = ''
 			
-		description += event['description']
+		description += '<p>'+event['description']+'</p>'
+
+		if event['authorizationDescription']:
+			description += event['authorizationDescription']
 		
 		prepend = self.getSetting('Title prepend', '')
 		append = self.getSetting('Title append', '')
@@ -62,8 +68,15 @@ class MeetupPlugin(Plugin):
 		if append != '':
 			title += ' ' + append
 		rsvp_limit = 1;
+
 		if config.checkBool(self.getSetting("Allow RSVP")):
 			rsvp_limit=0
+
+		if config.checkBool(self.getSetting("Post as draft")):
+			publish_status='draft'
+		else:
+			publish_status = 'published'
+
 
 		meetup_details = {
 			'group_id': group.id,
@@ -72,7 +85,7 @@ class MeetupPlugin(Plugin):
 			'time': event['startTime'].toTime_t() * 1000,
 			'duration': event['startTime'].msecsTo(event['stopTime']),
 			'venue_id': self.getSetting('Venue ID'),
-			'publish_status': 'draft',
+			'publish_status': publish_status,
 			'rsvp_limit': rsvp_limit,
 			'guest_limit': 0,
 			'waitlisting': 'off',

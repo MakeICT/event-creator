@@ -61,8 +61,12 @@ def load():
 			htmlBody += '<tr><td>Ending:</td><td>' + event['stopTime'].toString(dateTimeFormat) + tzName + '</td></tr>'
 			if event['registrationURL'] is not None and event['registrationURL'] != '':
 				htmlBody += '<tr><td>Register:</td><td>' + event['registrationURL'] + '</td></tr>'
-				
-			htmlBody += '</table><br/>' + event['description']
+			htmlBody += '</table>'
+
+			htmlBody += '\n\n' + event['instructorDescription']
+			htmlBody += '\n\n' + event['description']
+			if event['authorizationDescription']:
+				htmlBody += '\n\n' + event['authorizationDescription']
 			htmlBody += '\n\n' + event['priceDescription'] + '</body></html>'
 				
 			subject = 'Event notice: ' + event['title'] + ' (' + event['startTime'].toString(dateTimeFormat) + tzName + ')'

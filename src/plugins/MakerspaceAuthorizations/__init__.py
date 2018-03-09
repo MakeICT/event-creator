@@ -21,7 +21,7 @@ class MakerspaceAuthorizationsPlugin(Plugin):
 			auths.sort()
 			ui.addTagGroup('Required auth\'s', auths)
 			
-		ui.addTarget(self.name, self, self.updateDescription)
+		# ui.addTarget(self.name, self, self.updateDescription)
 		
 	def updateDescription(self, event):
 		logging.debug('Adding authorizations to description')
@@ -36,10 +36,10 @@ class MakerspaceAuthorizationsPlugin(Plugin):
 			for piece in reversed(description):
 				if auth_tag in piece:
 					description.remove(piece)
-			event['description'] = '\n'.join(description)
+			event['description'] = '\n'.join(p for p in description if not p=='')
 
 		if len(auths) > 0:
-			event['description'] += '\n' + auth_tag + ','.join(auths)
+			event['description'] += '\n\n' + auth_tag + ','.join(auths)
 
 def load():
 	return MakerspaceAuthorizationsPlugin()
