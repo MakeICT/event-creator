@@ -561,7 +561,10 @@ def collectEventDetails():
 			if checkbox.isChecked():
 				event['tags'][tagGroup['name']].append(checkbox.text())
 
-	auths = event['tags']['Required auth\'s']
+	try:
+		auths = event['tags']['Required auth\'s']
+	except KeyError:
+		auths=None
 
 	if auths:
 		event['authorizationDescription'] = "Required authorizations: "
