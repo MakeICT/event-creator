@@ -605,6 +605,8 @@ class PublishThread(QtCore.QThread):
 				raise Exception('Event location must be set')
 			if event['description'] == '':
 				raise Exception('Event description must be set')
+			if event['startTime'] < QtCore.QDateTime.currentDateTime():
+				raise Exception('Event start time must be in future')
 		except Exception as exc:
 			self.errorOccurred.emit('%s' % exc)
 			return

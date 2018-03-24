@@ -4,7 +4,14 @@ This is an automation tool that will create an event in multiple services/calend
 
 ## Installation
 
+###Pre-compiled
 Extract files to any location and run main.py.
+
+### From Source
+apt-get install python3 python3-pip python3-pyside python3-html2text python3-selenium python3-googleapi python3-dateutil pyside-tools
+
+pip3 install smartwaiver-sdk meetup-api
+
 
 ## Usage
 
