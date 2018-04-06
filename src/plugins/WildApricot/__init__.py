@@ -5,7 +5,7 @@ import logging
 import ui
 from PySide import QtCore
 
-from .WildApricotAPI import WaApiClient
+from .wildapricot_api import WaApiClient
 from plugins import Plugin
 
 from config import settings
