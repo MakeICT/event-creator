@@ -63,7 +63,7 @@ class WildApricotPlugin(Plugin):
 				"DescriptionHtml": description,
 				"AccessControl": { "AccessLevel": "Public" },
 				"GuestRegistrationSettings": { "CreateContactMode": "CreateContactForAllGuests" },
-				"PaymentMethod": "OnlineOnly",
+				"PaymentMethod": "OnlineAndOffline",
 				"SendEmailCopy": False,
 				"WaitListBehaviour": "Disabled",
 			},
