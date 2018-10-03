@@ -45,10 +45,20 @@ class WildApricotPlugin(Plugin):
 
 		tags = ["instructor_name:" + event['instructorName'], "instructor_email:"+event['instructorEmail']]
 
-		description = '<p>' + event['instructorDescription'] + '</p><p>' + event['description'] + '</p>'
+		desc = event['description'].split('\n')
+		html_desc=''
+		for par in desc:
+			if not par.strip()=='':
+				html_desc = html_desc + '<p>' + par + '</p>'
+
+		description = '<p>' + event['instructorDescription'] + '</p>' + html_desc
 		
 		if event['authorizationDescription']:
 			description += '<p>' + event['authorizationDescription'] + '</p>'
+
+		if event['ageDescription']:
+			description += '<p>' + event['ageDescription'] + '</p>'
+
 			
 		eventData = {
 			"Name": event['title'],

@@ -253,6 +253,10 @@ def removeTagGroup(name):
 					
 				break
 
+def SetDefaults():
+	SetDetails()
+
+
 def setDetails(event):
 	def setLocation(location):
 		for i in range(mainWindowUI.locationInput.count()):
@@ -306,6 +310,8 @@ def setDetails(event):
 		'tags': setTags,
 		'instructorEmail': mainWindowUI.instructorEmailInput.setText,
 		'instructorName': mainWindowUI.instructorNameInput.setText,
+		'minimumAge' : mainWindowUI.minAge.setValue,
+		'maximumAge' : mainWindowUI.maxAge.setValue,
 	}
 	for k,v in event.items():
 		if k in widgetLookup:
@@ -314,9 +320,21 @@ def setDetails(event):
 
 def _loadTemplate(filename=None):
 	global lastTemplateFile
+
+	if os.path.exists('default.js'):
+		defaults = 'default.js'
+		with open(defaults) as infile:
+			data = infile.read()
+
+		loadedEvent = json.loads(data)
+		today = QtCore.QDateTime.currentDateTime().toString('yyyy-MM-dd')
+		loadedEvent['startTime'] = today + 'T' + loadedEvent['startTime'][11:]
+		loadedEvent['stopTime'] = today + 'T' + loadedEvent['stopTime'][11:]
+		
+		setDetails(loadedEvent)
 	
 	if filename is None:
-		filename = QtGui.QFileDialog.getOpenFileName(mainWindow, 'Open template...', lastTemplateFile, 'Event Creater Templates (*.js)')[0]
+		filename = QtGui.QFileDialog.getOpenFileName(mainWindow, 'Open template...', lastTemplateFile, 'Event Creator Templates (*.js)')[0]
 		
 	if filename != '':
 		logging.debug('Loading template: ' + filename)
@@ -334,7 +352,7 @@ def _loadTemplate(filename=None):
 def _saveTemplate():
 	global lastTemplateFile
 	
-	filename = QtGui.QFileDialog.getSaveFileName(mainWindow, 'Save template as...', lastTemplateFile, 'Event Creater Templates (*.js)')[0]
+	filename = QtGui.QFileDialog.getSaveFileName(mainWindow, 'Save template as...', lastTemplateFile, 'Event Creator Templates (*.js)')[0]
 	if filename != '':
 		if '.' not in filename:
 			filename += '.js'
@@ -522,6 +540,8 @@ def collectEventDetails():
 		'priceDescription': '',
 		'instructorName':mainWindowUI.instructorNameInput.text().strip(),
 		'instructorEmail':mainWindowUI.instructorEmailInput.text().strip(),
+		'minimumAge': mainWindowUI.minAge.value(),
+		'maximumAge': mainWindowUI.maxAge.value(),
 		'pre-requisites':[],
 		'resources':[],
 	}
@@ -554,6 +574,19 @@ def collectEventDetails():
 		event['priceDescription'] = priceDescription + '.'
 
 	event['instructorDescription'] = 'Instructor: ' + event['instructorName']
+
+	if(event['minimumAge'] > 0):
+		if(event['maximumAge'] > 0):
+			assert event['minimumAge'] < event['maximumAge'], "You did the age thing wrong..."
+			event['ageDescription'] = 'Ages: %d-%d' % (event['minimumAge'],event['maximumAge'])
+		else:
+			event['ageDescription'] = 'Ages: %d and up' % (event['minimumAge'])
+
+	elif(event['maximumAge'] > 0):
+		event['ageDescription'] = 'Ages: %d and under' % (event['maximumAge'])
+
+	else:
+		event['ageDescription'] = None
 
 	for tagGroup in tagGroups:
 		event['tags'][tagGroup['name']] = []
