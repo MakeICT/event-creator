@@ -2,11 +2,14 @@
 
 import logging
 
-import ui
+#import ui
 
 from plugins import Plugin
 
 class MakerspaceAuthorizationsPlugin(Plugin):
+	
+	auths = []
+	
 	def __init__(self):
 		super().__init__('MakerspaceAuthorizations')
 
@@ -17,12 +20,15 @@ class MakerspaceAuthorizationsPlugin(Plugin):
 			}
 		]
 		if self.getSetting('Authorization list') != '':
-			auths = self.getSetting('Authorization list').split(',')
-			auths.sort()
-			ui.addTagGroup('Required auth\'s', auths)
+			self.auths = self.getSetting('Authorization list').split(',')
+			self.auths.sort()
+			#ui.addTagGroup('Required auth\'s', auths)
 			
 		# ui.addTarget(self.name, self, self.updateDescription)
 		
+	def getAuthorizations(self):
+		return self.auths
+	
 	def updateDescription(self, event):
 		logging.debug('Adding authorizations to description')
 		

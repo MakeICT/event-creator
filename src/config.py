@@ -1,9 +1,7 @@
-import logging
+import configparser
 
-from PySide import QtCore
-
-#settings = QtCore.QSettings('Green Light Go', 'Event Creator')
-settings = QtCore.QSettings('settings.ini', QtCore.QSettings.IniFormat)
+settings = configparser.ConfigParser()
+settings.read('settings.ini')
 
 def checkBool(value):
-	return value not in [ False, 'False', 'false', 'F', 'f', 0, '0', '', None ]
+    return value not in [ False, 'False', 'false', 'F', 'f', 0, '0', '', None ]
