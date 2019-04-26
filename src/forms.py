@@ -70,7 +70,7 @@ class NewClassForm(FlaskForm):
         if self.nonMemberPrice is not None:
            event['prices'].append({
             'name': 'Non-Members',
-            'price': self.memberPrice.data,
+            'price': self.nonMemberPrice.data,
             'description': '',
             'availability': ['Everyone']                
             })
