@@ -6,6 +6,10 @@ from wtforms import StringField, PasswordField, SubmitField, BooleanField, Integ
 from wtforms.validators import DataRequired, Length, Email, URL, Optional
 from wtforms.fields.simple import TextAreaField
 
+useHtml5Fields = True
+if useHtml5Fields:
+    from wtforms.fields.html5 import DateField, TimeField, IntegerField
+
 
 class NewClassForm(FlaskForm):
     tagGroups = []
@@ -17,9 +21,14 @@ class NewClassForm(FlaskForm):
     classDescription = TextAreaField('Description')
     registrationURL = StringField('Registration URL')
     registrationLimit = IntegerField('Registration Limit', validators=[DataRequired()])
-    classDate = DateField('Date', format='%m/%d/%Y')
-    starttime = TimeField(label='Start time(CDT)', format="%H:%M %p")
-    endtime = TimeField(label='End time(CDT)', format="%H:%M %p")
+    if useHtml5Fields:
+        classDate = DateField('Date', default=datetime.date.today())
+        starttime = TimeField(label='Start time(CDT)')
+        endtime = TimeField(label='End time(CDT)')
+    else:
+        classDate = DateField('Date', default=datetime.date.today(), format='%m/%d/%Y')
+        starttime = TimeField(label='Start time(CDT)', format="%H:%M %p")
+        endtime = TimeField(label='End time(CDT)', format="%H:%M %p")
     minAge = IntegerField('Min Age', validators=[Optional()])
     maxAge = IntegerField('Max Age', validators=[Optional()])
     memberPrice = DecimalField(places=2, validators=[Optional()])
