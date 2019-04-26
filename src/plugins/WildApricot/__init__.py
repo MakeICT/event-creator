@@ -1,6 +1,6 @@
 import logging
 
-from wildapricot_api import WaApiClient
+from .wildapricot_api import WaApiClient
 from plugins import Plugin
 
 from config import settings
