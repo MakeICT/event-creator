@@ -1,12 +1,18 @@
-{% extends "layout.html" %} {% block content %}
-<div class="content-section">
+{% extends "layout.html" %} 
+
+{% block pageTitle %}
+Create Event
+{% endblock %}
+
+{% block content %}
+<div class="container content-section">
   <form method="POST" action="">
     {{ form.hidden_tag() }}
     <table bgcolor="#00FF00">
       <fieldset class="form-group">
         <div class="modal-body" class="container-fluid">
           <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-12">
               <div class="form-group pull-left">
                 {{ form.classTitle.label(class="form-control-label") }} {% if form.classTitle.errors %} {{ form.classTitle(class="form-control form-control-sm is-invalid") }}
                 <div class="invalid-feedback">
@@ -18,7 +24,7 @@
           </div>
 
           <div class="row">
-            <div class="col-md-3">
+            <div class="col-md-6">
               <div class="form-group pull-left">
                 {{ form.instructorName.label(class="form-control-label") }} {% if form.instructorName.errors %} {{ form.instructorName(class="form-control form-control-sm is-invalid") }}
                 <div class="invalid-feedback">
@@ -27,7 +33,7 @@
                 {% else %} {{ form.instructorName(class="form-control form-control-sm") }} {% endif %}
               </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-6">
               <div class="form-group pull-left">
                 {{ form.instructorEmail.label(class="form-control-label") }} {% if form.instructorEmail.errors %} {{ form.instructorEmail(class="form-control form-control-sm is-invalid") }}
                 <div class="invalid-feedback">
@@ -39,7 +45,7 @@
           </div>
 
           <div class="row">
-            <div class="col-md-3">
+            <div class="col-md-6">
               <div class="form-group">
                 {{ form.classLocation.label(class="form-control-label") }} {% if form.classLocation.errors %} {{ form.classLocation(class="form-control form-control-sm is-invalid") }}
                 <div class="invalid-feedback">
@@ -51,7 +57,7 @@
           </div>
 
           <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-12">
               <div class="form-group">
                 {{ form.classDescription.label(class="form-control-label") }} {% if form.classDescription.errors %} {{ form.classDescription(class="form-control form-control-sm is-invalid") }}
                 <div class="invalid-feedback">
@@ -75,7 +81,7 @@
           </div>
 -->
           <div class="row">
-            <div class="col-md-3">
+            <div class="col-md-4">
               <div class="form-group">
                 {{ form.classDate.label(class="form-control-label") }} {% if form.classDate.errors %} {{ form.classDate(class="form-control form-control-sm is-invalid") }}
                 <div class="invalid-feedback">
@@ -85,7 +91,7 @@
               </div>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-md-4">
               <div class="form-group">
                 {{ form.starttime.label(class="form-control-label") }} {% if form.starttime.errors %} {{ form.starttime(class="form-control form-control-sm is-invalid") }}
                 <div class="invalid-feedback">
@@ -95,7 +101,7 @@
               </div>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-md-4">
               <div class="form-group">
                 {{ form.endtime.label(class="form-control-label") }} {% if form.endtime.errors %} {{ form.endtime(class="form-control form-control-sm is-invalid") }}
                 <div class="invalid-feedback">
@@ -107,7 +113,7 @@
           </div>
 
           <div class="row">
-            <div class="col-md-3">
+            <div class="col-md-6">
 
               <div class="form-group">
                 {{ form.minAge.label(class="form-control-label") }} {% if form.minAge.errors %} {{ form.minAge(class="form-control form-control-sm is-invalid") }}
@@ -117,7 +123,7 @@
                 {% else %} {{ form.minAge(class="form-control form-control-sm") }} {% endif %}
               </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-6">
               <div class="form-group">
                 {{ form.maxAge.label(class="form-control-label") }} {% if form.maxAge.errors %} {{ form.maxAge(class="form-control form-control-sm is-invalid") }}
                 <div class="invalid-feedback">
@@ -128,7 +134,7 @@
             </div>
           </div>
           <div class="row">
-            <div class="col-md-3">
+            <div class="col-md-6">
               <div class="form-group">
                 {{ form.registrationLimit.label(class="form-control-label") }} {% if form.registrationLimit.errors %} {{ form.registrationLimit(class="form-control form-control-sm is-invalid") }}
                 <div class="invalid-feedback">
@@ -139,7 +145,7 @@
             </div>
           </div>
           <div class="row">
-            <div class="col-md-3">
+            <div class="col-md-6">
               <div class="form-group">
                 {{ form.memberPrice.label(class="form-control-label") }} {% if form.memberPrice.errors %} {{ form.memberPrice(class="form-control form-control-sm is-invalid") }}
                 <div class="invalid-feedback">
@@ -148,7 +154,7 @@
                 {% else %} {{ form.memberPrice(class="form-control form-control-sm") }} {% endif %}
               </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-6">
               <div class="form-group">
                 {{ form.nonMemberPrice.label(class="form-control-label") }} {% if form.nonMemberPrice.errors %} {{ form.nonMemberPrice(class="form-control form-control-sm is-invalid") }}
                 <div class="invalid-feedback">
