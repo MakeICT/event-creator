@@ -13,7 +13,8 @@ if useHtml5Fields:
 
 class NewClassForm(FlaskForm):
     tagGroups = []
-    
+    auths = []
+
     classTitle = StringField('Title', validators=[DataRequired()])
     instructorName = StringField('Instructor Name', validators=[DataRequired()])
     instructorEmail = StringField('Instructor Email', validators=[DataRequired(), Email()])
@@ -33,8 +34,12 @@ class NewClassForm(FlaskForm):
     maxAge = IntegerField('Max Age', validators=[Optional()])
     memberPrice = DecimalField(places=2, validators=[Optional()])
     nonMemberPrice = DecimalField(places=2, validators=[Optional()])
+            
     submit = SubmitField('Submit')
 
+
+    def setSelectedAuthorizations(self, selected):
+        self.auths = selected
 
     def collectEventDetails(self):
         date = self.classDate.data
@@ -123,17 +128,18 @@ class NewClassForm(FlaskForm):
             for checkbox in tagGroup['checkboxes']:
                 if checkbox.isChecked():
                     event['tags'][tagGroup['name']].append(checkbox.text())
+
+        event['tags']['Required auth\'s'] = self.auths
+#         try:
+#             auths = event['tags']['Required auth\'s']
+#         except KeyError:
+#             auths=None
      
-        try:
-            auths = event['tags']['Required auth\'s']
-        except KeyError:
-            auths=None
-     
-        if auths:
+        if self.auths:
             event['authorizationDescription'] = "Required authorizations: "
      
-            if len(auths) > 0:
-                event['authorizationDescription'] += ','.join(auths)
+            if len(self.auths) > 0:
+                event['authorizationDescription'] += ','.join(self.auths)
      
         else:
             event['authorizationDescription'] = None

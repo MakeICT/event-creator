@@ -117,8 +117,7 @@ class WildApricotPlugin(Plugin):
             api.execute_request('EventRegistrationTypes', registrationTypeData)
             
         if config.checkBool(self.getSetting('Enable group-based authorizations')):
-            auths = []
-            #auths = event['tags']['Required auth\'s']
+            auths = event['tags']['Required auth\'s']
             auth_map = {'Woodshop':416232,
                         'Metalshop':416231,
                         'Forge':420386,

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, flash, redirect
+from flask import Flask, render_template, url_for, flash, redirect, request
 from forms import NewClassForm
 from attrdict import AttrDict
 import plugins
@@ -26,14 +26,22 @@ def home():
 @app.route("/createClass", methods=['GET', 'POST'])
 def createClass():
     form = NewClassForm()
+
+    authorizations=authorizationsplugin.getAuthorizations()
+
     if form.validate_on_submit():
         flash(f'Class created for {form.classTitle.data}!', 'success')
+
+        # FIXME 
+        # There must be a better way to do the checkboxes, but this is the only way I have found that works        
+        selected_authorizations = request.form.getlist("authorizations")
+        form.setSelectedAuthorizations(selected_authorizations)
         event=form.collectEventDetails()
-        print(event)
-        
+                
         waplugin.createEvent(event)
         return redirect(url_for('home'))
-    return render_template('createClass.html', title='Create Event', form=form, authorizations=authorizationsplugin.getAuthorizations())
+    
+    return render_template('createClass.html', title='Create Event', form=form, authorizations=authorizations)
 
 
 def setPlugins(plugins):

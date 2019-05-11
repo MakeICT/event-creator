@@ -163,20 +163,15 @@ Create Event
                 {% else %} {{ form.nonMemberPrice(class="form-control form-control-sm") }} {% endif %}
               </div>
             </div>
-
           </div>
     </table>
-    
-    <h2 class="">Required auth's</h1>
 
+    <h2 class="">Required authorizations</h1>
       {% for i in authorizations %}
-        <div class="checkbox">
-          <label><input type="checkbox" name={{i}}>{{i}}</label>
-        </div>
+        <input type="checkbox" id="id_{{i}}" name="authorizations" value="{{i}}">
+        <label for="id_{{i}}">{{i}}</label>
       {% endfor %}
       
-    
-    
     <div class="form-group">{{ form.submit(class="btn btn-outline-info") }}</div>
 </div>
 
