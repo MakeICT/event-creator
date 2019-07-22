@@ -10,6 +10,13 @@ Create Event
     {{ form.hidden_tag() }}
     <table bgcolor="#00FF00">
       <fieldset class="form-group">
+     
+        <select name="Template">
+          {% for template in form.templates %}
+            <option value="{{ template }}">{{ template }}</option>
+          {% endfor %}
+        </select>
+      
         <div class="modal-body" class="container-fluid">
           <div class="row">
             <div class="col-md-12">
@@ -55,7 +62,6 @@ Create Event
               </div>
             </div>
           </div>
-
           <div class="row">
             <div class="col-md-12">
               <div class="form-group">
@@ -168,13 +174,16 @@ Create Event
 
     <h2 class="">Required authorizations</h1>
       {% for i in authorizations %}
-        <input type="checkbox" id="id_{{i}}" name="authorizations" value="{{i}}">
+        {% if i in form.templateRequiredAuths %}
+          <input type="checkbox" id="id_{{i}}" name="authorizations" value="{{i}}" checked>
+        {% else %}
+          <input type="checkbox" id="id_{{i}}" name="authorizations" value="{{i}}">
+        {% endif %}
         <label for="id_{{i}}">{{i}}</label>
       {% endfor %}
       
     <div class="form-group">{{ form.submit(class="btn btn-outline-info") }}</div>
 </div>
-
 </form>
 </div>
 {% endblock content %}

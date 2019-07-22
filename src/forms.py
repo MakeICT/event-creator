@@ -1,8 +1,8 @@
-import sys,datetime
+import sys, datetime, dateparser, json, os
+from dateutil.parser import parse
 from flask import Flask
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, IntegerField, DecimalField, DateField, DateTimeField, TextAreaField, TimeField
-#from wtforms.fields.html5 import DateField
 from wtforms.validators import DataRequired, Length, Email, URL, Optional
 from wtforms.fields.simple import TextAreaField
 
@@ -37,9 +37,13 @@ class NewClassForm(FlaskForm):
             
     submit = SubmitField('Submit')
 
-
+    templateRequiredAuths = []
+    templates = {}
+    
     def setSelectedAuthorizations(self, selected):
         self.auths = selected
+
+
 
     def collectEventDetails(self):
         date = self.classDate.data
@@ -80,34 +84,6 @@ class NewClassForm(FlaskForm):
             'availability': ['Everyone']                
             })
             
-            
-        #     for rsvpType in _getChildren(mainWindowUI.priceList):
-        #       event['prices'].append({
-        #        'name': rsvpType.name,
-        #        'price': rsvpType.price,
-        #        'description': rsvpType.description,
-        #        'availability': rsvpType.availability,
-        #       })
-        #         
-        #     priceDescription = 'The price for this event is'
-        #     for i, priceGroup in enumerate(event['prices']):
-        #         if priceGroup['price'] > 0:
-        #             event['isFree'] = False
-        #             priceDescription += ' $%0.2f for %s' % (priceGroup['price'], priceGroup['name'])
-        #         else:
-        #             priceDescription += ' FREE for ' + priceGroup['name']
-        #             
-        #         if len(event['prices']) > 2:
-        #             if i < len(event['prices'])-1:
-        #                 priceDescription += ','
-        #         if len(event['prices']) > 1 and i == len(event['prices'])-2:
-        #             priceDescription += ' and'
-        # 
-        #     if event['isFree']:
-        #         event['priceDescription'] = 'This event is FREE!'
-        #     else:
-        #         event['priceDescription'] = priceDescription + '.'
-        # 
         event['instructorDescription'] = 'Instructor: ' + event['instructorName']
      
         if(event['minimumAge'] > 0):
@@ -130,10 +106,6 @@ class NewClassForm(FlaskForm):
                     event['tags'][tagGroup['name']].append(checkbox.text())
 
         event['tags']['Required auth\'s'] = self.auths
-#         try:
-#             auths = event['tags']['Required auth\'s']
-#         except KeyError:
-#             auths=None
      
         if self.auths:
             event['authorizationDescription'] = "Required authorizations: "
@@ -145,3 +117,74 @@ class NewClassForm(FlaskForm):
             event['authorizationDescription'] = None
         
         return event
+    
+    
+    
+    def loadTemplates(self):
+        self.templates = {}
+        basepath = 'EventTemplates/'
+        
+        # r=root, d=directories, f = files
+        for r, d, f in os.walk(basepath):
+            for file in f:
+                self.templates[file] = (os.path.join(r, file))
+        
+
+    
+    def populateTemplate(self, templateName):
+    
+        templateFile = self.templates.get(templateName, '')
+        
+        if self.isBlank(templateFile):
+            templateFile = self.templates.get('default')
+            
+        with open(templateFile) as json_file:
+            data = json.load(json_file)
+        
+            self.classTitle.data = data.get('title', '')
+            self.instructorName.data = data.get('instructorName', '')
+            self.instructorEmail.data = data.get('instructorEmail', '')
+            self.classLocation.data = data.get('location', '')
+            self.classDescription.data = data.get('description', '')
+            self.registrationURL.data = data.get('location', '')
+            self.registrationLimit.data = data.get('registrationLimit', '')
+            
+            value = data.get('classDate', '')            
+            if self.isNotBlank(value) :
+                self.classDate.data = parse(value, fuzzy=True) 
+
+            value = data.get('startTime', '')            
+            if self.isNotBlank(value) :
+                self.starttime.data = parse(value, fuzzy=True) 
+
+            value = data.get('stopTime', '')            
+            if self.isNotBlank(value) :
+                self.endtime.data = parse(value, fuzzy=True) 
+
+            self.minAge.data = data.get('minimumAge', '')
+            self.maxAge.data = data.get('maximumAge', '')
+            
+            pricelist = data.get('prices', [])
+            
+            for price in pricelist :
+              name = price['name']
+              
+              if (name == 'MakeICT Members') :
+                  self.memberPrice.data = price['price']
+              elif (name == 'Non-Members') :
+                  self.nonMemberPrice.data = price['price']
+                    
+            taglist = data.get('tags', [])
+            
+            self.templateRequiredAuths = []
+            
+            for tags in taglist :
+              if tags == "Required auth's" :
+                self.templateRequiredAuths = taglist[tags]
+                                    
+            
+    def isBlank (self, myString):
+        return not (myString and myString.strip())
+
+    def isNotBlank (self, myString):
+        return bool(myString and myString.strip())
