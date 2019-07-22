@@ -77,12 +77,15 @@ def authorized(resp):
 def get_access_token():
     return session.get('access_token')
 
-@app.route("/createClass", methods=['GET', 'POST'])
-def createClass():
+@app.route('/createClass', defaults={'template':'default.js'})
+@app.route("/createClass/<template>" )
+def createClass(template):
     form = NewClassForm()
-
+    form.loadTemplates()
+    
     authorizations=authorizationsplugin.getAuthorizations()
 
+    form.populateTemplate(template)
     if form.validate_on_submit():
         flash(f'Class created for {form.classTitle.data}!', 'success')
 
@@ -97,7 +100,7 @@ def createClass():
     
     return render_template('createClass.html', title='Create Event', form=form, authorizations=authorizations)
 
-
+    
 def setPlugins(plugins):
     global loadedPlugins
     loadedPlugins = plugins
