@@ -1,4 +1,5 @@
 import logging
+import pytz
 
 from .wildapricot_api import WaApiClient
 from plugins import Plugin
@@ -37,6 +38,10 @@ class WildApricotPlugin(Plugin):
         #     timezoneOffset = settings.value('timezone').split(' UTC')[1]
         # else:
         #     timezoneOffset = ''
+        if self.getGeneralSetting('timezone') is not None and self.getGeneralSetting('timezone') != '':
+            timezone = pytz.timezone(self.getGeneralSetting('timezone'))
+        else:
+            timezone = pytz.timezone("UTC")
 
         tags = ["instructor_name:" + event['instructorName'], "instructor_email:"+event['instructorEmail']]
 
@@ -54,11 +59,17 @@ class WildApricotPlugin(Plugin):
         if event['ageDescription']:
             description += '<p>' + event['ageDescription'] + '</p>'
 
-            
+        #@TODO: open ticket with WildApricot so that we can have an API endpoint for enabling email reminders
+        self.checkForInterruption()
+
+        logging.debug('Connecting to API')
+        api = WaApiClient()
+        api.authenticate_with_apikey(self.getSetting('API Key'))
+        
         eventData = {
             "Name": event['title'],
-            "StartDate": event['startTime'].strftime("%Y-%m-%d %H:%M:%S"),
-            "EndDate": event['stopTime'].strftime("%Y-%m-%d %H:%M:%S"),
+            "StartDate": api.DateTimeToWADate(timezone.localize(event['startTime'])),
+            "EndDate": api.DateTimeToWADate(timezone.localize(event['stopTime'])),
             "Location": event['location'],
             "RegistrationsLimit": event['registrationLimit'],
             "RegistrationEnabled": True,
@@ -73,14 +84,7 @@ class WildApricotPlugin(Plugin):
                 "WaitListBehaviour": "Disabled",
             },
             "Tags":tags
-        }
-        
-        #@TODO: open ticket with WildApricot so that we can have an API endpoint for enabling email reminders
-        self.checkForInterruption()
-
-        logging.debug('Connecting to API')
-        api = WaApiClient()
-        api.authenticate_with_apikey(self.getSetting('API Key'))
+        }      
 
         self.checkForInterruption()
         logging.debug('Creating event')
