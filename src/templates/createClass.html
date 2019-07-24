@@ -11,7 +11,7 @@ Create Event
     <table bgcolor="#00FF00">
       <fieldset class="form-group">
      
-        <select name="Template" onchange="(window.location = this.options[this.selectedIndex].value);">
+        <select name="Template" onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
           {% for template in form.templates %}
             <option value="{{ template }}">{{ template }}</option>
           {% endfor %}

@@ -77,9 +77,12 @@ def authorized(resp):
 def get_access_token():
     return session.get('access_token')
 
-@app.route('/createClass', methods=['GET', 'POST'], defaults={'template':'default.js'})
+@app.route('/createClass', methods=['GET', 'POST'], defaults={'template':None}, strict_slashes=False)
 @app.route("/createClass/<template>", methods=['GET', 'POST'])
 def createClass(template):
+    if not template:
+        print("NO TEMPLATE!")
+        return redirect(url_for('createClass')+'/default.js')
     form = NewClassForm()
     form.loadTemplates()
     
