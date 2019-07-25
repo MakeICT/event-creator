@@ -51,8 +51,8 @@ class NewClassForm(FlaskForm):
         event = {
             'title': self.classTitle.data.strip(),
             'location': self.classLocation.data.strip(),
-            'startTime': datetime.datetime.combine(date, self.starttime.data.time()),
-            'stopTime': datetime.datetime.combine(date, self.endtime.data.time()),
+            'startTime': datetime.datetime.combine(date, self.starttime.data),
+            'stopTime': datetime.datetime.combine(date, self.endtime.data),
             'description': self.classDescription.data.strip(),
             'registrationURL': self.registrationURL.data.strip(),
             'registrationLimit': self.registrationLimit.data,

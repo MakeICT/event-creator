@@ -80,28 +80,33 @@ def get_access_token():
 @app.route('/createClass', methods=['GET', 'POST'], defaults={'template':None}, strict_slashes=False)
 @app.route("/createClass/<template>", methods=['GET', 'POST'])
 def createClass(template):
-    if not template:
-        print("NO TEMPLATE!")
-        return redirect(url_for('createClass')+'/default.js')
     form = NewClassForm()
-    form.loadTemplates()
-    
-    authorizations=authorizationsplugin.getAuthorizations()
+    if request.method == 'GET':
+        if not template:
+            print("NO TEMPLATE!")
+            return redirect(url_for('createClass')+'/default.js')
+        form.loadTemplates()
+        
+        authorizations=authorizationsplugin.getAuthorizations()
 
-    form.populateTemplate(template)
-    if form.validate_on_submit():
-        flash(f'Class created for {form.classTitle.data}!', 'success')
+        form.populateTemplate(template)
+        return render_template('createClass.html', title='Create Event', form=form, authorizations=authorizations)
 
-        # FIXME 
-        # There must be a better way to do the checkboxes, but this is the only way I have found that works        
-        selected_authorizations = request.form.getlist("authorizations")
-        form.setSelectedAuthorizations(selected_authorizations)
-        event=form.collectEventDetails()
-                
-        waplugin.createEvent(event)
-        return redirect(url_for('home'))
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            flash(f'Class created for {form.classTitle.data}!', 'success')
+
+            # FIXME 
+            # There must be a better way to do the checkboxes, but this is the only way I have found that works        
+            selected_authorizations = request.form.getlist("authorizations")
+            form.setSelectedAuthorizations(selected_authorizations)
+            event=form.collectEventDetails()
+
+            print(event)
+                    
+            waplugin.createEvent(event)
+            return redirect(url_for('home'))
     
-    return render_template('createClass.html', title='Create Event', form=form, authorizations=authorizations)
 
     
 def setPlugins(plugins):
