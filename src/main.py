@@ -80,6 +80,11 @@ def get_access_token():
 @app.route('/createClass', methods=['GET', 'POST'], defaults={'template':None}, strict_slashes=False)
 @app.route("/createClass/<template>", methods=['GET', 'POST'])
 def createClass(template):
+    
+    access_token = session.get('access_token')
+    if access_token is None:
+      return redirect(url_for('login'))
+
     form = NewClassForm()
     if request.method == 'GET':
         if not template:
