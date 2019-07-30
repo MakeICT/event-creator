@@ -1,4 +1,4 @@
-import logging
+import logging, pytz
 
 from .wildapricot_api import WaApiClient
 from plugins import Plugin
@@ -54,11 +54,20 @@ class WildApricotPlugin(Plugin):
         if event['ageDescription']:
             description += '<p>' + event['ageDescription'] + '</p>'
 
-            
+
+        central = pytz.timezone('America/Chicago')
+        gmt = pytz.timezone('GMT')
+
+        centralStartDate = central.localize(event['startTime'])        
+        centralEndDate = central.localize(event['stopTime'])        
+        
+        gmtStartDate = centralStartDate.astimezone(gmt)
+        gmtEndDate = centralEndDate.astimezone(gmt) 
+        
         eventData = {
             "Name": event['title'],
-            "StartDate": event['startTime'].strftime("%Y-%m-%d %H:%M:%S"),
-            "EndDate": event['stopTime'].strftime("%Y-%m-%d %H:%M:%S"),
+            "StartDate": gmtStartDate.strftime("%Y-%m-%d %H:%M:%S"),
+            "EndDate": gmtEndDate.strftime("%Y-%m-%d %H:%M:%S"),
             "Location": event['location'],
             "RegistrationsLimit": event['registrationLimit'],
             "RegistrationEnabled": True,
