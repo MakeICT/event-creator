@@ -30,8 +30,7 @@ google = oauth.remote_app('google',
 base_url='https://www.google.com/accounts/',
 authorize_url='https://accounts.google.com/o/oauth2/auth',
 request_token_url=None,
-request_token_params={'scope': 'https://www.googleapis.com/auth/userinfo.email',
-'response_type': 'code'},
+request_token_params={'scope': 'https://www.googleapis.com/auth/plus.login', 'response_type': 'code'},
 access_token_url='https://accounts.google.com/o/oauth2/token',
 access_token_method='POST',
 access_token_params={'grant_type': 'authorization_code'},
@@ -108,7 +107,13 @@ def createClass(template):
             event=form.collectEventDetails()
 
             print(event)
-                    
+            
+            indicatorValue = request.form.get('ts_indicator', '')
+            
+            if indicatorValue == "save_template":
+              form.saveTemplate(dict(event), request.form["ts_name"])
+                  
+                           
             waplugin.createEvent(event)
             return redirect(url_for('home'))
     

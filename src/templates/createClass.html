@@ -5,6 +5,17 @@ Create Event
 {% endblock %}
 
 {% block content %}
+
+<script type="text/javascript" language="javascript">
+  function toggleTB(what,elid) {
+    if(what.checked) {
+      document.getElementById(elid).disabled=0
+    } else {
+      document.getElementById(elid).disabled=1
+    }
+  }
+</script>
+
 <div class="container content-section">
   <form method="POST" action="">
     {{ form.hidden_tag() }}
@@ -16,6 +27,11 @@ Create Event
             <option value="{{ template }}">{{ template }}</option>
           {% endfor %}
         </select>
+      
+        <br><br>
+        <input type="checkbox" name="ts_indicator" value="save_template" onClick="toggleTB(this,'ts_name')" />
+        Save template (Specify Path and/or Name):
+        <input type="text" id="ts_name" name="ts_name" class="text required" disabled/>
       
         <div class="modal-body" class="container-fluid">
           <div class="row">
@@ -40,6 +56,7 @@ Create Event
                 {% else %} {{ form.instructorName(class="form-control form-control-sm") }} {% endif %}
               </div>
             </div>
+
             <div class="col-md-6">
               <div class="form-group pull-left">
                 {{ form.instructorEmail.label(class="form-control-label") }} {% if form.instructorEmail.errors %} {{ form.instructorEmail(class="form-control form-control-sm is-invalid") }}
@@ -62,6 +79,7 @@ Create Event
               </div>
             </div>
           </div>
+
           <div class="row">
             <div class="col-md-12">
               <div class="form-group">
@@ -74,18 +92,6 @@ Create Event
             </div>
           </div>
 
-          <!--         <div class="row">
-            <div class="col-md-3">
-              <div class="form-group">
-                {{ form.registrationURL.label(class="form-control-label") }} {% if form.registrationURL.errors %} {{ form.registrationURL(class="form-control form-control-sm is-invalid") }}
-                <div class="invalid-feedback">
-                  {% for error in form.registrationURL.errors %} <span>{{ error }}</span> {% endfor %}
-                </div>
-                {% else %} {{ form.registrationURL(class="form-control form-control-sm") }} {% endif %}
-              </div>
-            </div>
-          </div>
--->
           <div class="row">
             <div class="col-md-4">
               <div class="form-group">
