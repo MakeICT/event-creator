@@ -71,7 +71,7 @@ class NewClassForm(FlaskForm):
         if self.memberPrice is not None:
            event['prices'].append({
             'name': 'MakeICT Members',
-            'price': self.memberPrice.data,
+            'price': float(self.memberPrice.data),
             'description': '',
             'availability': ['Members']                
             })
@@ -79,7 +79,7 @@ class NewClassForm(FlaskForm):
         if self.nonMemberPrice is not None:
            event['prices'].append({
             'name': 'Non-Members',
-            'price': self.nonMemberPrice.data,
+            'price': float(self.nonMemberPrice.data),
             'description': '',
             'availability': ['Everyone']                
             })
@@ -165,10 +165,10 @@ class NewClassForm(FlaskForm):
             self.maxAge.data = data.get('maximumAge', '')
             
             pricelist = data.get('prices', [])
-            
+             
             for price in pricelist :
               name = price['name']
-              
+               
               if (name == 'MakeICT Members') :
                   self.memberPrice.data = price['price']
               elif (name == 'Non-Members') :
@@ -182,6 +182,37 @@ class NewClassForm(FlaskForm):
               if tags == "Required auth's" :
                 self.templateRequiredAuths = taglist[tags]
                                     
+    def saveTemplate(self, event, templateName):        
+        
+        if templateName != '':
+            if not templateName.endswith(".js"):
+                templateName += ".js"
+        
+            value = event.get('classDate', '')            
+            if value :
+                del event['classDate']
+     
+            value = event.get('startTime', '')            
+            if value :
+                event['startTime'] = value.isoformat() 
+     
+            value = event.get('stopTime', '')            
+            if value :
+                event['stopTime'] = value.isoformat()
+     
+    
+            self.createDirectoryIfNeeded(templateName)
+            with open('EventTemplates/' + templateName , 'w') as outfile:
+                jstr = json.dump(event, outfile, sort_keys=True, indent=4, ensure_ascii=False)
+
+    def createDirectoryIfNeeded(self, fpath):
+        fpath = fpath.replace("\\", "/")
+        index = fpath.rfind("/")
+
+        if index > 0:
+          dirpath = fpath[0:index]
+          os.makedirs('EventTemplates/' + dirpath, exist_ok=True)
+        
             
     def isBlank (self, myString):
         return not (myString and myString.strip())
