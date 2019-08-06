@@ -2,6 +2,8 @@
 
 {% block title %}Upcoming Events{% endblock title %}
 
+{% block pageTitle %} Upcoming Events {% endblock %}
+
 {% block header %}Upcoming Events{% endblock header %}
 
 {% block head %}
@@ -86,13 +88,12 @@
             </div>
         </div>
         <div class="card-body text-center text-sm-left" ng-if="showDetails">
-          <p ng-bind="details"></p>
-          <div ng-if="!details" class=" d-flex justify-content-center">
-            <div class="loader"></div>
+          <div class=" d-flex justify-content-center">
+            [[ event["Description"] ]]
           </div> 
-          <div class="col-sm-4 col-lg-2">
-            <a ng-if="details" class= "btn btn-primary btn-block" href= "[[ event['Register'] ]]" target="_blank">Register</a>
-          </div>
+<!--           <div class="col-sm-4 col-lg-2">
+            <a class= "btn btn-primary btn-block" href= "[[ event['Register'] ]]" target="_blank">Register</a>
+          </div> -->
         </div>
       </div>
     </div>

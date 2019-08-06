@@ -232,6 +232,7 @@ def upcoming_events():
                                     "Name":event.title,
                                     "Date": start_date.strftime('%b %d %Y'),
                                     "Time": start_date.strftime('%I:%M %p'),
+                                    "Description":event.description,
                                     "Register":"http://makeict.wildapricot.org/event-" + str(event.id),
                                   })
 
@@ -240,6 +241,7 @@ def upcoming_events():
             #       ' | ' + event['Name'] + ' | ' + '<a href="http://makeict.wildapricot.org/event-' + 
             #       str(event['Id']) + '" target="_blank">Register</a><br />')
 
+    print (upcoming_events)
     return render_template('events.html', events=event_list)
     
 
