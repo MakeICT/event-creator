@@ -29,7 +29,7 @@ app.config['REDIRECT_URI'] = settings.get('Google','OATH Redirect URL')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 
 db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+migrate = Migrate(app, db, compare_type=True)
 
 oauth = OAuth()
 
@@ -52,13 +52,13 @@ association_table = db.Table('association', db.Model.metadata,
 class Event(db.Model):
     _tablename_="event"
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(50), unique=True, nullable=False)
+    title = db.Column(db.String(50), unique=False, nullable=False)
     instructor_email = db.Column(db.String(120), unique=False, nullable=True)
     instructor_name = db.Column(db.String(60))
     location = db.Column(db.String(120))
     start_date = db.Column(db.Date(), nullable=True, default=None)
     end_date = db.Column(db.Date(), nullable=True, default=None)
-    duration = db.Column(db.Interval(), nullable=False, default=datetime.timedelta(hours=1))
+    # duration = db.Column(db.Interval(), nullable=False, default=datetime.timedelta(hours=1))
     image_file = db.Column(db.String(20), nullable=True, default='default.jpg')
     description = db.Column(db.String(500), nullable=False)
     min_age = db.Column(db.Integer(), nullable=True)
@@ -85,6 +85,16 @@ class Authorization(db.Model):
 
     def __repr__(self):
         return f"Authorization('{self.name}': '{self.wa_id}')"
+
+# class Price(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(40), nullable=False, unique=True)
+#     value = db.Column(db.Float(), nullable=False)
+
+# class Location(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(40), nullable=False, unique=True)
+#     description = db.Column(db.String(120), nullable=False, unique=True)
 
 
 @app.route("/home")
@@ -179,7 +189,7 @@ def createClass(template):
               form.saveTemplate(dict(event), request.form["ts_name"])
                   
                            
-            waplugin.createEvent(event)
+            # waplugin.createEvent(event)
             return redirect(url_for('home'))
     
 

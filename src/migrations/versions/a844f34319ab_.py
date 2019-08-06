@@ -1,8 +1,8 @@
-"""events table
+"""empty message
 
-Revision ID: fe42fb19ee33
+Revision ID: a844f34319ab
 Revises: 
-Create Date: 2019-08-05 17:37:39.659242
+Create Date: 2019-08-05 19:01:28.100900
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'fe42fb19ee33'
+revision = 'a844f34319ab'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -34,7 +34,6 @@ def upgrade():
     sa.Column('location', sa.String(length=120), nullable=True),
     sa.Column('start_date', sa.Date(), nullable=True),
     sa.Column('end_date', sa.Date(), nullable=True),
-    sa.Column('duration', sa.Interval(), nullable=False),
     sa.Column('image_file', sa.String(length=20), nullable=True),
     sa.Column('description', sa.String(length=500), nullable=False),
     sa.Column('min_age', sa.Integer(), nullable=True),
@@ -44,8 +43,7 @@ def upgrade():
     sa.Column('nonmember_price', sa.Float(), nullable=True),
     sa.Column('created_date', sa.DateTime(), nullable=True),
     sa.Column('updated_date', sa.DateTime(), nullable=True),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('title')
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('association',
     sa.Column('event_id', sa.Integer(), nullable=True),
