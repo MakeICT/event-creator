@@ -1,0 +1,120 @@
+{% extends 'layout.html' %}
+
+{% block title %}Upcoming Events{% endblock title %}
+
+{% block header %}Upcoming Events{% endblock header %}
+
+{% block head %}
+  <style>
+    .loader {
+      border: 16px solid #f3f3f3; /* Light grey */
+      border-top: 16px solid #3498db; /* Blue */
+      border-radius: 50%;
+      width: 120px;
+      height: 120px;
+      animation: spin 2s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+
+
+  <script>
+    app.controller("dateCtrl", function($scope) {
+      $scope.event_date = null;
+      // console.log($scope.event_date);
+
+
+      $scope.setDate = function(date) {
+        console.log(date);
+        $scope.event_date = new Date(date);
+        console.log($scope.event_date);
+      };
+    });
+
+    app.controller("eventCtrl", function($scope) {
+      $scope.showDetails = false;
+      $scope.details = "";
+
+      $scope.toggleDetailDisplay = function(event) {
+        $scope.showDetails = !$scope.showDetails;
+        console.log($scope.showDetails);
+
+        if ($scope.details == "") {
+          // $scope.details = "Fetching Details";
+          console.log(event["Id"]);
+          fetch("event/" + event["Id"])
+            .then(function(res){
+              return res.text();
+            }).then(function(text){
+                // console.log(text);
+                var event_json = JSON.parse(text);
+                // console.log(event_json);
+                $scope.details = event_json["Description"];
+                $scope.$digest();
+              });
+        };
+      };  
+    });
+  </script>
+{% endblock head %}
+
+{% block content %}
+  <body ng-app="app" ng-init="events = {{ events }}">
+  <!-- [[ events ]] -->
+
+  <div class="card my-2 py-0 border-3" ng-repeat="(key, value) in events | groupBy: 'Date'">
+    <h5 class="card-header" ng-controller="dateCtrl" ng-init="setDate(key)">  
+      <b>[[ event_date | date:'MMM d']]</b> 
+      <small class="text-muted">[[ event_date | date:'EEE' ]]</small>
+    </h5>
+    <div ng-repeat="event in value">
+      <div class="card my-1 py-0 mx-1" ng-controller = "eventCtrl"> 
+        <div class="card-header bg-white d-flex flex-sm-row flex-column align-items-center py-1 px-2" ng-click="toggleDetailDisplay(event)">
+            <div>
+              <small class="text-muted text-nowrap">[[ event["Time"] ]]</small>  
+            </div>
+            <div class="flex-grow-1 text-center text-sm-left px-1">
+              [[ event["Name"] ]]
+            </div>
+            <div>
+              <i ng-if="!showDetails" class="fas fa-sort-down float-right"></i>
+              <i ng-if="showDetails" class="fas fa-sort-up float-right"></i>
+            </div>
+        </div>
+        <div class="card-body text-center text-sm-left" ng-if="showDetails">
+          <p ng-bind="details"></p>
+          <div ng-if="!details" class=" d-flex justify-content-center">
+            <div class="loader"></div>
+          </div> 
+          <div class="col-sm-4 col-lg-2">
+            <a ng-if="details" class= "btn btn-primary btn-block" href= "[[ event['Register'] ]]" target="_blank">Register</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+<!--     <div ng-if="1" class="card my-1 py-0"ng-repeat="event in events"> 
+      <h5 ng-if="1"class="card-header">  [[ event["Date" ] ]] </h5>
+
+      <div class="card my-1 py-0 mx-1" ng-controller = "eventCtrl"> 
+        <h5 class="card-header"> [[ event["Time"] ]] | [[ event["Name"] ]]
+          <button class= "btn btn-primary float-right mx-2" ng-click="toggleDetailDisplay([[ event ]])" target="_blank">+</button>
+          <a class= "btn btn-primary float-right" href= "[[ event['Register'] ]]" target="_blank">Register</a>
+        </h5>
+        <div class="card-body" ng-if="showDetails">
+          <div class="d-flex align-items-center flex-row">
+            <div ng-bind="details">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div> -->
+
+  </body>
+{% endblock content %}

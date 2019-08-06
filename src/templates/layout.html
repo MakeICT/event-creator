@@ -1,9 +1,14 @@
 <!DOCTYPE html>
-<html>
 <head>
+    <!-- Page Title -->
+    {% if title %}
+        <title>  MakeICT - {% block title %}{% endblock title%} </title>
+    {% else %}
+        <title>MakeICT Events</title>
+    {% endif %}
+
     <!-- Required meta tags -->
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- Bootstrap CSS -->
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
@@ -24,14 +29,15 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-filter/0.5.17/angular-filter.min.js"></script>
 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <script>
-    var app = angular.module('app', ['angular.filter'], function($interpolateProvider) {
-      $interpolateProvider.startSymbol('[[');
-      $interpolateProvider.endSymbol(']]');
-    });
+        var app = angular.module('app', ['angular.filter'], function($interpolateProvider) {
+          $interpolateProvider.startSymbol('[[');
+          $interpolateProvider.endSymbol(']]');
+        });
     </script>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
@@ -41,14 +47,10 @@
 
     <!-- <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}"> -->
 
-    {% if title %}
-        <title>  MakeICT - {% block title %}{% endblock title%} </title>
-    {% else %}
-        <title>MakeICT Events</title>
-    {% endif %}
-
+    {% block head %}{% endblock head%}
 </head>
 
+<html>
 <body background-color: #515459>
     <!-- navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
