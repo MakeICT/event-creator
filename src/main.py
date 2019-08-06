@@ -47,6 +47,10 @@ association_table = db.Table('association', db.Model.metadata,
     db.Column('event_id', db.Integer, db.ForeignKey('event.id')),
     db.Column('authorization_id', db.Integer, db.ForeignKey('authorization.id'))
 )
+event_price = db.Table('event_price', db.Model.metadata,
+    db.Column('event_id', db.Integer, db.ForeignKey('event.id')),
+    db.Column('price_id', db.Integer, db.ForeignKey('price.id'))
+)
 
 class Event(db.Model):
     _tablename_="event"
@@ -63,9 +67,8 @@ class Event(db.Model):
     min_age = db.Column(db.Integer(), nullable=True)
     max_age = db.Column(db.Integer(), nullable=True)
     registration_limit = db.Column(db.Integer(), nullable=True)
-    member_price = db.Column(db.Float(), nullable=True)
-    nonmember_price = db.Column(db.Float(), nullable=True)
 
+    prices = db.relationship("Price", secondary=event_price)
     authorizations = db.relationship("Authorization", secondary=association_table)
 
     created_date = db.Column(db.DateTime, nullable=True, default=datetime.datetime.utcnow)
@@ -83,12 +86,20 @@ class Authorization(db.Model):
     events = db.relationship("Event", secondary=association_table, back_populates="authorizations")
 
     def __repr__(self):
-        return f"Authorization('{self.name}': '{self.wa_id}')"
+        return f"Authorization('{self.name}': '{self.wa_group_id}')"
 
-# class Price(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.String(40), nullable=False, unique=True)
-#     value = db.Column(db.Float(), nullable=False)
+class Price(db.Model):
+    _tablename_ = "price"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(40), nullable=False)
+    value = db.Column(db.Float(), nullable=False)
+    description = db.Column(db.String(40), nullable=True)
+    availability = db.Column(db.String(30), nullable=False)
+
+    events = db.relationship("Event", secondary=event_price, back_populates="prices")
+
+    def __repr__(self):
+        return f"Price('{self.name}': '{self.value}', '{self.availability}', '{self.events}')"
 
 # class Location(db.Model):
 #     id = db.Column(db.Integer, primary_key=True)
@@ -164,7 +175,12 @@ def createClass(template):
             form.setSelectedAuthorizations(selected_authorizations)
             event=form.collectEventDetails()
             event_auths = [Authorization.query.filter_by(name=auth).first() for auth in selected_authorizations]
+            if None in event_auths:
+                print("INVALID EVENT AUTHORIZATIONS!!!!")
+            event_prices = [Price(name=price['name'], description=price['description'], value=price['price'], availability=price['availability'][0]) for price in event['prices']]
             print(event_auths)
+            print(event_prices)
+
             event_entry = Event(title=event["title"],
                                 instructor_email = event["instructorEmail"],
                                 instructor_name = event["instructorName"],
@@ -175,9 +191,8 @@ def createClass(template):
                                 min_age = event["minimumAge"],
                                 max_age = event["maximumAge"],
                                 registration_limit = event["registrationLimit"],
-                                member_price = None,
-                                nonmember_price = None,
-                                
+
+                                prices = event_prices,                                
                                 authorizations = event_auths,
                                 )
             db.session.add(event_entry)
