@@ -60,7 +60,7 @@ class WildApricotPlugin(Plugin):
             description += '<p>' + event['ageDescription'] + '</p>'
 
         #@TODO: open ticket with WildApricot so that we can have an API endpoint for enabling email reminders
-        self.checkForInterruption()
+        
 
         logging.debug('Connecting to API')
         api = WaApiClient()
@@ -86,7 +86,7 @@ class WildApricotPlugin(Plugin):
             "Tags":tags
         }      
 
-        self.checkForInterruption()
+        
         logging.debug('Creating event')
         eventID = api.execute_request('Events', eventData)
 
@@ -115,7 +115,7 @@ class WildApricotPlugin(Plugin):
                 else:
                     registrationTypeData['Availability'] = 'Everyone'
             
-            self.checkForInterruption()
+            
 
             logging.debug('Adding registration type: ' + rsvpType['name'])
             api.execute_request('EventRegistrationTypes', registrationTypeData)
@@ -140,7 +140,7 @@ class WildApricotPlugin(Plugin):
                 for auth in auths:
                     auth_ids.append(auth_map[auth])
 
-                    self.checkForInterruption()
+                    
 
                     logging.debug('Adding auth group requirements')
                     api.SetEventAccessControl(eventID, restricted=True, any_level=False, any_group=False, group_ids=auth_ids, level_ids=[])
