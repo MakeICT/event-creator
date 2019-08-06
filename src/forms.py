@@ -38,8 +38,9 @@ class NewClassForm(FlaskForm):
     submit = SubmitField('Submit')
 
     templateRequiredAuths = []
-    templates = {}
-    
+    template_map = {}
+    templates = []
+        
     def setSelectedAuthorizations(self, selected):
         self.auths = selected
 
@@ -121,22 +122,25 @@ class NewClassForm(FlaskForm):
     
     
     def loadTemplates(self):
-        self.templates = {}
+        self.template_map = {}
+        
         basepath = 'EventTemplates/'
         
         # r=root, d=directories, f = files
         for r, d, f in os.walk(basepath):
             for file in f:
-                self.templates[file] = (os.path.join(r, file))
+                self.template_map[file] = (os.path.join(r, file))
         
-
+        for t in sorted(self.template_map.keys()):
+            self.templates.append(t)
+        
     
     def populateTemplate(self, templateName):
     
-        templateFile = self.templates.get(templateName, '')
+        templateFile = self.template_map.get(templateName, '')
         
         if self.isBlank(templateFile):
-            templateFile = self.templates.get('default')
+            templateFile = self.template_map.get('default')
             
         with open(templateFile) as json_file:
             data = json.load(json_file)
