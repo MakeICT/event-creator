@@ -8,6 +8,9 @@ import plugins
 from plugins import WildApricot, MakerspaceAuthorizations
 import json
 from config import settings
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+import datetime
 
 targets = []
 actions = {}
@@ -16,13 +19,16 @@ loadedPlugins = {}
 populationTypes = ['Everybody']
 lastTemplateFile = None
 
-
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = settings.get('General', 'SECRET_KEY')
 app.config['GOOGLE_CLIENT_ID'] = settings.get('Google', 'Client ID')
 app.config['GOOGLE_CLIENT_SECRET'] = settings.get('Google', 'Client Secret')
 app.config['REDIRECT_URI'] = settings.get('Google','OATH Redirect URL')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+
+db = SQLAlchemy(app)
+migrate = Migrate(app, db, compare_type=True)
 
 oauth = OAuth()
 
@@ -36,6 +42,69 @@ access_token_method='POST',
 access_token_params={'grant_type': 'authorization_code'},
 consumer_key=app.config['GOOGLE_CLIENT_ID'],
 consumer_secret=app.config['GOOGLE_CLIENT_SECRET'])
+
+association_table = db.Table('association', db.Model.metadata,
+    db.Column('event_id', db.Integer, db.ForeignKey('event.id')),
+    db.Column('authorization_id', db.Integer, db.ForeignKey('authorization.id'))
+)
+event_price = db.Table('event_price', db.Model.metadata,
+    db.Column('event_id', db.Integer, db.ForeignKey('event.id')),
+    db.Column('price_id', db.Integer, db.ForeignKey('price.id'))
+)
+
+class Event(db.Model):
+    _tablename_="event"
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(50), unique=False, nullable=False)
+    instructor_email = db.Column(db.String(120), unique=False, nullable=True)
+    instructor_name = db.Column(db.String(60))
+    location = db.Column(db.String(120))
+    start_date = db.Column(db.Date(), nullable=True, default=None)
+    end_date = db.Column(db.Date(), nullable=True, default=None)
+    # duration = db.Column(db.Interval(), nullable=False, default=datetime.timedelta(hours=1))
+    image_file = db.Column(db.String(20), nullable=True, default='default.jpg')
+    description = db.Column(db.String(500), nullable=False)
+    min_age = db.Column(db.Integer(), nullable=True)
+    max_age = db.Column(db.Integer(), nullable=True)
+    registration_limit = db.Column(db.Integer(), nullable=True)
+
+    prices = db.relationship("Price", secondary=event_price)
+    authorizations = db.relationship("Authorization", secondary=association_table)
+
+    created_date = db.Column(db.DateTime, nullable=True, default=datetime.datetime.utcnow)
+    updated_date = db.Column(db.DateTime, nullable=True, default=datetime.datetime.utcnow)
+
+    def __repr__(self):
+        return f"Event('{self.title}', '{self.start_date}')"
+
+class Authorization(db.Model):
+    _tablename_="authorization"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(40), nullable=False, unique=True)
+    wa_group_id = db.Column(db.Integer, nullable=False, unique=True)
+
+    events = db.relationship("Event", secondary=association_table, back_populates="authorizations")
+
+    def __repr__(self):
+        return f"Authorization('{self.name}': '{self.wa_group_id}')"
+
+class Price(db.Model):
+    _tablename_ = "price"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(40), nullable=False)
+    value = db.Column(db.Float(), nullable=False)
+    description = db.Column(db.String(40), nullable=True)
+    availability = db.Column(db.String(30), nullable=False)
+
+    events = db.relationship("Event", secondary=event_price, back_populates="prices")
+
+    def __repr__(self):
+        return f"Price('{self.name}': '{self.value}', '{self.availability}', '{self.events}')"
+
+# class Location(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(40), nullable=False, unique=True)
+#     description = db.Column(db.String(120), nullable=False, unique=True)
 
 
 @app.route("/home")
@@ -105,7 +174,29 @@ def createClass(template):
             selected_authorizations = request.form.getlist("authorizations")
             form.setSelectedAuthorizations(selected_authorizations)
             event=form.collectEventDetails()
+            event_auths = [Authorization.query.filter_by(name=auth).first() for auth in selected_authorizations]
+            if None in event_auths:
+                print("INVALID EVENT AUTHORIZATIONS!!!!")
+            event_prices = [Price(name=price['name'], description=price['description'], value=price['price'], availability=price['availability'][0]) for price in event['prices']]
+            print(event_auths)
+            print(event_prices)
 
+            event_entry = Event(title=event["title"],
+                                instructor_email = event["instructorEmail"],
+                                instructor_name = event["instructorName"],
+                                location = event["location"],
+                                start_date = event["startTime"],
+                                end_date = event["stopTime"],
+                                description = event["description"],
+                                min_age = event["minimumAge"],
+                                max_age = event["maximumAge"],
+                                registration_limit = event["registrationLimit"],
+
+                                prices = event_prices,                                
+                                authorizations = event_auths,
+                                )
+            db.session.add(event_entry)
+            db.session.commit()
             print(event)
             
             indicatorValue = request.form.get('ts_indicator', '')
@@ -114,7 +205,7 @@ def createClass(template):
               form.saveTemplate(dict(event), request.form["ts_name"])
                   
                            
-            waplugin.createEvent(event)
+            # waplugin.createEvent(event)
             return redirect(url_for('home'))
     
 
