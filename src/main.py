@@ -19,7 +19,6 @@ loadedPlugins = {}
 populationTypes = ['Everybody']
 lastTemplateFile = None
 
-
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = settings.get('General', 'SECRET_KEY')
@@ -164,6 +163,8 @@ def createClass(template):
             selected_authorizations = request.form.getlist("authorizations")
             form.setSelectedAuthorizations(selected_authorizations)
             event=form.collectEventDetails()
+            event_auths = [Authorization.query.filter_by(name=auth).first() for auth in selected_authorizations]
+            print(event_auths)
             event_entry = Event(title=event["title"],
                                 instructor_email = event["instructorEmail"],
                                 instructor_name = event["instructorName"],
@@ -177,7 +178,7 @@ def createClass(template):
                                 member_price = None,
                                 nonmember_price = None,
                                 
-                                authorizations = [],
+                                authorizations = event_auths,
                                 )
             db.session.add(event_entry)
             db.session.commit()
