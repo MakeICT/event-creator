@@ -244,8 +244,11 @@ def upcoming_events():
     print (upcoming_events)
     return render_template('events.html', events=event_list)
     
+@app.route('/event/<event_id>')
+def edit_event(event_id):
+    e = Event.query.get(event_id)
+    return render_template('edit_event.html', event=e)
 
-    
 def setPlugins(plugins):
     global loadedPlugins
     loadedPlugins = plugins

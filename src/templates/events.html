@@ -83,12 +83,15 @@
               [[ event["Name"] ]]
             </div>
             <div>
-              <i ng-if="!showDetails" class="fas fa-sort-down float-right"></i>
-              <i ng-if="showDetails" class="fas fa-sort-up float-right"></i>
+              <a class= "btn btn-primary btn-block py-0" href= "/event/[[ event['Id'] ]]">Edit</a> 
+            </div>
+            <div>
+              <i ng-if="!showDetails" class="fas fa-sort-down float-right btn btn-primary mx-1 py-1"></i>
+              <i ng-if="showDetails" class="fas fa-sort-up float-right btn btn-primary mx-1 py-1"></i>
             </div>
         </div>
         <div class="card-body text-center text-sm-left" ng-if="showDetails">
-          <div class=" d-flex justify-content-center">
+          <div class=" d-flex justify-content-left">
             [[ event["Description"] ]]
           </div> 
 <!--           <div class="col-sm-4 col-lg-2">
