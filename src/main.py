@@ -226,16 +226,16 @@ def upcoming_events():
                     spots = 'FULL'
             # start_date = WA_API.WADateToDateTime(event['StartDate'])
             start_date = event.start_date
-            if 'test' not in event.title.lower():
-                event_list.append({
-                                    "Id": event.id,
-                                    "Name":event.title,
-                                    "Date": start_date.strftime('%b %d %Y'),
-                                    "Time": start_date.strftime('%I:%M %p'),
-                                    "Description":event.description,
-                                    "Register":"http://makeict.wildapricot.org/event-" + str(event.id),
-                                  })
-
+            # if 'test' not in event.title.lower():
+            event_list.append({
+                                "Id": event.id,
+                                "Name":event.title,
+                                "Date": start_date.strftime('%b %d %Y'),
+                                "Time": start_date.strftime('%I:%M %p'),
+                                "Description":event.description,
+                                "Register":"http://makeict.wildapricot.org/event-" + str(event.id),
+                              })
+            print(event_list)
             #       str(event['Id']))
             # print(start_date.strftime('%b %d') + ' | ' + start_date.strftime('%I:%M %p') + 
             #       ' | ' + event['Name'] + ' | ' + '<a href="http://makeict.wildapricot.org/event-' + 
