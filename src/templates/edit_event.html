@@ -1,0 +1,17 @@
+{% extends 'layout.html' %}
+
+{% block title %} {{ event.title }} {% endblock title %}
+
+{% block pageTitle %} {{ event.title }} {% endblock %}
+
+{% block header %}{{ event.title }}{% endblock header %}
+
+{% block head %}
+{% endblock head %}
+
+{% block content %}
+  <body ng-app="app" ng-init="">
+    {{ event.title }}
+    {{ event.description }}
+  </body>
+{% endblock content %}
