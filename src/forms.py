@@ -209,6 +209,8 @@ class NewClassForm(FlaskForm):
             with open('EventTemplates/' + templateName , 'w') as outfile:
                 jstr = json.dump(event, outfile, sort_keys=True, indent=4, ensure_ascii=False)
 
+            return os.path.basename(outfile.name)
+        
     def createDirectoryIfNeeded(self, fpath):
         fpath = fpath.replace("\\", "/")
         index = fpath.rfind("/")

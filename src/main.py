@@ -167,10 +167,6 @@ def createClass(template):
 
     if request.method == 'POST':
         if form.validate_on_submit():
-            flash(f'Class created for {form.classTitle.data}!', 'success')
-
-            # FIXME 
-            # There must be a better way to do the checkboxes, but this is the only way I have found that works        
             selected_authorizations = request.form.getlist("authorizations")
             form.setSelectedAuthorizations(selected_authorizations)
             event=form.collectEventDetails()
@@ -195,18 +191,30 @@ def createClass(template):
                                 prices = event_prices,                                
                                 authorizations = event_auths,
                                 )
-            db.session.add(event_entry)
-            db.session.commit()
-            print(event)
             
+            print(event)
+
             indicatorValue = request.form.get('ts_indicator', '')
             
             if indicatorValue == "save_template":
-              form.saveTemplate(dict(event), request.form["ts_name"])
-                  
-                           
-            # waplugin.createEvent(event)
-            return redirect(url_for('home'))
+              templateFile = request.form.get('ts_name', '')
+              
+              templateName = form.saveTemplate(dict(event), request.form["ts_name"])
+              form.loadTemplates()
+
+              flash("Template Saved as " + templateName + "!", 'success')                
+
+        
+              authorizations=authorizationsplugin.getAuthorizations()
+
+              form.populateTemplate(templateName)
+              return render_template('createClass.html', title='Create Event', form=form, authorizations=authorizations)
+
+            else:       
+              flash(f'Class created for {form.classTitle.data}!', 'success')                 
+              db.session.add(event_entry)
+              db.session.commit()
+              return redirect(url_for('home'))
 
 @app.route('/events', methods=['GET'])
 def upcoming_events():
