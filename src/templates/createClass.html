@@ -74,16 +74,17 @@ $("#templateSaveDialog").on("hidden.bs.modal", function () {
     {{ form.hidden_tag() }}
     <table bgcolor="#00FF00">
       <fieldset class="form-group">
-     
-        <select name="Template" onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
-          {% for template in form.templates %}
-            <option value="{{ template }}">{{ template }}</option>
-          {% endfor %}
-        </select>
-        <!-- Button trigger modal -->
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#templateSaveDialog">
-          Save Template File
-        </button>
+        <div class="form-control-group form-inline">
+          <select name="Template" class="form-control" onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
+            {% for template in form.templates %}
+              <option value="{{ template }}">{{ template }}</option>
+            {% endfor %}
+          </select>
+          <!-- Button trigger modal -->
+          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#templateSaveDialog">
+            Save Template File
+          </button>
+        </div>
       
         <div class="modal-body" class="container-fluid">
           <div class="row">
