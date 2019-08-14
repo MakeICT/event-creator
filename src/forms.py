@@ -123,6 +123,7 @@ class NewClassForm(FlaskForm):
     
     def loadTemplates(self):
         self.template_map = {}
+        self.templates = []
         
         basepath = 'EventTemplates/'
         
