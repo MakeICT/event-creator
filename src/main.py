@@ -11,6 +11,8 @@ from config import settings
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import datetime
+from flask_navbar import Nav
+from flask_navbar.elements import *
 
 targets = []
 actions = {}
@@ -31,6 +33,8 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db, compare_type=True)
 
 oauth = OAuth()
+nav = Nav()
+nav.init_app(app)
 
 google = oauth.remote_app('google',
 base_url='https://www.google.com/accounts/',
@@ -42,6 +46,14 @@ access_token_method='POST',
 access_token_params={'grant_type': 'authorization_code'},
 consumer_key=app.config['GOOGLE_CLIENT_ID'],
 consumer_secret=app.config['GOOGLE_CLIENT_SECRET'])
+
+
+
+waplugin = WildApricot.load()
+authorizationsplugin = MakerspaceAuthorizations.load();
+
+authorizations=authorizationsplugin.getAuthorizations()
+
 
 association_table = db.Table('association', db.Model.metadata,
     db.Column('event_id', db.Integer, db.ForeignKey('event.id')),
@@ -107,6 +119,13 @@ class Price(db.Model):
 #     description = db.Column(db.String(120), nullable=False, unique=True)
 
 
+@nav.navigation()
+def top_nav():
+    items = [View('Home', 'home'), View('Create Class', 'createClass'), View('Events', 'upcoming_events')]
+
+    return Navbar('', *items)
+
+@app.route("/")
 @app.route("/home")
 def home():
     access_token = session.get('access_token')
@@ -158,63 +177,59 @@ def createClass(template):
         if not template:
             print("NO TEMPLATE!")
             return redirect(url_for('createClass')+'/default.js')
-        form.loadTemplates()
-        
-        authorizations=authorizationsplugin.getAuthorizations()
-
+        form.loadTemplates()        
         form.populateTemplate(template)
         return render_template('createClass.html', title='Create Event', form=form, authorizations=authorizations)
 
-    if request.method == 'POST':
-        if form.validate_on_submit():
-            selected_authorizations = request.form.getlist("authorizations")
-            form.setSelectedAuthorizations(selected_authorizations)
-            event=form.collectEventDetails()
-            event_auths = [Authorization.query.filter_by(name=auth).first() for auth in selected_authorizations]
-            if None in event_auths:
-                print("INVALID EVENT AUTHORIZATIONS!!!!")
-            event_prices = [Price(name=price['name'], description=price['description'], value=price['price'], availability=price['availability'][0]) for price in event['prices']]
-            print(event_auths)
-            print(event_prices)
+    if request.method == 'POST' and form.validate_on_submit():
+        selected_authorizations = request.form.getlist("authorizations")
+        form.setSelectedAuthorizations(selected_authorizations)
+        event=form.collectEventDetails()
+        event_auths = [Authorization.query.filter_by(name=auth).first() for auth in selected_authorizations]
+        if None in event_auths:
+            print("INVALID EVENT AUTHORIZATIONS!!!!")
+        event_prices = [Price(name=price['name'], description=price['description'], value=price['price'], availability=price['availability'][0]) for price in event['prices']]
+        print(event_auths)
+        print(event_prices)
 
-            event_entry = Event(title=event["title"],
-                                instructor_email = event["instructorEmail"],
-                                instructor_name = event["instructorName"],
-                                location = event["location"],
-                                start_date = event["startTime"],
-                                end_date = event["stopTime"],
-                                description = event["description"],
-                                min_age = event["minimumAge"],
-                                max_age = event["maximumAge"],
-                                registration_limit = event["registrationLimit"],
+        event_entry = Event(title=event["title"],
+                            instructor_email = event["instructorEmail"],
+                            instructor_name = event["instructorName"],
+                            location = event["location"],
+                            start_date = event["startTime"],
+                            end_date = event["stopTime"],
+                            description = event["description"],
+                            min_age = event["minimumAge"],
+                            max_age = event["maximumAge"],
+                            registration_limit = event["registrationLimit"],
 
-                                prices = event_prices,                                
-                                authorizations = event_auths,
-                                )
-            
-            print(event)
-
-            indicatorValue = request.form.get('ts_indicator', '')
-            
-            if indicatorValue == "save_template":
-              templateFile = request.form.get('ts_name', '')
-              
-              templateName = form.saveTemplate(dict(event), request.form["ts_name"])
-              form.loadTemplates()
-
-              flash("Template Saved as " + templateName + "!", 'success')                
-
+                            prices = event_prices,                                
+                            authorizations = event_auths,
+                            )
         
-              authorizations=authorizationsplugin.getAuthorizations()
+        print(event)
 
-              form.populateTemplate(templateName)
-              return render_template('createClass.html', title='Create Event', form=form, authorizations=authorizations)
+        indicatorValue = request.form.get('ts_indicator', '')
+        
+        if indicatorValue == "save_template":
+          templateFile = request.form.get('ts_name', '')
+          
+          templateName = form.saveTemplate(dict(event), request.form["ts_name"])
+          form.loadTemplates()
 
-            else:       
-              flash(f'Class created for {form.classTitle.data}!', 'success')                 
-              db.session.add(event_entry)
-              db.session.commit()
-              return redirect(url_for('home'))
+          flash("Template Saved as " + templateName + "!", 'success')                
+    
+          form.populateTemplate(templateName)
+          return render_template('createClass.html', title='Create Event', form=form, authorizations=authorizations)
+
+        else:       
+          flash(f'Class created for {form.classTitle.data}!', 'success')                 
+          db.session.add(event_entry)
+          db.session.commit()
+          return redirect(url_for('home'))
+
+    form.loadTemplates()      
+    return render_template('createClass.html', title='Create Event', form=form, authorizations=authorizations)
 
 @app.route('/events', methods=['GET'])
 def upcoming_events():
@@ -264,14 +279,6 @@ def setPlugins(plugins):
 def _getChildren(parent):
     for i in range(parent.count()):
         yield parent.itemAt(i).widget()
-
-
-
-#setPlugins(plugins.loadAllFromPath())
-
-waplugin = WildApricot.load()
-authorizationsplugin = MakerspaceAuthorizations.load();
-
 
 if __name__ == '__main__':
     app.run(debug=True)
