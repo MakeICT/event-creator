@@ -181,52 +181,54 @@ def createClass(template):
         form.populateTemplate(template)
         return render_template('createClass.html', title='Create Event', form=form, authorizations=authorizations)
 
-    if request.method == 'POST' and form.validate_on_submit():
-        selected_authorizations = request.form.getlist("authorizations")
-        form.setSelectedAuthorizations(selected_authorizations)
-        event=form.collectEventDetails()
-        event_auths = [Authorization.query.filter_by(name=auth).first() for auth in selected_authorizations]
-        if None in event_auths:
-            print("INVALID EVENT AUTHORIZATIONS!!!!")
-        event_prices = [Price(name=price['name'], description=price['description'], value=price['price'], availability=price['availability'][0]) for price in event['prices']]
-        print(event_auths)
-        print(event_prices)
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            selected_authorizations = request.form.getlist("authorizations")
+            form.setSelectedAuthorizations(selected_authorizations)
+            event=form.collectEventDetails()
+            event_auths = [Authorization.query.filter_by(name=auth).first() for auth in selected_authorizations]
+            if None in event_auths:
+                print("INVALID EVENT AUTHORIZATIONS!!!!")
+            event_prices = [Price(name=price['name'], description=price['description'], value=price['price'], availability=price['availability'][0]) for price in event['prices']]
+            print(event_auths)
+            print(event_prices)
 
-        event_entry = Event(title=event["title"],
-                            instructor_email = event["instructorEmail"],
-                            instructor_name = event["instructorName"],
-                            location = event["location"],
-                            start_date = event["startTime"],
-                            end_date = event["stopTime"],
-                            description = event["description"],
-                            min_age = event["minimumAge"],
-                            max_age = event["maximumAge"],
-                            registration_limit = event["registrationLimit"],
+            event_entry = Event(title=event["title"],
+                                instructor_email = event["instructorEmail"],
+                                instructor_name = event["instructorName"],
+                                location = event["location"],
+                                start_date = event["startTime"],
+                                end_date = event["stopTime"],
+                                description = event["description"],
+                                min_age = event["minimumAge"],
+                                max_age = event["maximumAge"],
+                                registration_limit = event["registrationLimit"],
 
-                            prices = event_prices,                                
-                            authorizations = event_auths,
-                            )
-        
-        print(event)
+                                prices = event_prices,
+                                authorizations = event_auths,
+                                )
 
-        indicatorValue = request.form.get('ts_indicator', '')
-        
-        if indicatorValue == "save_template":
-          templateFile = request.form.get('ts_name', '')
-          
-          templateName = form.saveTemplate(dict(event), request.form["ts_name"])
-          form.loadTemplates()
+            print(event)
 
-          flash("Template Saved as " + templateName + "!", 'success')                
-    
-          form.populateTemplate(templateName)
-          return render_template('createClass.html', title='Create Event', form=form, authorizations=authorizations)
+            indicatorValue = request.form.get('ts_indicator', '')
 
-        else:       
-          flash(f'Class created for {form.classTitle.data}!', 'success')                 
-          db.session.add(event_entry)
-          db.session.commit()
-          return redirect(url_for('home'))
+            if indicatorValue == "save_template":
+                templateFile = request.form.get('ts_name', '')
+
+                templateName = form.saveTemplate(dict(event), request.form["ts_name"])
+                form.loadTemplates()
+                flash("Template Saved as " + templateName + "!", 'success')
+
+                form.populateTemplate(templateName)
+                return render_template('createClass.html', title='Create Event', form=form, authorizations=authorizations)
+            else:
+                flash(f'Class created for {form.classTitle.data}!', 'success')
+                db.session.add(event_entry)
+                db.session.commit()
+                return redirect(url_for('upcoming_events'))
+        else:
+            flash(f'Event failed to post! Check form for errors.', 'danger')
+
 
     form.loadTemplates()      
     return render_template('createClass.html', title='Create Event', form=form, authorizations=authorizations)
