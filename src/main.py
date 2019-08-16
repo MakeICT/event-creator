@@ -174,7 +174,7 @@ def createClass(template):
 
     form = NewClassForm()
     if request.method == 'GET':
-        if not template:
+        if not template or template == "Select Template":
             print("NO TEMPLATE!")
             return redirect(url_for('createClass')+'/default.js')
         form.loadTemplates()        
