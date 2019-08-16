@@ -15,4 +15,6 @@ venv/
 build/
 dist/
 src/logs/
-src/EventTemplates/
+src/EventTemplates/*
+!src/EventTemplates/default.js
+src/site.db
