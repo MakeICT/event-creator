@@ -71,8 +71,8 @@ class Event(db.Model):
     instructor_email = db.Column(db.String(120), unique=False, nullable=True)
     instructor_name = db.Column(db.String(60))
     location = db.Column(db.String(120))
-    start_date = db.Column(db.Date(), nullable=True, default=None)
-    end_date = db.Column(db.Date(), nullable=True, default=None)
+    start_date = db.Column(db.DateTime(), nullable=True, default=None)
+    end_date = db.Column(db.DateTime(), nullable=True, default=None)
     # duration = db.Column(db.Interval(), nullable=False, default=datetime.timedelta(hours=1))
     image_file = db.Column(db.String(20), nullable=True, default='default.jpg')
     description = db.Column(db.String(500), nullable=False)
@@ -239,7 +239,7 @@ def upcoming_events():
     upcoming_events = sorted(upcoming_events, key=lambda event: event.start_date)
     event_list = []
     for event in upcoming_events:
-        if event.start_date >= datetime.datetime.today().date():
+        if event.start_date.date() >= datetime.datetime.today().date():
         # if not event['AccessLevel'] == 'AdminOnly':
             if event.registration_limit:
                 # print(event['RegistrationsLimit'], event['ConfirmedRegistrationsCount'])
