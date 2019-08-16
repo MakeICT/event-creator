@@ -132,6 +132,8 @@ class NewClassForm(FlaskForm):
             for file in f:
                 self.template_map[file] = (os.path.join(r, file))
         
+        self.templates.append("Select Template")
+        
         for t in sorted(self.template_map.keys(), key=str.lower):
             self.templates.append(t)
         
