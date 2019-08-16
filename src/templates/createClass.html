@@ -37,7 +37,7 @@ Create Event
 
   <input type="hidden" id="close_action" name="close_action" value="">
    
-  <div class="modal-dialog" role="document">
+  <div class="modal-dialog modal-lg modal-dialog.centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="templateSaveDialogTitle">Modal title</h5>
@@ -46,8 +46,8 @@ Create Event
         </button>
       </div>
       <div class="modal-body">
-        Save template (Specify Path and/or Name):
-      <input type="text" id="ts_name_input" name="ts_name_input" class="text required" onkeyup="text_keyup();"/>        
+        Save template (Specify Path and/or Name):<br>
+      <input type="text" id="ts_name_input" name="ts_name_input" class="form-control" onkeyup="text_keyup();" width=100%/>        
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" onclick="cancel_action();" data-dismiss="modal">Cancel</button>
@@ -77,14 +77,13 @@ $("#templateSaveDialog").on("hidden.bs.modal", function () {
 });
 </script>
 <script>
-$("#templateSaveDialog").on("shown.bs.modal", function () {   
-     document.getElementById("ts_name_input").value = "" 
-     document.getElementById("ts_name").value = ""
-     document.getElementById("ts_indicator").value = ""
-     document.getElementById("save_btn").disabled = true     
+$("#templateSaveDialog").on("shown.bs.modal", function () {	 
+     document.getElementById("ts_name_input").value = "{{form.selectedTemplateFullName}}";
+     document.getElementById("ts_name").value = "";
+     document.getElementById("ts_indicator").value = "";
+     document.getElementById("save_btn").disabled = false;     
   }
-
-});
+);
 </script>
 
 
@@ -100,8 +99,13 @@ $("#templateSaveDialog").on("shown.bs.modal", function () {
         <div class="form-control-group form-inline">
           <select name="Template" class="form-control" onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
             {% for template in form.templates %}
-              <option value="{{ template }}">{{ template }}</option>
+              {% if form.selectedTemplateName and form.selectedTemplateName == template %}
+                <option value="{{ template }}" selected="selected">{{ template }}</option>
+              {% else %}
+                <option value="{{ template }}">{{ template }}</option>
+              {% endif %}
             {% endfor %}
+            
           </select>
           <!-- Button trigger modal -->
           <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#templateSaveDialog">

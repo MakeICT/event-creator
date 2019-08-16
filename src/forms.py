@@ -40,7 +40,10 @@ class NewClassForm(FlaskForm):
     templateRequiredAuths = []
     template_map = {}
     templates = []
-        
+    
+    selectedTemplateName = ""
+    selectedTemplateFullName = ""
+            
     def setSelectedAuthorizations(self, selected):
         self.auths = selected
 
@@ -146,6 +149,12 @@ class NewClassForm(FlaskForm):
             templateFile = self.template_map.get('default')
             
         with open(templateFile) as json_file:
+            
+            self.selectedTemplateName = templateName
+            self.selectedTemplateFullName = templateFile[15:]
+            self.selectedTemplateFullName = self.selectedTemplateFullName.replace("\\", "/")
+
+            
             data = json.load(json_file)
         
             self.classTitle.data = data.get('title', '')
