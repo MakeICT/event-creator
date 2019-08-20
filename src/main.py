@@ -63,6 +63,10 @@ event_price = db.Table('event_price', db.Model.metadata,
     db.Column('event_id', db.Integer, db.ForeignKey('event.id')),
     db.Column('price_id', db.Integer, db.ForeignKey('price.id'))
 )
+event_platform = db.Table('event_platform', db.Model.metadata,
+    db.Column('event_id', db.Integer, db.ForeignKey('event.id')),
+    db.Column('platform_id', db.Integer, db.ForeignKey('platform.id')),
+)
 
 class Event(db.Model):
     _tablename_="event"
@@ -82,12 +86,19 @@ class Event(db.Model):
 
     prices = db.relationship("Price", secondary=event_price)
     authorizations = db.relationship("Authorization", secondary=association_table)
+    platforms = db.relationship("Platform", secondary=event_platform)
+    external_events = db.relationship("ExternalEvent")
 
     created_date = db.Column(db.DateTime, nullable=True, default=datetime.datetime.utcnow)
     updated_date = db.Column(db.DateTime, nullable=True, default=datetime.datetime.utcnow)
 
     def __repr__(self):
         return f"Event('{self.title}', '{self.start_date}')"
+
+    def addExternalEvent(self, platform, external_id):
+        ext_event = ExternalEvent(event_id=self.id, platform_id=platform.id,
+                                  external_event_id=external_id)
+        self. external_events.append(ext_event)
 
 class Authorization(db.Model):
     _tablename_="authorization"
@@ -112,6 +123,24 @@ class Price(db.Model):
 
     def __repr__(self):
         return f"Price('{self.name}': '{self.value}', '{self.availability}', '{self.events}')"
+
+
+class Platform(db.Model):
+    _tablename_ = "platform"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(40), nullable=False)
+
+    events = db.relationship("Event", secondary=event_platform,
+                             back_populates="platforms")
+
+
+class ExternalEvent(db.Model):
+    _tablename_ = "external_event"
+    id = db.Column(db.Integer, primary_key=True)
+
+    platform_id = db.Column(db.Integer, db.ForeignKey('platform.id'))
+    event_id = db.Column(db.Integer, db.ForeignKey('event.id'))
+    ext_event_id = db.Column(db.Integer)
 
 # class Location(db.Model):
 #     id = db.Column(db.Integer, primary_key=True)
