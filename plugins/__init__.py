@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import os, sys
-import importlib
-import traceback
+import os
 
-from PySide import QtCore
 from config import settings
 
 import plugins
@@ -47,24 +44,39 @@ def loadAllFromPath(base='plugins'):
     return loaded
 
 
-class Plugin(QtCore.QObject):
+class Plugin():
     def __init__(self, name):
-        super().__init__()
+        # super().__init__()
         self.name = name
 
+    # def getSetting(self, setting, default=''):
+    #     value = settings.value('plugin-%s/%s' % (self.name, setting), default)
+    #     if value == '':
+    #         value = default
+
+    #     return value
+
     def getSetting(self, setting, default=''):
-        value = settings.value('plugin-%s/%s' % (self.name, setting), default)
+        value = settings.get('plugin-' + self.name, setting)
+        #value = settings['plugin-%s/%s' % (self.name, setting)]
         if value == '':
             value = default
 
         return value
 
-    def saveSetting(self, setting, value):
-        return settings.setValue('plugin-%s/%s' % (self.name, setting), value)
+    def getGeneralSetting(self, setting, default=''):
+        value = settings.get('General', setting)
+        #value = settings['plugin-%s/%s' % (self.name, setting)]
+        if value == '':
+            value = default
 
-    def checkForInterruption(self):
-        if QtCore.QThread.currentThread().isInterruptionRequested():
-            raise Interruption(self)
+        return value
+
+    # def saveSetting(self, setting, value):
+    #     return settings.setValue('plugin-%s/%s' % (self.name, setting), value)
+
+    def saveSetting(self, setting, value):
+        settings['plugin-%s/%s' % (self.name, setting)]: value
 
     def prepare(self, callback=None):
         if callback:
