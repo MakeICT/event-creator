@@ -13,6 +13,7 @@ from flask_migrate import Migrate
 import datetime
 from flask_navbar import Nav
 from flask_navbar.elements import *
+from dateutil.parser import parse
 
 targets = []
 actions = {}
@@ -63,6 +64,10 @@ event_price = db.Table('event_price', db.Model.metadata,
     db.Column('event_id', db.Integer, db.ForeignKey('event.id')),
     db.Column('price_id', db.Integer, db.ForeignKey('price.id'))
 )
+event_platform = db.Table('event_platform', db.Model.metadata,
+    db.Column('event_id', db.Integer, db.ForeignKey('event.id')),
+    db.Column('platform_id', db.Integer, db.ForeignKey('platform.id')),
+)
 
 class Event(db.Model):
     _tablename_="event"
@@ -71,8 +76,8 @@ class Event(db.Model):
     instructor_email = db.Column(db.String(120), unique=False, nullable=True)
     instructor_name = db.Column(db.String(60))
     location = db.Column(db.String(120))
-    start_date = db.Column(db.Date(), nullable=True, default=None)
-    end_date = db.Column(db.Date(), nullable=True, default=None)
+    start_date = db.Column(db.DateTime(), nullable=True, default=None)
+    end_date = db.Column(db.DateTime(), nullable=True, default=None)
     # duration = db.Column(db.Interval(), nullable=False, default=datetime.timedelta(hours=1))
     image_file = db.Column(db.String(20), nullable=True, default='default.jpg')
     description = db.Column(db.String(500), nullable=False)
@@ -82,12 +87,19 @@ class Event(db.Model):
 
     prices = db.relationship("Price", secondary=event_price)
     authorizations = db.relationship("Authorization", secondary=association_table)
+    platforms = db.relationship("Platform", secondary=event_platform)
+    external_events = db.relationship("ExternalEvent")
 
     created_date = db.Column(db.DateTime, nullable=True, default=datetime.datetime.utcnow)
     updated_date = db.Column(db.DateTime, nullable=True, default=datetime.datetime.utcnow)
 
     def __repr__(self):
         return f"Event('{self.title}', '{self.start_date}')"
+
+    def addExternalEvent(self, platform, external_id):
+        ext_event = ExternalEvent(event_id=self.id, platform_id=platform.id,
+                                  external_event_id=external_id)
+        self. external_events.append(ext_event)
 
 class Authorization(db.Model):
     _tablename_="authorization"
@@ -112,6 +124,24 @@ class Price(db.Model):
 
     def __repr__(self):
         return f"Price('{self.name}': '{self.value}', '{self.availability}', '{self.events}')"
+
+
+class Platform(db.Model):
+    _tablename_ = "platform"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(40), nullable=False)
+
+    events = db.relationship("Event", secondary=event_platform,
+                             back_populates="platforms")
+
+
+class ExternalEvent(db.Model):
+    _tablename_ = "external_event"
+    id = db.Column(db.Integer, primary_key=True)
+
+    platform_id = db.Column(db.Integer, db.ForeignKey('platform.id'))
+    event_id = db.Column(db.Integer, db.ForeignKey('event.id'))
+    ext_event_id = db.Column(db.Integer)
 
 # class Location(db.Model):
 #     id = db.Column(db.Integer, primary_key=True)
@@ -181,52 +211,54 @@ def createClass(template):
         form.populateTemplate(template)
         return render_template('createClass.html', title='Create Event', form=form, authorizations=authorizations)
 
-    if request.method == 'POST' and form.validate_on_submit():
-        selected_authorizations = request.form.getlist("authorizations")
-        form.setSelectedAuthorizations(selected_authorizations)
-        event=form.collectEventDetails()
-        event_auths = [Authorization.query.filter_by(name=auth).first() for auth in selected_authorizations]
-        if None in event_auths:
-            print("INVALID EVENT AUTHORIZATIONS!!!!")
-        event_prices = [Price(name=price['name'], description=price['description'], value=price['price'], availability=price['availability'][0]) for price in event['prices']]
-        print(event_auths)
-        print(event_prices)
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            selected_authorizations = request.form.getlist("authorizations")
+            form.setSelectedAuthorizations(selected_authorizations)
+            event=form.collectEventDetails()
+            event_auths = [Authorization.query.filter_by(name=auth).first() for auth in selected_authorizations]
+            if None in event_auths:
+                print("INVALID EVENT AUTHORIZATIONS!!!!")
+            event_prices = [Price(name=price['name'], description=price['description'], value=price['price'], availability=price['availability'][0]) for price in event['prices']]
+            print(event_auths)
+            print(event_prices)
 
-        event_entry = Event(title=event["title"],
-                            instructor_email = event["instructorEmail"],
-                            instructor_name = event["instructorName"],
-                            location = event["location"],
-                            start_date = event["startTime"],
-                            end_date = event["stopTime"],
-                            description = event["description"],
-                            min_age = event["minimumAge"],
-                            max_age = event["maximumAge"],
-                            registration_limit = event["registrationLimit"],
+            event_entry = Event(title=event["title"],
+                                instructor_email = event["instructorEmail"],
+                                instructor_name = event["instructorName"],
+                                location = event["location"],
+                                start_date = event["startTime"],
+                                end_date = event["stopTime"],
+                                description = event["description"],
+                                min_age = event["minimumAge"],
+                                max_age = event["maximumAge"],
+                                registration_limit = event["registrationLimit"],
 
-                            prices = event_prices,                                
-                            authorizations = event_auths,
-                            )
-        
-        print(event)
+                                prices = event_prices,
+                                authorizations = event_auths,
+                                )
 
-        indicatorValue = request.form.get('ts_indicator', '')
-        
-        if indicatorValue == "save_template":
-          templateFile = request.form.get('ts_name', '')
-          
-          templateName = form.saveTemplate(dict(event), request.form["ts_name"])
-          form.loadTemplates()
+            print(event)
 
-          flash("Template Saved as " + templateName + "!", 'success')                
-    
-          form.populateTemplate(templateName)
-          return render_template('createClass.html', title='Create Event', form=form, authorizations=authorizations)
+            indicatorValue = request.form.get('ts_indicator', '')
 
-        else:       
-          flash(f'Class created for {form.classTitle.data}!', 'success')                 
-          db.session.add(event_entry)
-          db.session.commit()
-          return redirect(url_for('home'))
+            if indicatorValue == "save_template":
+                templateFile = request.form.get('ts_name', '')
+
+                templateName = form.saveTemplate(dict(event), request.form["ts_name"])
+                form.loadTemplates()
+                flash("Template Saved as " + templateName + "!", 'success')
+
+                form.populateTemplate(templateName)
+                return render_template('createClass.html', title='Create Event', form=form, authorizations=authorizations)
+            else:
+                flash(f'Class created for {form.classTitle.data}!', 'success')
+                db.session.add(event_entry)
+                db.session.commit()
+                return redirect(url_for('upcoming_events'))
+        else:
+            flash(f'Event failed to post! Check form for errors.', 'danger')
+
 
     form.loadTemplates()      
     return render_template('createClass.html', title='Create Event', form=form, authorizations=authorizations)
@@ -237,7 +269,7 @@ def upcoming_events():
     upcoming_events = sorted(upcoming_events, key=lambda event: event.start_date)
     event_list = []
     for event in upcoming_events:
-        if event.start_date >= datetime.datetime.today().date():
+        if event.start_date.date() >= datetime.datetime.today().date():
         # if not event['AccessLevel'] == 'AdminOnly':
             if event.registration_limit:
                 # print(event['RegistrationsLimit'], event['ConfirmedRegistrationsCount'])
@@ -271,6 +303,49 @@ def upcoming_events():
 def edit_event(event_id):
     e = Event.query.get(event_id)
     return render_template('edit_event.html', event=e)
+
+@app.route('/calendar')
+def calendar():
+    return render_template("calendar.html")
+
+
+@app.route('/calendardata')
+def return_data():
+    start_date_range = parse(request.args.get('start', ''), fuzzy=True)
+    end_date_range = parse(request.args.get('end', ''), fuzzy=True)
+    
+    
+    upcoming_events = Event.query.all()
+    upcoming_events = sorted(upcoming_events, key=lambda event: event.start_date)
+    event_list = []
+    for event in upcoming_events:
+        if event.start_date >= start_date_range.date() and event.start_date <= end_date_range.date()  :
+        # if not event['AccessLevel'] == 'AdminOnly':
+            if event.registration_limit:
+                # print(event['RegistrationsLimit'], event['ConfirmedRegistrationsCount'])
+                spots_available = event.registration_limit
+                spots = None
+                if spots_available > 0:
+                    spots = str(spots_available) + 'Register'
+                else:
+                    spots = 'FULL'
+            # start_date = WA_API.WADateToDateTime(event['StartDate'])
+            start_date = event.start_date
+            # if 'test' not in event.title.lower():
+ 
+            event_list.append({
+                                "Id": event.id,
+                                "title": event.title,
+                                "Name": event.title,
+                                "start": start_date.strftime('%b %d %Y'),
+                                "Date": start_date.strftime('%b %d %Y'),
+                                "Time": start_date.strftime('%I:%M %p'),
+                                "Description":event.description,
+                                "Register":"http://makeict.wildapricot.org/event-" + str(event.id),
+                              })
+
+    
+    return json.dumps(event_list)
 
 def setPlugins(plugins):
     global loadedPlugins
