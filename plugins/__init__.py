@@ -73,9 +73,3 @@ class Plugin(QtCore.QObject):
 
 class DependencyMissingException(Exception):
     pass
-
-
-class Interruption(Exception):
-    def __init__(self, plugin):
-        super().__init__('Interruption detected by plugin: ' + plugin.name)
-        self.plugin = plugin

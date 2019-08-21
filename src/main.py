@@ -5,7 +5,7 @@ from attrdict import AttrDict
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 import plugins
-from plugins import WildApricot, MakerspaceAuthorizations
+from plugins import WildApricot
 import json
 from config import settings
 from flask_sqlalchemy import SQLAlchemy
@@ -51,10 +51,6 @@ consumer_secret=app.config['GOOGLE_CLIENT_SECRET'])
 
 
 waplugin = WildApricot.load()
-authorizationsplugin = MakerspaceAuthorizations.load();
-
-authorizations=authorizationsplugin.getAuthorizations()
-
 
 association_table = db.Table('association', db.Model.metadata,
     db.Column('event_id', db.Integer, db.ForeignKey('event.id')),
@@ -199,6 +195,8 @@ def get_access_token():
 def createClass(template):
     
     access_token = session.get('access_token')
+    auth_list = [auth.name for auth in Authorization.query.all()]
+
     if access_token is None:
       return redirect(url_for('login'))
 
@@ -209,7 +207,8 @@ def createClass(template):
             return redirect(url_for('createClass')+'/default.js')
         form.loadTemplates()        
         form.populateTemplate(template)
-        return render_template('createClass.html', title='Create Event', form=form, authorizations=authorizations)
+
+        return render_template('createClass.html', title='Create Event', form=form, authorizations=auth_list)
 
     if request.method == 'POST':
         if form.validate_on_submit():
@@ -220,8 +219,6 @@ def createClass(template):
             if None in event_auths:
                 print("INVALID EVENT AUTHORIZATIONS!!!!")
             event_prices = [Price(name=price['name'], description=price['description'], value=price['price'], availability=price['availability'][0]) for price in event['prices']]
-            print(event_auths)
-            print(event_prices)
 
             event_entry = Event(title=event["title"],
                                 instructor_email = event["instructorEmail"],
@@ -250,7 +247,7 @@ def createClass(template):
                 flash("Template Saved as " + templateName + "!", 'success')
 
                 form.populateTemplate(templateName)
-                return render_template('createClass.html', title='Create Event', form=form, authorizations=authorizations)
+                return render_template('createClass.html', title='Create Event', form=form, authorizations=auth_list)
             else:
                 flash(f'Class created for {form.classTitle.data}!', 'success')
                 db.session.add(event_entry)
@@ -261,7 +258,7 @@ def createClass(template):
 
 
     form.loadTemplates()      
-    return render_template('createClass.html', title='Create Event', form=form, authorizations=authorizations)
+    return render_template('createClass.html', title='Create Event', form=form, authorizations=auth_list)
 
 @app.route('/events', methods=['GET'])
 def upcoming_events():
