@@ -3,7 +3,6 @@
 import logging
 
 import meetup.api
-import ui
 
 from plugins import Plugin
 import config
@@ -40,7 +39,7 @@ class MeetupPlugin(Plugin):
 			}
 		]
 		#@TODO: Download venue list and add them to the location dropdown in the UI
-		ui.addTarget(self.name, self, self.createEvent)
+		# ui.addTarget(self.name, self, self.createEvent)
 		
 	def createEvent(self, event):
 		api = meetup.api.Client(self.getSetting('API Key'))

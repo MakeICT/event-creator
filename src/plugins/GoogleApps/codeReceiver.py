@@ -2,7 +2,7 @@ import logging
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-from PySide import QtCore
+# from PySide import QtCore
 
 import urllib.request
 
@@ -25,33 +25,33 @@ class CodeHandler(BaseHTTPRequestHandler):
 
 		server.server_close()
 
-class WaitThread(QtCore.QThread):
-	codeReceived = QtCore.Signal(object)
+# class WaitThread(QtCore.QThread):
+# 	codeReceived = QtCore.Signal(object)
 	
-	def __init__(self, port):
-		super().__init__()
-		self.port = port
+# 	def __init__(self, port):
+# 		super().__init__()
+# 		self.port = port
 
-	def run(self):
-		global server
-		server = HTTPServer(('', self.port), CodeHandler)
-		server.allow_reuse_address = 1
-		logging.debug('Waiting for request')
-		server.handle_request()
+# 	def run(self):
+# 		global server
+# 		server = HTTPServer(('', self.port), CodeHandler)
+# 		server.allow_reuse_address = 1
+# 		logging.debug('Waiting for request')
+# 		server.handle_request()
 		
-		if code != 'CANCEL':
-			self.codeReceived.emit(code)
+# 		if code != 'CANCEL':
+# 			self.codeReceived.emit(code)
 	
-def waitForCode(callback, port=8080):
-	global waitThread
-	waitThread = WaitThread(port)
-	waitThread.codeReceived.connect(callback)
-	waitThread.start()
+# def waitForCode(callback, port=8080):
+# 	global waitThread
+# 	waitThread = WaitThread(port)
+# 	waitThread.codeReceived.connect(callback)
+# 	waitThread.start()
 
 	
-def cancel():
-	global server
+# def cancel():
+# 	global server
 
-	if server is not None:
-		logging.debug('Sending CANCEL request')
-		urllib.request.urlopen('http://%s:%s/action=CANCEL' % server.server_address)
+# 	if server is not None:
+# 		logging.debug('Sending CANCEL request')
+# 		urllib.request.urlopen('http://%s:%s/action=CANCEL' % server.server_address)

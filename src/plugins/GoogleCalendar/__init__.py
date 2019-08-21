@@ -8,9 +8,9 @@ import json
 from apiclient import discovery
 from config import settings
 
-import ui
+# import ui
 
-from PySide import QtCore
+# from PySide import QtCore
 
 def load():
 	from plugins import GoogleApps
@@ -30,22 +30,22 @@ def load():
 			]
 			#@TODO: Add option for "pre" event/setup event on Google Calendar (we will use this for checkins)
 
-			ui.addTarget(self.name, self, self.createEvent)
-			ui.addAction(self.name, 'Refresh resources', self.refreshResources)
+			# ui.addTarget(self.name, self, self.createEvent)
+			# ui.addAction(self.name, 'Refresh resources', self.refreshResources)
 
-			resourceJSON = self.getSetting('Resources')
+			resourceJSON = json.loads(self.getSetting('Resources'))
 			if resourceJSON != '':
 				logging.debug('Loading resources from settings')
 				self._setResourceObjects(json.loads(resourceJSON))
 		
 		def _setResourceObjects(self, objs):
-			ui.removeTagGroup('Resources')
+			# ui.removeTagGroup('Resources')
 			self.resourceObjects = objs
 			if len(self.resourceObjects) > 0:
 				resources = []
 				for resource in self.resourceObjects:
 					resources.append(resource['resourceName'])
-				ui.addTagGroup('Resources', resources)
+				# ui.addTagGroup('Resources', resources)
 		
 		def refreshResources(self):
 			def credentialsReceived(credentials):
@@ -100,8 +100,8 @@ def load():
 				'description': description,
 				# 'start': {'dateTime': event['startTime'].toString(QtCore.Qt.ISODate) + timezoneOffset},
 				# 'end': {'dateTime': event['stopTime'].toString(QtCore.Qt.ISODate) + timezoneOffset},
-				'start': {'dateTime': event['startTime'].toString(QtCore.Qt.ISODate), 'timeZone':timezone},
-				'end': {'dateTime': event['stopTime'].toString(QtCore.Qt.ISODate), 'timeZone':timezone},
+				'start': {'dateTime': event['startTime'], 'timeZone':timezone},
+				'end': {'dateTime': event['stopTime'], 'timeZone':timezone},
 				'attendees': selectedResources
 			}
 			

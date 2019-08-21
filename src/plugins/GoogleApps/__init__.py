@@ -5,7 +5,7 @@ import httplib2
 import os
 import time
 
-from PySide import QtGui, QtCore
+# from PySide import QtGui, QtCore
 
 from apiclient import discovery
 from oauth2client import client
@@ -13,7 +13,7 @@ from oauth2client import tools
 from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.file import Storage
 
-import ui
+# import ui
 
 from plugins import Plugin
 from . import codeReceiver
@@ -40,7 +40,7 @@ class GoogleAppsPlugin(Plugin):
 
         if name == 'GoogleApps' and instance is None:
             instance = self
-            ui.addAction(self.name, 'Reauthorize', self.reauthorize)
+            # ui.addAction(self.name, 'Reauthorize', self.reauthorize)
 
     def reauthorize(self):
         if os.path.exists(credentialsPath):
@@ -71,7 +71,7 @@ class GoogleAppsPlugin(Plugin):
 
             # bug in google code and encoding chars?
             authURI = flow.step1_get_authorize_url().replace('%3A', ':').replace('%2F', '/')
-            QtGui.QDesktopServices.openUrl(authURI)
+            # QtGui.QDesktopServices.openUrl(authURI)
 
             dialog = showWaitForCodeDialog()
             def codeReceived(code):
@@ -95,23 +95,23 @@ class GoogleAppsPlugin(Plugin):
 def showWaitForCodeDialog():
     global waitForAuthDialog
 
-    if waitForAuthDialog is None:
-        waitForAuthDialog = QtGui.QDialog(None)
-        waitForAuthDialog.setWindowTitle('Authorization required...')
-        waitForAuthDialog.setModal(True)
+    # if waitForAuthDialog is None:
+    #     waitForAuthDialog = QtGui.QDialog(None)
+    #     waitForAuthDialog.setWindowTitle('Authorization required...')
+    #     waitForAuthDialog.setModal(True)
 
-        layout = QtGui.QVBoxLayout()
-        layout.addWidget(QtGui.QLabel('A window requesting authorization will appear in your browser.\n\nPlease accept the authorization to continue.'))
-        buttonBox = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Cancel)
-        layout.addWidget(buttonBox)
-        waitForAuthDialog.setLayout(layout)
+    #     layout = QtGui.QVBoxLayout()
+    #     layout.addWidget(QtGui.QLabel('A window requesting authorization will appear in your browser.\n\nPlease accept the authorization to continue.'))
+    #     buttonBox = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Cancel)
+    #     layout.addWidget(buttonBox)
+    #     waitForAuthDialog.setLayout(layout)
 
-        buttonBox.rejected.connect(codeReceiver.cancel)
-        buttonBox.rejected.connect(waitForAuthDialog.close)
+    #     buttonBox.rejected.connect(codeReceiver.cancel)
+    #     buttonBox.rejected.connect(waitForAuthDialog.close)
 
-    waitForAuthDialog.show()
+    # waitForAuthDialog.show()
 
-    return waitForAuthDialog
+    # return waitForAuthDialog
 
 
 def load():

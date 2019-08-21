@@ -2,8 +2,8 @@
 
 import logging
 
-import ui
-from PySide import QtCore
+# import ui
+# from PySide import QtCore
 
 from . import pydiscourse
 from .pydiscourse import DiscourseClient
@@ -35,7 +35,7 @@ class DiscoursePlugin(Plugin):
 			},
 		]
 
-		ui.addTarget(self.name, self, self.createForumPost)
+		# ui.addTarget(self.name, self, self.createForumPost)
 		# ui.addPopulationType('Members')
 	
 	def createForumPost(self, event):

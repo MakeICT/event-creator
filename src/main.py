@@ -48,7 +48,8 @@ access_token_params={'grant_type': 'authorization_code'},
 consumer_key=app.config['GOOGLE_CLIENT_ID'],
 consumer_secret=app.config['GOOGLE_CLIENT_SECRET'])
 
-
+loadedPlugins = plugins.loadAllFromPath()
+print(loadedPlugins)
 
 waplugin = WildApricot.load()
 
@@ -193,6 +194,7 @@ def get_access_token():
 @app.route('/createClass', methods=['GET', 'POST'], defaults={'template':None}, strict_slashes=False)
 @app.route("/createClass/<template>", methods=['GET', 'POST'])
 def createClass(template):
+    print(loadedPlugins)
     
     access_token = session.get('access_token')
     auth_list = [auth.name for auth in Authorization.query.all()]
