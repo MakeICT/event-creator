@@ -319,7 +319,7 @@ def return_data():
     upcoming_events = sorted(upcoming_events, key=lambda event: event.start_date)
     event_list = []
     for event in upcoming_events:
-        if event.start_date >= start_date_range.date() and event.start_date <= end_date_range.date()  :
+        if event.start_date.date() >= start_date_range.date() and event.start_date.date() <= end_date_range.date()  :
         # if not event['AccessLevel'] == 'AdminOnly':
             if event.registration_limit:
                 # print(event['RegistrationsLimit'], event['ConfirmedRegistrationsCount'])
