@@ -84,10 +84,15 @@ class DiscoursePlugin(Plugin):
         logging.debug('Creating post')
         title = 'Event notice: ' + event.title + ' (' \
             + event.start_date.strftime(dateTimeFormat) + ')'
-        discourse_api.create_post(content=description,
-                                  category_id=int(self.getSetting('Category ID')),
-                                  topic_id=None, title=title)
-        return
+        post = discourse_api.create_post(content=description,
+                                         category_id=int(self.getSetting('Category ID')),
+                                         topic_id=None, title=title)
+
+        post_url = f"https://talk.makeict.org/t/{post.id}"
+
+        event.addExternalEvent(self.name, post.id, post_url)
+
+        return post.id
 
 
 def load():
