@@ -32,7 +32,7 @@ class GoogleAppsPlugin(Plugin):
             {
                 'name': 'Client ID',
                 'type': 'text',
-            },{
+            }, {
                 'name': 'Client secret',
                 'type': 'password',
             }
@@ -57,23 +57,25 @@ class GoogleAppsPlugin(Plugin):
             logging.debug('Missing or bad credentials. Authorization required')
 
             flow = OAuth2WebServerFlow(
-                client_id = self.getSetting('Client ID'),
-                client_secret = self.getSetting('Client secret'),
-                prompt = 'consent',
-                scope = [
+                client_id=self.getSetting('Client ID'),
+                client_secret=self.getSetting('Client secret'),
+                prompt='consent',
+                scope=[
                     'https://www.googleapis.com/auth/calendar',
                     'https://www.googleapis.com/auth/gmail.compose',
                     'https://www.googleapis.com/auth/gmail.send',
                     'https://www.googleapis.com/auth/admin.directory.resource.calendar',
                 ],
-                redirect_uri = 'http://localhost:8080/',
+                redirect_uri='http://localhost:8080/',
             )
 
             # bug in google code and encoding chars?
-            authURI = flow.step1_get_authorize_url().replace('%3A', ':').replace('%2F', '/')
+            authURI = flow.step1_get_authorize_url().replace('%3A', ':') \
+                          .replace('%2F', '/')
             # QtGui.QDesktopServices.openUrl(authURI)
 
             dialog = showWaitForCodeDialog()
+
             def codeReceived(code):
                 dialog.hide()
                 credentials = flow.step2_exchange(code)
