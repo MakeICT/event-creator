@@ -39,36 +39,37 @@ class DiscoursePlugin(Plugin):
         # ui.addTarget(self.name, self, self.createForumPost)
         # ui.addPopulationType('Members')
 
-    def createForumPost(self, event):
+    def createEvent(self, event):
         logging.debug('Discourse')
 
-        dateTimeFormat = self.getSetting(
-                                'Date/Time format', 'yyyy MMM dd - h:mm ap')
+        dateTimeFormat = '%Y %b %d - %I:%M %p'
 
         description = "**Starting:** " \
-            + event['startTime'].toString(dateTimeFormat)
+            + event.start_date.strftime(dateTimeFormat)
         description += '\n' + "**Ending:** " \
-            + event['stopTime'].toString(dateTimeFormat)
+            + event.end_date.strftime(dateTimeFormat)
         description += '\n' + "**Instructor:** " \
-            + ' '.join(event['instructorDescription'].split(' ')[1:])
+            + event.instructor_name
 
-        if event['registrationURL'] and event['registrationURL'] != '':
-            description += '\n' + "**Register:** " + '[' \
-                + event['registrationURL'] + '](' + event['registrationURL'] + ')'
+        # if event['registrationURL'] and event['registrationURL'] != '':
+        #     description += '\n' + "**Register:** " + '[' \
+        #         + event['registrationURL'] + '](' + event['registrationURL'] + ')'
 
-        description += '\n' + "**Price:** " + event['priceDescription'][28:]
+        for price in event.prices:
+            description += f"\n **Price:** {price.name} - ${price.value:.2f}"
 
-        if event['ageDescription']:
-            description += '\n' + "**Ages:** " \
-                + ' '.join(event['ageDescription'].split(' ')[1:])
+        if event.min_age and not event.max_age:
+            description += f"\n**Ages**: {event.min_age} and up\n"
+        elif event.max_age and not event.min_age:
+            description += f"\n**Ages**: {event.max_age} and under\n"
+        elif event.min_age and event.max_age:
+            description += f"\n**Ages**: {event.min_age} to {event.max_age}\n"
 
-        if event['authorizationDescription']:
-            description += '\n' + "**Required Authorizations:** " \
-                + ', '.join(event['authorizationDescription'].split(' ')[2:])
+        if event.authorizations:
+            description += f"\n**Required Authorizations:** " \
+                + f"{', '.join([auth.name for auth in event.authorizations])}"
 
-        description += '\n\n' + event['description']
-
-        self.checkForInterruption()
+        description += '\n\n' + event.description
 
         logging.debug('Connecting to API')
         print('username:', self.getSetting('Username'))
@@ -79,10 +80,9 @@ class DiscoursePlugin(Plugin):
             api_username=self.getSetting('Username'),
             api_key=self.getSetting('API Key'))
 
-        self.checkForInterruption()
         logging.debug('Creating post')
-        title = 'Event notice: ' + event['title'] + ' (' \
-            + event['startTime'].toString(dateTimeFormat) + ')'
+        title = 'Event notice: ' + event.title + ' (' \
+            + event.start_date.strftime(dateTimeFormat) + ')'
         discourse_api.create_post(content=description,
                                   category_id=int(self.getSetting('Category ID')),
                                   topic_id=None, title=title)
