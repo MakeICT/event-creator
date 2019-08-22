@@ -5,5 +5,6 @@ loadedPlugins = plugins.loadAllFromPath()
 
 event = Event.query.first()
 
-loadedPlugins['WildApricot'].createEvent(event)
-print(loadedPlugins['WildApricot'])
+if not event.sync_date:
+    loadedPlugins['WildApricot'].createEvent(event)
+    event.updateSyncDate()

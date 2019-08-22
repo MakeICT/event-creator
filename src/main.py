@@ -89,6 +89,7 @@ class Event(db.Model):
 
     created_date = db.Column(db.DateTime, nullable=True, default=datetime.datetime.utcnow)
     updated_date = db.Column(db.DateTime, nullable=True, default=datetime.datetime.utcnow)
+    sync_date = db.Column(db.DateTime, nullable=True, default=None)
 
     def __repr__(self):
         return f"Event('{self.title}', '{self.start_date}')"
@@ -98,6 +99,10 @@ class Event(db.Model):
                                   external_event_id=external_id)
         self. external_events.append(ext_event)
 
+    def updateSyncDate(self):
+        self.sync_date = datetime.datetime.utcnow()
+        db.session.add(self)
+        db.session.commit()
 
     def detailedDescription(self):
         desc = f"Instructor: {self.instructor_name}\n\n"
