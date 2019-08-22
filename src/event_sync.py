@@ -1,5 +1,4 @@
 from main import db, Event, Platform, ExternalEvent
-
 import plugins
 
 loadedPlugins = plugins.loadAllFromPath()

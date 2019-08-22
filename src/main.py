@@ -5,7 +5,7 @@ from attrdict import AttrDict
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 import plugins
-from plugins import WildApricot
+# from plugins import WildApricot
 import json
 from config import settings
 from flask_sqlalchemy import SQLAlchemy
@@ -97,6 +97,29 @@ class Event(db.Model):
         ext_event = ExternalEvent(event_id=self.id, platform_id=platform.id,
                                   external_event_id=external_id)
         self. external_events.append(ext_event)
+
+
+    def detailedDescription(self):
+        desc = f"Instructor: {self.instructor_name}\n\n"
+        desc += self.description
+        if self.authorizations:
+            auths = [auth.name for auth in self.authorizations]
+            desc += f"\n\nRequired Authorizations: {auths}\n\n"
+
+        if self.min_age and not self.max_age:
+            desc += f"Ages: {self.min_age} and up\n\n"
+        elif self.max_age and not self.min_age:
+            desc += f"Ages: {self.max_age} and under\n\n"
+        elif self.min_age and self.max_age:
+            desc += f"Ages: {self.min_age} to {self.max_age}\n\n"
+
+        if self.prices:
+            desc += "Event Prices:\n"
+            for price in self.prices:
+                desc += f"- {price.name}: ${price.value:.2f}\n"
+
+        return desc
+
 
 class Authorization(db.Model):
     _tablename_="authorization"
@@ -195,7 +218,7 @@ def get_access_token():
 @app.route("/createClass/<template>", methods=['GET', 'POST'])
 def createClass(template):
     print(loadedPlugins)
-    
+
     access_token = session.get('access_token')
     auth_list = [auth.name for auth in Authorization.query.all()]
 
