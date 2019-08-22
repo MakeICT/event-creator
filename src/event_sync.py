@@ -10,17 +10,19 @@ for plugin in loadedPlugins:
         db.session.add(new_platform)
         db.session.commit()
 
-event = Event.query.first()
+events = Event.query.all()
 
 active_plugins = ['WildApricot', 'Discourse']
 
-if not event.sync_date:
-    for platform in active_plugins:
-        event_id = loadedPlugins[platform].createEvent(event)
-        for ext_event in event.external_events:
-            if ext_event.ext_event_id == event_id:
+for event in events:
+    if not event.sync_date:
+        for platform in active_plugins:
+            event_id = loadedPlugins[platform].createEvent(event)
+            # Set first external event as primary event
+            if len(event.external_events) == 1:
+                ext_event = event.external_events[0]
                 ext_event.primary_event = True
                 db.session.add(ext_event)
                 db.session.commit()
 
-    event.updateSyncDate()
+        event.updateSyncDate()
