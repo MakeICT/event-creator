@@ -51,7 +51,7 @@ consumer_secret=app.config['GOOGLE_CLIENT_SECRET'])
 loadedPlugins = plugins.loadAllFromPath()
 print(loadedPlugins)
 
-waplugin = WildApricot.load()
+# waplugin = WildApricot.load()
 
 association_table = db.Table('association', db.Model.metadata,
     db.Column('event_id', db.Integer, db.ForeignKey('event.id')),

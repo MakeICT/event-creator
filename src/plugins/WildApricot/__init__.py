@@ -41,36 +41,38 @@ class WildApricotPlugin(Plugin):
         else:
             timezone = pytz.timezone("UTC")
 
-        tags = ["instructor_name:" + event['instructorName'],
-                "instructor_email:"+event['instructorEmail']]
+        tags = ["instructor_name:" + event.instructor_name,
+                "instructor_email:"+event.instructor_email]
 
-        desc = event['description'].split('\n')
+        desc = event.description.split('\n')
         html_desc = ''
         for par in desc:
             if not par.strip() == '':
                 html_desc = html_desc + '<p>' + par + '</p>'
 
-        description = '<p>' + event['instructorDescription'] \
-                      + '</p>' + html_desc
+        description = html_desc
 
-        if event['authorizationDescription']:
-            description += '<p>' + event['authorizationDescription'] + '</p>'
+        # description = '<p>' + event['instructorDescription'] \
+        #               + '</p>' + html_desc
 
-        if event['ageDescription']:
-            description += '<p>' + event['ageDescription'] + '</p>'
+        # if event['authorizationDescription']:
+        #     description += '<p>' + event['authorizationDescription'] + '</p>'
+
+        # if event['ageDescription']:
+        #     description += '<p>' + event['ageDescription'] + '</p>'
 
         logging.debug('Connecting to API')
         api = WaApiClient()
         api.authenticate_with_apikey(self.getSetting('API Key'))
 
         eventData = {
-            "Name": event['title'],
+            "Name": event.title,
             "StartDate": api.DateTimeToWADate(
-                             timezone.localize(event['startTime'])),
+                             timezone.localize(event.start_date)),
             "EndDate": api.DateTimeToWADate(
-                           timezone.localize(event['stopTime'])),
-            "Location": event['location'],
-            "RegistrationsLimit": event['registrationLimit'],
+                           timezone.localize(event.end_date)),
+            "Location": event.location,
+            "RegistrationsLimit": event.registration_limit,
             "RegistrationEnabled": True,
             "StartTimeSpecified": True,
             "EndTimeSpecified": True,
@@ -90,12 +92,12 @@ class WildApricotPlugin(Plugin):
         logging.debug('Creating event')
         eventID = api.execute_request('Events', eventData)
 
-        for rsvpType in event['prices']:
+        for rsvpType in event.prices:
             registrationTypeData = {
                 "EventId": eventID,
-                "Name": rsvpType['name'],
-                "BasePrice": str(rsvpType['price']),
-                "Description": rsvpType['description'],
+                "Name": rsvpType.name,
+                "BasePrice": str(rsvpType.value),
+                "Description": rsvpType.description,
                 "IsEnabled": True,
                 "GuestRegistrationPolicy": "Disabled",
                 "MultipleRegistrationAllowed": False,
@@ -103,7 +105,7 @@ class WildApricotPlugin(Plugin):
                 "UnavailabilityPolicy": "Show"
             }
 
-            for populationType in rsvpType['availability']:
+            for populationType in rsvpType.availability:
                 if populationType == 'Members':
                     registrationTypeData['Availability'] = 'MembersOnly'
                     registrationTypeData['AvailableForMembershipLevels'] = []
@@ -116,39 +118,21 @@ class WildApricotPlugin(Plugin):
                 else:
                     registrationTypeData['Availability'] = 'Everyone'
 
-            logging.debug('Adding registration type: ' + rsvpType['name'])
+            logging.debug('Adding registration type: ' + rsvpType.name)
             api.execute_request('EventRegistrationTypes', registrationTypeData)
 
-        if config.checkBool(
-                self.getSetting('Enable group-based authorizations')):
-            auths = event['tags']['Required auth\'s']
-            auth_map = {'Woodshop': 416232,
-                        'Metalshop': 416231,
-                        'Forge': 420386,
-                        'LaserCutter': 416230,
-                        'Mig welding': 420387,
-                        'Tig welding': 420388,
-                        'Stick welding': 420389,
-                        'Manual mill': 420390,
-                        'Plasma': 420391,
-                        'Metal lathes': 420392,
-                        'CNC Plasma': 420393,
-                        'Intro Tormach': 420394,
-                        'Full Tormach': 420395}
-            auth_ids = []
-            if len(auths) > 0:
-                for auth in auths:
-                    auth_ids.append(auth_map[auth])
+        auth_ids = [auth.wa_group_id for auth in event.authorizations]
 
-                    logging.debug('Adding auth group requirements')
-                    api.SetEventAccessControl(eventID, restricted=True,
-                                              any_level=False, any_group=False,
-                                              group_ids=auth_ids, level_ids=[])
+        for auth in event.authorizations:
+            logging.debug('Adding auth group requirements')
+            api.SetEventAccessControl(eventID, restricted=True,
+                                      any_level=False, any_group=False,
+                                      group_ids=auth_ids, level_ids=[])
 
-            event['registrationURL'] = \
-                '=http://makeict.wildapricot.org/event-%s' % eventID
+        registration_url = \
+            '=http://makeict.wildapricot.org/event-%s' % eventID
 
-        return event['registrationURL']
+        return registration_url
 
 
 def load():
