@@ -51,10 +51,11 @@ class DiscoursePlugin(Plugin):
         description += '\n' + "**Instructor:** " \
             + event.instructor_name
 
-        # if event['registrationURL'] and event['registrationURL'] != '':
-        #     description += '\n' + "**Register:** " + '[' \
-        #         + event['registrationURL'] + '](' + event['registrationURL'] + ')'
-
+        if event.external_events:
+            for ext_event in event.external_events:
+                if ext_event.primary_event:
+                    description += f"\n**Register:** [{ext_event.ext_event_url}]" \
+                                   f"({ext_event.ext_event_url})"
         for price in event.prices:
             description += f"\n **Price:** {price.name} - ${price.value:.2f}"
 

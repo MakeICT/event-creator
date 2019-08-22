@@ -121,9 +121,11 @@ class WildApricotPlugin(Plugin):
                                       group_ids=auth_ids, level_ids=[])
 
         registration_url = \
-            '=http://makeict.wildapricot.org/event-%s' % eventID
+            'http://makeict.wildapricot.org/event-%s' % eventID
 
-        return registration_url
+        event.addExternalEvent(self.name, eventID, registration_url)
+
+        return eventID
 
 
 def load():

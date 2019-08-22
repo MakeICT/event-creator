@@ -94,9 +94,12 @@ class Event(db.Model):
     def __repr__(self):
         return f"Event('{self.title}', '{self.start_date}')"
 
-    def addExternalEvent(self, platform, external_id):
-        ext_event = ExternalEvent(event_id=self.id, platform_id=platform.id,
-                                  external_event_id=external_id)
+    def addExternalEvent(self, platform_name, external_id, external_url):
+        platform = Platform.query.filter_by(name=platform_name).first()
+        ext_event = ExternalEvent(event_id=self.id,
+                                  platform_id=platform.id,
+                                  ext_event_id=external_id,
+                                  ext_event_url=external_url)
         self. external_events.append(ext_event)
 
     def updateSyncDate(self):
@@ -164,9 +167,11 @@ class ExternalEvent(db.Model):
     _tablename_ = "external_event"
     id = db.Column(db.Integer, primary_key=True)
 
+    primary_event = db.Column(db.Boolean, default=False)
     platform_id = db.Column(db.Integer, db.ForeignKey('platform.id'))
     event_id = db.Column(db.Integer, db.ForeignKey('event.id'))
-    ext_event_id = db.Column(db.Integer)
+    ext_event_id = db.Column(db.String(100))
+    ext_event_url = db.Column(db.String(300))
 
 # class Location(db.Model):
 #     id = db.Column(db.Integer, primary_key=True)
