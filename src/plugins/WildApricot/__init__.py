@@ -44,13 +44,7 @@ class WildApricotPlugin(Plugin):
         tags = ["instructor_name:" + event.instructor_name,
                 "instructor_email:"+event.instructor_email]
 
-        desc = event.detailedDescription().split('\n')
-        html_desc = ''
-        for par in desc:
-            if not par.strip() == '':
-                html_desc = html_desc + '<p>' + par + '</p>'
-
-        description = html_desc
+        description = event.htmlSummary(omit=['reg', 'price'])
 
         logging.debug('Connecting to API')
         api = WaApiClient()

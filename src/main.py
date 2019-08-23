@@ -128,6 +128,43 @@ class Event(db.Model):
 
         return desc
 
+    def htmlSummary(self, omit=[]):
+        desc = ""
+
+        if 'time' not in omit:
+            desc += "<b>Time:</b> " \
+                + self.start_date.strftime('%b %d %I:%M %p - ') \
+                + self.end_date.strftime('%I:%M %p')
+
+        if 'instr' not in omit:
+            desc += f"<br><b>Instructor:</b> {self.instructor_name}"
+
+        if self.external_events and 'reg' not in omit:
+            for ext_event in self.external_events:
+                if ext_event.primary_event:
+                    desc += f"<br><b>Register:</b> <a href='{ext_event.ext_event_url}'>" \
+                                   f"{ext_event.ext_event_url}</a>"
+
+        if 'price' not in omit:
+            for price in self.prices:
+                desc += f"<br><b>Price:</b> {price.name} - ${price.value:.2f}"
+
+        if 'age' not in omit:
+            if self.min_age and not self.max_age:
+                desc += f"<br><b>Ages</b>: {self.min_age} and up"
+            elif self.max_age and not self.min_age:
+                desc += f"<br><b>Ages</b>: {self.max_age} and under"
+            elif self.min_age and self.max_age:
+                desc += f"<br><b>Ages</b>: {self.min_age} to {self.max_age}"
+
+        if self.authorizations and 'auth' not in omit:
+            desc += f"<br><b>Required Authorizations:</b> " \
+                + f"{', '.join([auth.name for auth in self.authorizations])}"
+
+        desc += '<br><br>' + self.description
+
+        return desc
+
 
 class Authorization(db.Model):
     _tablename_="authorization"

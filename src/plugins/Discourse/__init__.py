@@ -44,33 +44,7 @@ class DiscoursePlugin(Plugin):
 
         dateTimeFormat = '%Y %b %d - %I:%M %p'
 
-        description = "**Starting:** " \
-            + event.start_date.strftime(dateTimeFormat)
-        description += '\n' + "**Ending:** " \
-            + event.end_date.strftime(dateTimeFormat)
-        description += '\n' + "**Instructor:** " \
-            + event.instructor_name
-
-        if event.external_events:
-            for ext_event in event.external_events:
-                if ext_event.primary_event:
-                    description += f"\n**Register:** [{ext_event.ext_event_url}]" \
-                                   f"({ext_event.ext_event_url})"
-        for price in event.prices:
-            description += f"\n **Price:** {price.name} - ${price.value:.2f}"
-
-        if event.min_age and not event.max_age:
-            description += f"\n**Ages**: {event.min_age} and up\n"
-        elif event.max_age and not event.min_age:
-            description += f"\n**Ages**: {event.max_age} and under\n"
-        elif event.min_age and event.max_age:
-            description += f"\n**Ages**: {event.min_age} to {event.max_age}\n"
-
-        if event.authorizations:
-            description += f"\n**Required Authorizations:** " \
-                + f"{', '.join([auth.name for auth in event.authorizations])}"
-
-        description += '\n\n' + event.description
+        description = event.htmlSummary()
 
         logging.debug('Connecting to API')
         print('username:', self.getSetting('Username'))

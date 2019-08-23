@@ -66,31 +66,7 @@ def load():
 
         def createEvent(self, event):
             timezone = self.getGeneralSetting('timezone')
-
-            # selectedResources = []
-            # for resourceTag in event['tags']['Resources']:
-            #     for resource in self.resourceObjects:
-            #         if resourceTag == resource['resourceName']:
-            #             selectedResources.append({'email': resource['resourceEmail']})
-            #             break
-
-            # if event['registrationURL'] != '':
-            #     description = '<strong>Register here:\n'
-            #     description += '<a href="' + event['registrationURL'] + '">' \
-            #         + event['registrationURL'] + '</a></strong>\n'
-            #     description += '<hr/>' + event['description']
-            # else:
-            #     description = event['description']
-
-            # description = event['instructorDescription'] + '\n\n' + description
-            description = event.htmlDescription()
-
-            # if event['ageDescription']:
-            #     description += '\n\n' + event['ageDescription']
-
-            # if event['authorizationDescription']:
-            #     description += '\n\n' + event['authorizationDescription']
-            # description += '\n\n' + event['priceDescription']
+            description = event.htmlSummary()
 
             eventData = {
                 'summary': event.title,
