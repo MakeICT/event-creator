@@ -77,8 +77,6 @@ def load():
                     body=eventData) \
                 .execute()
 
-            event.addExternalEvent(self.name, cal_event['id'], cal_event['htmlLink'])
-
-            return cal_event['htmlLink']
+            return (cal_event['id'], cal_event['htmlLink'])
 
     return GoogleCalendarPlugin()

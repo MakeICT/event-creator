@@ -114,9 +114,7 @@ class WildApricotPlugin(Plugin):
         registration_url = \
             'http://makeict.wildapricot.org/event-%s' % eventID
 
-        event.addExternalEvent(self.name, eventID, registration_url)
-
-        return eventID
+        return (eventID, registration_url)
 
 
 def load():

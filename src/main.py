@@ -66,9 +66,22 @@ event_platform = db.Table('event_platform', db.Model.metadata,
     db.Column('platform_id', db.Integer, db.ForeignKey('platform.id')),
 )
 
-class Event(db.Model):
-    _tablename_="event"
+
+class BaseModel(db.Model):
+    """
+    A base for all database models to implement common requirements.
+    """
+    __abstract__ = True
+
     id = db.Column(db.Integer, primary_key=True)
+    created_date = db.Column(db.DateTime, default=db.func.current_timestamp())
+    modified_date = db.Column(db.DateTime, default=db.func.current_timestamp(),
+                              onupdate=db.func.current_timestamp())
+
+
+class Event(BaseModel):
+    _tablename_ = "event"
+
     title = db.Column(db.String(50), unique=False, nullable=False)
     instructor_email = db.Column(db.String(120), unique=False, nullable=True)
     instructor_name = db.Column(db.String(60))
@@ -87,10 +100,6 @@ class Event(db.Model):
     platforms = db.relationship("Platform", secondary=event_platform)
     external_events = db.relationship("ExternalEvent")
 
-    created_date = db.Column(db.DateTime, nullable=True, default=datetime.datetime.utcnow)
-    updated_date = db.Column(db.DateTime, nullable=True, default=datetime.datetime.utcnow)
-    sync_date = db.Column(db.DateTime, nullable=True, default=None)
-
     def __repr__(self):
         return f"Event('{self.title}', '{self.start_date}')"
 
@@ -102,10 +111,28 @@ class Event(db.Model):
                                   ext_event_url=external_url)
         self. external_events.append(ext_event)
 
-    def updateSyncDate(self):
-        self.sync_date = datetime.datetime.utcnow()
-        db.session.add(self)
-        db.session.commit()
+        return ext_event
+
+    def fullySynced(self):
+        synced = True
+        ext_event_platforms = [ext.platform_id for ext in self.external_events]
+
+        # check for out of date external events
+        for ext_event in self.external_events:
+            if ext_event.sync_date < self.modified_date:
+                synced = False
+
+        # check for uninitialized external events
+        for platform in self.platforms:
+            if platform.id not in ext_event_platforms:
+                synced = False
+
+        # check for deleted external events
+        for platform_id in ext_event_platforms:
+            if platform_id not in [platform.id for platform in self.platforms]:
+                synced = False
+
+        return synced
 
     def detailedDescription(self):
         desc = f"Instructor: {self.instructor_name}\n\n"
@@ -206,15 +233,22 @@ class Platform(db.Model):
                              back_populates="platforms")
 
 
-class ExternalEvent(db.Model):
+class ExternalEvent(BaseModel):
     _tablename_ = "external_event"
-    id = db.Column(db.Integer, primary_key=True)
 
     primary_event = db.Column(db.Boolean, default=False)
     platform_id = db.Column(db.Integer, db.ForeignKey('platform.id'))
     event_id = db.Column(db.Integer, db.ForeignKey('event.id'))
     ext_event_id = db.Column(db.String(100))
     ext_event_url = db.Column(db.String(300))
+
+    sync_date = db.Column(db.DateTime, nullable=True, default=None)
+
+
+    def updateSyncDate(self):
+        self.sync_date = datetime.datetime.utcnow()
+        db.session.add(self)
+        db.session.commit()
 
 # class Location(db.Model):
 #     id = db.Column(db.Integer, primary_key=True)

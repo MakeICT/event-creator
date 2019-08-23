@@ -65,9 +65,7 @@ class DiscoursePlugin(Plugin):
         print(post)
         post_url = f"https://talk.makeict.org/t/{post['id']}"
 
-        event.addExternalEvent(self.name, post['id'], post_url)
-
-        return post['id']
+        return (post['id'], post_url)
 
 
 def load():
