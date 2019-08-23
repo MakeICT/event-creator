@@ -58,14 +58,14 @@ def load():
 
         def createEvent(self, event):
             timezone = self.getGeneralSetting('timezone')
-            description = event.htmlSummary()
+            description = event.htmlSummary(omit=['time'])
 
             eventData = {
                 'summary': event.title,
                 'location': event.location,
                 'description': description,
-                'start': {'dateTime': event.start_date.isoformat() + 'Z', 'timeZone': 'UTC'},
-                'end': {'dateTime': event.end_date.isoformat() + 'Z', 'timeZone': 'UTC'},
+                'start': {'dateTime': event.start_date.isoformat(), 'timeZone': timezone},
+                'end': {'dateTime': event.end_date.isoformat(), 'timeZone': timezone},
                 # 'attendees': selectedResources
             }
 
