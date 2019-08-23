@@ -128,7 +128,7 @@ class Event(db.Model):
 
         return desc
 
-    def htmlSummary(self, omit=[]):
+    def htmlSummary(self, all_links=False, omit=[]):
         desc = ""
 
         if 'time' not in omit:
@@ -139,11 +139,17 @@ class Event(db.Model):
         if 'instr' not in omit:
             desc += f"<br><b>Instructor:</b> {self.instructor_name}"
 
-        if self.external_events and 'reg' not in omit:
+        if all_links:
             for ext_event in self.external_events:
-                if ext_event.primary_event:
-                    desc += f"<br><b>Register:</b> <a href='{ext_event.ext_event_url}'>" \
-                                   f"{ext_event.ext_event_url}</a>"
+                platform_name = Platform.query.get(ext_event.platform_id).name
+                desc += f"<br><b>{platform_name}:</b> <a href='{ext_event.ext_event_url}'>" \
+                               f"{ext_event.ext_event_url}</a>"
+        else:
+            if self.external_events and 'reg' not in omit:
+                for ext_event in self.external_events:
+                    if ext_event.primary_event:
+                        desc += f"<br><b>Register:</b> <a href='{ext_event.ext_event_url}'>" \
+                                       f"{ext_event.ext_event_url}</a>"
 
         if 'price' not in omit:
             for price in self.prices:
