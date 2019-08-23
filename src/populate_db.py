@@ -21,11 +21,15 @@ def populate_auths():
         db.session.add(a)
         db.session.commit()
 
+
 if os.path.exists('migrations/'):
-    os.system('rm -r migrations/')
+    os.system('rm -r migrations/versions/*')
+else:
+    os.system('flask db init')
 if os.path.exists('site.db'):
     os.system('rm site.db')
-os.system('flask db init')
+
+
 os.system('flask db migrate')
 os.system('flask db upgrade')
 
