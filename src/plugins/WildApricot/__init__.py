@@ -31,9 +31,6 @@ class WildApricotPlugin(Plugin):
             }
         ]
 
-#         ui.addTarget(self.name, self, self.createEvent)
-#         ui.addPopulationType('Members')
-
     def createEvent(self, event):
         if self.getGeneralSetting('timezone') is not None \
                 and self.getGeneralSetting('timezone') != '':
@@ -42,7 +39,7 @@ class WildApricotPlugin(Plugin):
             timezone = pytz.timezone("UTC")
 
         tags = ["instructor_name:" + event.instructor_name,
-                "instructor_email:"+event.instructor_email]
+                "instructor_email:" + event.instructor_email]
 
         description = event.htmlSummary(omit=['reg', 'price'])
 

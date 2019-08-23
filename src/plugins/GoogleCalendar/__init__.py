@@ -3,16 +3,11 @@
 import logging
 
 import httplib2
+
 import json
-
-# from apiclient import discovery
-from config import settings
-
 from googleapiclient import discovery
 
-# import ui
-
-# from PySide import QtCore
+from config import settings
 
 
 def load():
@@ -32,9 +27,6 @@ def load():
                 }
             ]
             # @TODO: Add option for "pre" event/setup event on Google Calendar (we will use this for checkins)
-
-            # ui.addTarget(self.name, self, self.createEvent)
-            # ui.addAction(self.name, 'Refresh resources', self.refreshResources)
 
             resourceJSON = json.loads(self.getSetting('Resources'))
             if resourceJSON != '':
@@ -77,10 +69,8 @@ def load():
                 # 'attendees': selectedResources
             }
 
-            # http = GoogleApps.getCredentials().authorize(httplib2.Http())
-            http = GoogleApps.getCredentials()
-            # service = discovery.build('calendar', 'v3', http=http)
-            service = discovery.build('calendar', 'v3', credentials=http)
+            creds = GoogleApps.getCredentials()
+            service = discovery.build('calendar', 'v3', credentials=creds)
 
             cal_event = service.events().insert(
                     calendarId=self.getSetting('Calendar ID', 'primary'),

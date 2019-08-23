@@ -1,26 +1,20 @@
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 
 import logging
-import httplib2
 import os
-import time
 
-# from PySide import QtGui, QtCore
+import pickle
+import os.path
 
-from apiclient import discovery
-from oauth2client import client
-from oauth2client import tools
-from oauth2client.client import OAuth2WebServerFlow
-from oauth2client.file import Storage
-
-# import ui
+from googleapiclient.discovery import build
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
 
 from plugins import Plugin
-from . import codeReceiver
 
-credentialsPath = os.path.join(os.path.dirname(__file__), 'credentials.dat')
+credentialsPath = os.path.join(os.path.dirname(__file__), 'credentials.json')
 instance = None
-waitForAuthDialog = None
 
 
 class GoogleAppsPlugin(Plugin):
@@ -40,7 +34,6 @@ class GoogleAppsPlugin(Plugin):
 
         if name == 'GoogleApps' and instance is None:
             instance = self
-            # ui.addAction(self.name, 'Reauthorize', self.reauthorize)
 
     def reauthorize(self):
         if os.path.exists(credentialsPath):
@@ -50,40 +43,27 @@ class GoogleAppsPlugin(Plugin):
         self._getCredentials()
 
     def _getCredentials(self, callback=None):
-        storage = Storage(credentialsPath)
-        credentials = storage.get()
+        credentials = None
+        SCOPES = ['https://www.googleapis.com/auth/calendar',
+                  'https://www.googleapis.com/auth/admin.directory.resource.calendar']
+        # The file token.pickle stores the user's access and refresh tokens, and is
+        # created automatically when the authorization flow completes for the first
+        # time.
+        if os.path.exists('token.pickle'):
+            with open('token.pickle', 'rb') as token:
+                credentials = pickle.load(token)
+        # If there are no (valid) credentials available, let the user log in.
+        if not credentials or not credentials.valid:
+            if credentials and credentials.expired and credentials.refresh_token:
+                credentials.refresh(Request())
+            else:
+                flow = InstalledAppFlow.from_client_secrets_file(
+                    credentialsPath, SCOPES)
+                credentials = flow.run_local_server(port=0)
+            # Save the credentials for the next run
+            with open('token.pickle', 'wb') as token:
+                pickle.dump(credentials, token)
 
-        if credentials is None or credentials.invalid:
-            logging.debug('Missing or bad credentials. Authorization required')
-
-            flow = OAuth2WebServerFlow(
-                client_id=self.getSetting('Client ID'),
-                client_secret=self.getSetting('Client secret'),
-                prompt='consent',
-                scope=[
-                    'https://www.googleapis.com/auth/calendar',
-                    'https://www.googleapis.com/auth/gmail.compose',
-                    'https://www.googleapis.com/auth/gmail.send',
-                    'https://www.googleapis.com/auth/admin.directory.resource.calendar',
-                ],
-                redirect_uri='http://localhost:8080/',
-            )
-
-            # bug in google code and encoding chars?
-            authURI = flow.step1_get_authorize_url().replace('%3A', ':') \
-                          .replace('%2F', '/')
-            # QtGui.QDesktopServices.openUrl(authURI)
-
-            dialog = showWaitForCodeDialog()
-
-            def codeReceived(code):
-                dialog.hide()
-                credentials = flow.step2_exchange(code)
-                storage.put(credentials)
-                if callback is not None:
-                    callback(credentials)
-
-            codeReceiver.waitForCode(codeReceived)
         else:
             if callback is not None:
                 callback(credentials)
@@ -92,28 +72,6 @@ class GoogleAppsPlugin(Plugin):
 
     def prepare(self, callback=None):
         instance._getCredentials(callback)
-
-
-def showWaitForCodeDialog():
-    global waitForAuthDialog
-
-    # if waitForAuthDialog is None:
-    #     waitForAuthDialog = QtGui.QDialog(None)
-    #     waitForAuthDialog.setWindowTitle('Authorization required...')
-    #     waitForAuthDialog.setModal(True)
-
-    #     layout = QtGui.QVBoxLayout()
-    #     layout.addWidget(QtGui.QLabel('A window requesting authorization will appear in your browser.\n\nPlease accept the authorization to continue.'))
-    #     buttonBox = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Cancel)
-    #     layout.addWidget(buttonBox)
-    #     waitForAuthDialog.setLayout(layout)
-
-    #     buttonBox.rejected.connect(codeReceiver.cancel)
-    #     buttonBox.rejected.connect(waitForAuthDialog.close)
-
-    # waitForAuthDialog.show()
-
-    # return waitForAuthDialog
 
 
 def load():
