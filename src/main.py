@@ -362,7 +362,7 @@ def upcoming_events():
                                 "Name":event.title,
                                 "Date": start_date.strftime('%b %d %Y'),
                                 "Time": start_date.strftime('%I:%M %p'),
-                                "Description":event.description,
+                                "Description":event.htmlSummary(all_links=True),
                                 "Register":"http://makeict.wildapricot.org/event-" + str(event.id),
                               })
             print(event_list)

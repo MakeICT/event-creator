@@ -37,28 +37,32 @@
       };
     });
 
+    app.filter('unsafe', function($sce) { return $sce.trustAsHtml; });
+
     app.controller("eventCtrl", function($scope) {
       $scope.showDetails = false;
       $scope.details = "";
 
       $scope.toggleDetailDisplay = function(event) {
         $scope.showDetails = !$scope.showDetails;
-        console.log($scope.showDetails);
 
-        if ($scope.details == "") {
-          // $scope.details = "Fetching Details";
-          console.log(event["Id"]);
-          fetch("event/" + event["Id"])
-            .then(function(res){
-              return res.text();
-            }).then(function(text){
-                // console.log(text);
-                var event_json = JSON.parse(text);
-                // console.log(event_json);
-                $scope.details = event_json["Description"];
-                $scope.$digest();
-              });
-        };
+        $scope.details = event.Description;
+        console.log(event);
+
+        // if ($scope.details == "") {
+        //   // $scope.details = "Fetching Details";
+        //   console.log(event["Id"]);
+        //   fetch("event/" + event["Id"])
+        //     .then(function(res){
+        //       return res.text();
+        //     }).then(function(text){
+        //         // console.log(text);
+        //         var event_json = JSON.parse(text);
+        //         // console.log(event_json);
+        //         $scope.details = event_json["Description"];
+        //         $scope.$digest();
+        //       });
+        // };
       };  
     });
   </script>
@@ -92,7 +96,7 @@
         </div>
         <div class="card-body text-center text-sm-left" ng-if="showDetails">
           <div class=" d-flex justify-content-left">
-            [[ event["Description"] ]]
+            <p  ng-bind-html='details | unsafe'> [[ details ]]</p>
           </div> 
 <!--           <div class="col-sm-4 col-lg-2">
             <a class= "btn btn-primary btn-block" href= "[[ event['Register'] ]]" target="_blank">Register</a>
