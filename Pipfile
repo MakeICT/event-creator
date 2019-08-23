@@ -19,6 +19,10 @@ meetup = "*"
 meetup-api = "*"
 google-api-python-client = "*"
 oauth2client = "*"
+googleapiclient = "*"
+google-oauth-oauthlib = "*"
+google-auth-oauthlib = "*"
+google = "*"
 
 [requires]
 python_version = "3.7"

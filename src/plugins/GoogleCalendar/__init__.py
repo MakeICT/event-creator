@@ -5,8 +5,10 @@ import logging
 import httplib2
 import json
 
-from apiclient import discovery
+# from apiclient import discovery
 from config import settings
+
+from googleapiclient import discovery
 
 # import ui
 
@@ -63,51 +65,54 @@ def load():
             GoogleApps.getCredentials(credentialsReceived)
 
         def createEvent(self, event):
-            timezone = settings.value('timezone')
+            timezone = self.getGeneralSetting('timezone')
 
-            selectedResources = []
-            for resourceTag in event['tags']['Resources']:
-                for resource in self.resourceObjects:
-                    if resourceTag == resource['resourceName']:
-                        selectedResources.append({'email': resource['resourceEmail']})
-                        break
+            # selectedResources = []
+            # for resourceTag in event['tags']['Resources']:
+            #     for resource in self.resourceObjects:
+            #         if resourceTag == resource['resourceName']:
+            #             selectedResources.append({'email': resource['resourceEmail']})
+            #             break
 
-            if event['registrationURL'] != '':
-                description = '<strong>Register here:\n'
-                description += '<a href="' + event['registrationURL'] + '">' \
-                    + event['registrationURL'] + '</a></strong>\n'
-                description += '<hr/>' + event['description']
-            else:
-                description = event['description']
+            # if event['registrationURL'] != '':
+            #     description = '<strong>Register here:\n'
+            #     description += '<a href="' + event['registrationURL'] + '">' \
+            #         + event['registrationURL'] + '</a></strong>\n'
+            #     description += '<hr/>' + event['description']
+            # else:
+            #     description = event['description']
 
-            description = event['instructorDescription'] + '\n\n' + description
+            # description = event['instructorDescription'] + '\n\n' + description
+            description = event.htmlDescription()
 
-            if event['ageDescription']:
-                description += '\n\n' + event['ageDescription']
+            # if event['ageDescription']:
+            #     description += '\n\n' + event['ageDescription']
 
-            if event['authorizationDescription']:
-                description += '\n\n' + event['authorizationDescription']
-            description += '\n\n' + event['priceDescription']
+            # if event['authorizationDescription']:
+            #     description += '\n\n' + event['authorizationDescription']
+            # description += '\n\n' + event['priceDescription']
 
             eventData = {
-                'summary': event['title'],
-                'location': event['location'],
+                'summary': event.title,
+                'location': event.location,
                 'description': description,
-                'start': {'dateTime': event['startTime'], 'timeZone': timezone},
-                'end': {'dateTime': event['stopTime'], 'timeZone': timezone},
-                'attendees': selectedResources
+                'start': {'dateTime': event.start_date.isoformat() + 'Z', 'timeZone': 'UTC'},
+                'end': {'dateTime': event.end_date.isoformat() + 'Z', 'timeZone': 'UTC'},
+                # 'attendees': selectedResources
             }
 
-            self.checkForInterruption()
-            http = GoogleApps.getCredentials().authorize(httplib2.Http())
-            service = discovery.build('calendar', 'v3', http=http)
+            # http = GoogleApps.getCredentials().authorize(httplib2.Http())
+            http = GoogleApps.getCredentials()
+            # service = discovery.build('calendar', 'v3', http=http)
+            service = discovery.build('calendar', 'v3', credentials=http)
 
-            self.checkForInterruption()
-            event = service.events().insert(
+            cal_event = service.events().insert(
                     calendarId=self.getSetting('Calendar ID', 'primary'),
                     body=eventData) \
                 .execute()
 
-            return event['htmlLink']
+            event.addExternalEvent(self.name, cal_event['id'], cal_event['htmlLink'])
+
+            return cal_event['htmlLink']
 
     return GoogleCalendarPlugin()
