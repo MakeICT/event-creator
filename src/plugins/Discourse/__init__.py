@@ -62,11 +62,12 @@ class DiscoursePlugin(Plugin):
                                          category_id=int(self.getSetting('Category ID')),
                                          topic_id=None, title=title)
 
-        post_url = f"https://talk.makeict.org/t/{post.id}"
+        print(post)
+        post_url = f"https://talk.makeict.org/t/{post['id']}"
 
-        event.addExternalEvent(self.name, post.id, post_url)
+        event.addExternalEvent(self.name, post['id'], post_url)
 
-        return post.id
+        return post['id']
 
 
 def load():
