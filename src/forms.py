@@ -22,7 +22,7 @@ class NewClassForm(FlaskForm):
     instructorName = StringField('Instructor Name', validators=[DataRequired()])
     instructorEmail = StringField('Instructor Email', validators=[DataRequired(), Email()])
     classLocation = StringField('Location')
-    classDescription = TextAreaField('Description')
+    classDescription = TextAreaField('Description', render_kw={"rows": 10})
     registrationURL = StringField('Registration URL')
     registrationLimit = IntegerField('Registration Limit', validators=[DataRequired()])
     if useHtml5Fields:
