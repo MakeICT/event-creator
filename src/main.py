@@ -313,11 +313,16 @@ def createClass(template):
       return redirect(url_for('login'))
 
     form = NewClassForm()
+    form.authorizations.choices = [(auth, auth) for auth in auth_list]
     if request.method == 'GET':
         if not template or template == "Select Template":
             print("NO TEMPLATE!")
             return redirect(url_for('createClass')+'/default.js')
         form.loadTemplates()        
+        form.populateTemplate(template)
+        if form.templateRequiredAuths:
+            form.authorizations.default = [auth for auth in form.templateRequiredAuths]
+        form.process()
         form.populateTemplate(template)
 
         return render_template('createClass.html', title='Create Event', form=form, authorizations=auth_list)
@@ -327,7 +332,8 @@ def createClass(template):
             selected_authorizations = request.form.getlist("authorizations")
             form.setSelectedAuthorizations(selected_authorizations)
             event=form.collectEventDetails()
-            event_auths = [Authorization.query.filter_by(name=auth).first() for auth in selected_authorizations]
+            # event_auths = [Authorization.query.filter_by(name=auth).first() for auth in selected_authorizations]
+            event_auths = [Authorization.query.filter_by(name=auth).first() for auth in event["pre-requisites"][0]]
             if None in event_auths:
                 print("INVALID EVENT AUTHORIZATIONS!!!!")
             event_prices = [Price(name=price['name'], description=price['description'], value=price['price'], availability=price['availability'][0]) for price in event['prices']]
