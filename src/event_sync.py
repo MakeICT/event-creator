@@ -1,21 +1,9 @@
 from main import db, Event, Platform, ExternalEvent
 import plugins
 
-loadedPlugins = plugins.loadAllFromPath()
 
-for plugin in loadedPlugins:
-    if not Platform.query.filter_by(name=plugin).first():
-        print(f"Adding new platform: {plugin}")
-        new_platform = Platform(name=plugin)
-        db.session.add(new_platform)
-        db.session.commit()
-
-events = Event.query.all()
-
-active_plugins = ['WildApricot', 'Discourse', 'GoogleCalendar']
-
-for event in events:
-    platform_list = [Platform.query.filter_by(name=ap).first() for ap in active_plugins]
+def SyncEvent(event):
+    platform_list = [Platform.query.filter_by(name=p).first() for p in event_plugins]
     event.platforms = platform_list
     db.session.add(event)
 
@@ -39,3 +27,25 @@ for event in events:
                     ext_event.primary_event = True
                     db.session.add(ext_event)
                     db.session.commit()
+
+
+def SyncEvents(events):
+    for event in events:
+        SyncEvent(event)
+
+
+loadedPlugins = plugins.loadAllFromPath()
+
+event_plugins = [plugin for plugin in loadedPlugins
+                 if isinstance(loadedPlugins[plugin], plugins.EventPlugin)]
+
+for plugin in event_plugins:
+    if not Platform.query.filter_by(name=plugin).first():
+        print(f"Adding new platform: {plugin}")
+        new_platform = Platform(name=plugin)
+        db.session.add(new_platform)
+        db.session.commit()
+
+events = Event.query.all()
+
+SyncEvents(events)

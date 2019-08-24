@@ -11,9 +11,9 @@ from config import settings
 
 
 def load():
-    from plugins import GoogleApps
+    from plugins import GoogleApps, EventPlugin
 
-    class GoogleCalendarPlugin(GoogleApps.GoogleAppsPlugin):
+    class GoogleCalendarPlugin(GoogleApps.GoogleAppsPlugin, EventPlugin):
         def __init__(self):
             super().__init__('GoogleCalendar')
 

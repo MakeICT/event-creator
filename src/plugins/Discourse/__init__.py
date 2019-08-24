@@ -7,13 +7,13 @@ import logging
 
 from . import pydiscourse
 from .pydiscourse import DiscourseClient
-from plugins import Plugin
+from plugins import EventPlugin
 
 from config import settings
 import config
 
 
-class DiscoursePlugin(Plugin):
+class DiscoursePlugin(EventPlugin):
     def __init__(self):
         super().__init__('Discourse')
 

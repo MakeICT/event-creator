@@ -4,11 +4,11 @@ import logging
 
 import meetup.api
 
-from plugins import Plugin
+from plugins import EventPlugin
 import config
 
 
-class MeetupPlugin(Plugin):
+class MeetupPlugin(EventPlugin):
     def __init__(self):
         super().__init__('Meetup')
 
@@ -102,7 +102,7 @@ class MeetupPlugin(Plugin):
         if config.checkBool(self.getSetting('Use this as registration URL')):
             event['registrationURL'] = meetupEvent.event_url
 
-        return meetupEvent.event_url
+        return (meetupEvent.id, meetupEvent.event_url)
 
 
 def load():

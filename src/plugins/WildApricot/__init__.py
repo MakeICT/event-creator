@@ -2,13 +2,13 @@ import logging
 import pytz
 
 from .wildapricot_api import WaApiClient
-from plugins import Plugin
+from plugins import EventPlugin
 
 from config import settings
 import config
 
 
-class WildApricotPlugin(Plugin):
+class WildApricotPlugin(EventPlugin):
     def __init__(self):
         super().__init__('WildApricot')
 

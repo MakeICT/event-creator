@@ -23,38 +23,39 @@ def loadAllFromPath(base='plugins'):
     while len(pluginDirs) > 0 and len(pluginDirs) != leftover:
         leftover = len(pluginDirs)
         modules = {}
-        for p in list(pluginDirs):
+        enabled_plugins = settings.get('General', 'Plugin priority').split(',')
+        print("enabled:", enabled_plugins)
+
+        # for p in list(pluginDirs):
+        for p in enabled_plugins:
             logging.debug('Loading plugin module: %s...' % p)
+            print('Loading plugin module: %s...' % p)
             path = os.path.join(base, p)
             source_file = SourceFileLoader("plugins.%s" % p,
                                            os.path.join(path, "__init__.py"))
             mod = source_file.load_module()
             modules[p] = mod
             plugins.__dict__[p] = mod
-            pluginDirs.remove(p)
+            # pluginDirs.remove(p)
 
+        print(modules.items())
         for name, mod in modules.items():
-            logging.debug('Initializing plugin: %s...' % name)
-            plugin = mod.load()
-            loaded[plugin.name] = plugin
+            if name in enabled_plugins:
+                logging.debug('Initializing plugin: %s...' % name)
+                plugin = mod.load()
+                loaded[plugin.name] = plugin
+            else:
+                logging.debug('Skipping disabled plugin: %s...' % name)
 
-    if len(pluginDirs) > 0:
-        logging.error('Failed to load plugin modules: %s' % pluginDirs)
+    # if len(pluginDirs) > 0:
+    #     logging.error('Failed to load plugin modules: %s' % pluginDirs)
 
     return loaded
 
 
 class Plugin():
     def __init__(self, name):
-        # super().__init__()
         self.name = name
-
-    # def getSetting(self, setting, default=''):
-    #     value = settings.value('plugin-%s/%s' % (self.name, setting), default)
-    #     if value == '':
-    #         value = default
-
-    #     return value
 
     def getSetting(self, setting, default=''):
         value = settings.get('plugin-' + self.name, setting)
@@ -72,15 +73,17 @@ class Plugin():
 
         return value
 
-    # def saveSetting(self, setting, value):
-    #     return settings.setValue('plugin-%s/%s' % (self.name, setting), value)
-
     def saveSetting(self, setting, value):
         settings['plugin-%s/%s' % (self.name, setting)]: value
 
     def prepare(self, callback=None):
         if callback:
             callback()
+
+
+class EventPlugin(Plugin):
+    def __init__(self, name):
+        super().__init__(name)
 
 
 class DependencyMissingException(Exception):
