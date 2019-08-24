@@ -13,7 +13,10 @@ from google.auth.transport.requests import Request
 
 from plugins import Plugin
 
-credentialsPath = os.path.join(os.path.dirname(__file__), 'credentials.json')
+credentials_folder = os.path.dirname(__file__) + '/credentials'
+credentials_file = os.path.join(credentials_folder, 'credentials.json')
+pickle_file = os.path.join(credentials_folder, 'token.pickle')
+
 instance = None
 
 
@@ -36,9 +39,9 @@ class GoogleAppsPlugin(Plugin):
             instance = self
 
     def reauthorize(self):
-        if os.path.exists(credentialsPath):
+        if os.path.exists(credentials_file):
             logging.debug('Deleting credentials')
-            os.remove(credentialsPath)
+            os.remove(credentials_file)
 
         self._getCredentials()
 
@@ -49,8 +52,8 @@ class GoogleAppsPlugin(Plugin):
         # The file token.pickle stores the user's access and refresh tokens, and is
         # created automatically when the authorization flow completes for the first
         # time.
-        if os.path.exists('token.pickle'):
-            with open('token.pickle', 'rb') as token:
+        if os.path.exists(pickle_file):
+            with open(pickle_file, 'rb') as token:
                 credentials = pickle.load(token)
         # If there are no (valid) credentials available, let the user log in.
         if not credentials or not credentials.valid:
@@ -58,10 +61,10 @@ class GoogleAppsPlugin(Plugin):
                 credentials.refresh(Request())
             else:
                 flow = InstalledAppFlow.from_client_secrets_file(
-                    credentialsPath, SCOPES)
+                    credentials_file, SCOPES)
                 credentials = flow.run_local_server(port=0)
             # Save the credentials for the next run
-            with open('token.pickle', 'wb') as token:
+            with open(pickle_file, 'wb') as token:
                 pickle.dump(credentials, token)
 
         else:
