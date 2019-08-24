@@ -1,0 +1,99 @@
+{% from "_macros.html" import render_field, render_multipleselect_field %}
+<script>
+  $('.selectpicker').selectpicker();
+</script>
+
+<form method="POST" action="" id="classForm">
+  <input type="hidden" name="ts_indicator" id="ts_indicator" value="">
+  <input type="hidden" id="ts_name" name="ts_name" value="">
+    
+  {{ form.hidden_tag() }}
+  <fieldset class="pb-2">
+    <div class="form-control-group form-inline">
+      <select name="Template" class="selectpicker border rounded" data-live-search="true" data-width="auto" onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
+        {% for template in form.templates %}
+          {% if form.selectedTemplateName and form.selectedTemplateName == template %}
+            <option value="{{ template }}" selected="selected">{{ template }}</option>
+          {% else %}
+            <option value="{{ template }}">{{ template }}</option>
+          {% endif %}
+        {% endfor %}
+      </select>
+      <!-- Button trigger modal -->
+      <button type="button" class="btn btn-primary mx-2" data-toggle="modal" data-target="#templateSaveDialog">
+        Save Template File
+      </button>
+    </div>
+  </fieldset>
+  
+  <div class="border rounded p-2 mb-2 bg-light">
+    <div class="row">
+      <div class="col-md-12">
+        {{ render_field(form.classTitle) }}
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6">
+        {{ render_field(form.instructorName) }}
+      </div>
+      <div class="col-md-6">
+        {{ render_field(form.instructorEmail) }}
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6">
+        {{ render_field(form.classLocation) }}
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        {{ render_field(form.classDescription) }}
+      </div>
+    </div>
+
+    <fieldset class="form-row">
+      <div class="col">
+        {{ render_field(form.classDate) }}
+      </div>
+      <div class="col">
+        {{ render_field(form.starttime) }}
+      </div>
+      <div class="col">
+        {{ render_field(form.endtime) }}
+      </div>
+    </fieldset>
+
+    <div class="row">
+      <div class="col-md-6">
+        {{ render_field(form.minAge) }}
+      </div>
+      <div class="col-md-6">
+        {{ render_field(form.maxAge) }}
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6">
+        {{ render_field(form.registrationLimit) }}
+      </div>
+    </div>
+    
+    <div class="row">
+      <div class="col-md-6">
+        {{ render_field(form.memberPrice) }}
+      </div>
+      <div class="col-md-6">
+        {{ render_field(form.nonMemberPrice) }}
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        {{ render_multipleselect_field(form.authorizations) }}
+      </div>
+    </div>
+  </div>
+  <div class="form-group">{{ form.submit(class="btn btn-outline-info") }}</div>
