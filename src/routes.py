@@ -212,6 +212,9 @@ def upcoming_events():
 @app.route('/event/<event_id>', methods=['GET', 'POST'])
 def edit_event(event_id):
     event = Event.query.get(event_id)
+    if not event:
+        # TODO: 404
+        pass 
 
     access_token = session.get('access_token')
     auth_list = [auth.name for auth in Authorization.query.all()]
