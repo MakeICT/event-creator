@@ -80,8 +80,8 @@ class NewClassForm(FlaskForm):
             'instructorEmail': self.instructorEmail.data.strip(),
             'minimumAge': self.minAge.data if self.minAge.data is not None else 0,
             'maximumAge': self.maxAge.data if self.maxAge.data is not None else 0,
-            'pre-requisites': [self.authorizations.data],
-            'resources':[],
+            'pre-requisites': self.authorizations.data,
+            'resources': [],
             'platforms': self.platforms.data,
         }
 

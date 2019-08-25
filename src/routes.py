@@ -241,7 +241,9 @@ def edit_event(event_id):
             form.setSelectedAuthorizations(selected_authorizations)
             details = form.collectEventDetails()
             event_auths = [Authorization.query.filter_by(name=auth).first()
-                           for auth in details["pre-requisites"][0]]
+                           for auth in details["pre-requisites"]]
+            event_platforms = [Platform.query.filter_by(name=plat).first()
+                              for plat in details["platforms"]]
             if None in event_auths:
                 print("INVALID EVENT AUTHORIZATIONS!!!!")
             event_prices = [Price(name=price['name'],
@@ -261,6 +263,7 @@ def edit_event(event_id):
             event.registration_limit = details["registrationLimit"]
             event.prices = event_prices
             event.authorizations = event_auths
+            event.platforms = event_platforms
 
             db.session.commit()
             flash(f'{form.classTitle.data} has been updated!', 'success')
