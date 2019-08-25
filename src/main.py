@@ -19,14 +19,16 @@ print(loadedPlugins)
 
 app = Flask(__name__)
 
-db = SQLAlchemy(app)
-migrate = Migrate(app, db, compare_type=True)
 
 app.config['SECRET_KEY'] = settings.get('General', 'SECRET_KEY')
 app.config['GOOGLE_CLIENT_ID'] = settings.get('Google', 'Client ID')
 app.config['GOOGLE_CLIENT_SECRET'] = settings.get('Google', 'Client Secret')
 app.config['REDIRECT_URI'] = settings.get('Google', 'OATH Redirect URL')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+
+db = SQLAlchemy(app)
+migrate = Migrate(app, db, compare_type=True)
+
 
 import routes
 
