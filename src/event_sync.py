@@ -1,9 +1,9 @@
-from main import db, Event, Platform, ExternalEvent
+from main import db, Event, Platform, ExternalEvent, loadedPlugins
 import plugins
 
 
 def SyncEvent(event):
-    platform_list = [Platform.query.filter_by(name=p).first() for p in event_plugins]
+    platform_list = [Platform.query.all()]
     event.platforms = platform_list
     db.session.add(event)
 
@@ -32,20 +32,3 @@ def SyncEvent(event):
 def SyncEvents(events):
     for event in events:
         SyncEvent(event)
-
-
-loadedPlugins = plugins.loadAllFromPath()
-
-event_plugins = [plugin for plugin in loadedPlugins
-                 if isinstance(loadedPlugins[plugin], plugins.EventPlugin)]
-
-for plugin in event_plugins:
-    if not Platform.query.filter_by(name=plugin).first():
-        print(f"Adding new platform: {plugin}")
-        new_platform = Platform(name=plugin)
-        db.session.add(new_platform)
-        db.session.commit()
-
-events = Event.query.all()
-
-SyncEvents(events)
