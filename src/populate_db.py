@@ -1,6 +1,7 @@
 import os
-from main import db
-from models import Event, Authorization
+from main import db, loadedPlugins
+from models import Event, Authorization, Platform
+import plugins
 
 
 def populate_auths():
@@ -25,6 +26,18 @@ def populate_auths():
         db.session.commit()
 
 
+def populate_platforms():
+    event_plugins = [plugin for plugin in loadedPlugins
+                     if isinstance(loadedPlugins[plugin], plugins.EventPlugin)]
+
+    for plugin in event_plugins:
+        if not Platform.query.filter_by(name=plugin).first():
+            print(f"Adding new platform: {plugin}")
+            new_platform = Platform(name=plugin)
+            db.session.add(new_platform)
+            db.session.commit()
+
+
 if os.path.exists('migrations/'):
     os.system('rm -r migrations/versions/*')
 else:
@@ -37,3 +50,4 @@ os.system('flask db migrate')
 os.system('flask db upgrade')
 
 populate_auths()
+populate_platforms()

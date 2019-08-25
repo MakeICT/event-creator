@@ -210,14 +210,3 @@ class ExternalEvent(BaseModel):
 #     id = db.Column(db.Integer, primary_key=True)
 #     name = db.Column(db.String(40), nullable=False, unique=True)
 #     description = db.Column(db.String(120), nullable=False, unique=True)
-
-
-event_plugins = [plugin for plugin in loadedPlugins
-                 if isinstance(loadedPlugins[plugin], plugins.EventPlugin)]
-
-for plugin in event_plugins:
-    if not Platform.query.filter_by(name=plugin).first():
-        print(f"Adding new platform: {plugin}")
-        new_platform = Platform(name=plugin)
-        db.session.add(new_platform)
-        db.session.commit()
