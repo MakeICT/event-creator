@@ -47,6 +47,7 @@ class NewClassForm(FlaskForm):
     nonMemberPrice = DecimalField(places=2, validators=[Optional()])
 
     authorizations = SelectMultipleField('Required Authorizations', choices=[])
+    platforms = SelectMultipleField('Platforms', choices=[])
 
     submit = SubmitField('Submit')
 
@@ -81,6 +82,7 @@ class NewClassForm(FlaskForm):
             'maximumAge': self.maxAge.data if self.maxAge.data is not None else 0,
             'pre-requisites': [self.authorizations.data],
             'resources':[],
+            'platforms': self.platforms.data,
         }
 
         if self.memberPrice is not None:

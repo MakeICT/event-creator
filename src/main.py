@@ -311,12 +311,14 @@ def createClass(template):
 
     access_token = session.get('access_token')
     auth_list = [auth.name for auth in Authorization.query.all()]
+    plat_list = [plat.name for plat in Platform.query.all()]
 
     if access_token is None:
       return redirect(url_for('login'))
 
     form = NewClassForm()
     form.authorizations.choices = [(auth, auth) for auth in auth_list]
+    form.platforms.choices = [(plat, plat) for plat in plat_list]
     if request.method == 'GET':
         if not template or template == "Select Template":
             print("NO TEMPLATE!")
@@ -340,6 +342,8 @@ def createClass(template):
             if None in event_auths:
                 print("INVALID EVENT AUTHORIZATIONS!!!!")
             event_prices = [Price(name=price['name'], description=price['description'], value=price['price'], availability=price['availability'][0]) for price in event['prices']]
+            event_platforms = [Platform.query.filter_by(name=plat).first()
+                               for plat in event["platforms"]]
 
             event_entry = Event(title=event["title"],
                                 instructor_email = event["instructorEmail"],
@@ -354,6 +358,7 @@ def createClass(template):
 
                                 prices = event_prices,
                                 authorizations = event_auths,
+                                platforms=event_platforms,
                                 )
 
             print(event)
@@ -426,16 +431,20 @@ def edit_event(event_id):
 
     access_token = session.get('access_token')
     auth_list = [auth.name for auth in Authorization.query.all()]
+    plat_list = [plat.name for plat in Platform.query.all()]
 
     if access_token is None:
         return redirect(url_for('login'))
 
     form = NewClassForm()
     form.authorizations.choices = [(auth, auth) for auth in auth_list]
+    form.platforms.choices = [(plat, plat) for plat in plat_list]
+
     if request.method == 'GET':
         form.populateEvent(event)
         if form.templateRequiredAuths:
             form.authorizations.default = [auth for auth in form.templateRequiredAuths]
+        form.platforms.default = [plat.name for plat in event.platforms]
         form.process()
         form.populateEvent(event)
 
