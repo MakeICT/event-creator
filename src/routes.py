@@ -181,7 +181,10 @@ def upcoming_events():
     upcoming_events = Event.query.all()
     upcoming_events = sorted(upcoming_events, key=lambda event: event.start_date)
     event_list = []
+    needs_sync = 0
     for event in upcoming_events:
+        if not event.fullySynced():
+            needs_sync = 1
         if event.start_date.date() >= datetime.datetime.today().date():
             if event.registration_limit:
                 spots_available = event.registration_limit
@@ -206,7 +209,7 @@ def upcoming_events():
             #       ' | ' + event['Name'] + ' | ' + '<a href="http://makeict.wildapricot.org/event-' + 
             #       str(event['Id']) + '" target="_blank">Register</a><br />')
 
-    return render_template('events.html', events=event_list)
+    return render_template('events.html', events=event_list, sync_all=needs_sync)
 
 
 @app.route('/event/<event_id>', methods=['GET', 'POST'])
