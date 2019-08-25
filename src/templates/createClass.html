@@ -89,6 +89,23 @@ $("#templateSaveDialog").on("shown.bs.modal", function () {
 
 
 <div class="container content-section">
+  <fieldset>
+    <div class="form-control-group form-inline">
+      <select name="Template" class="selectpicker border rounded" data-live-search="true" data-width="auto" onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
+        {% for template in form.templates %}
+          {% if form.selectedTemplateName and form.selectedTemplateName == template %}
+            <option value="{{ template }}" selected="selected">{{ template }}</option>
+          {% else %}
+            <option value="{{ template }}">{{ template }}</option>
+          {% endif %}
+        {% endfor %}
+      </select>
+      <!-- Button trigger modal -->
+      <button type="button" class="btn btn-primary mx-2" data-toggle="modal" data-target="#templateSaveDialog">
+        Save Template File
+      </button>
+    </div>
+  </fieldset>
 
   {% include "_event_edit_form.html" %}
 
