@@ -10,8 +10,5 @@
 {% endblock head %}
 
 {% block content %}
-  <body ng-app="app" ng-init="">
-    {{ event.title }}
-    {{ event.description }}
-  </body>
+    {% include "_event_edit_form.html" %}
 {% endblock content %}

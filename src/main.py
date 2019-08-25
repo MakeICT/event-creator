@@ -103,6 +103,9 @@ class Event(BaseModel):
     def __repr__(self):
         return f"Event('{self.title}', '{self.start_date}')"
 
+    def registrationURL(self):
+        return "placeholder.com"
+
     def addExternalEvent(self, platform_name, external_id, external_url):
         platform = Platform.query.filter_by(name=platform_name).first()
         ext_event = ExternalEvent(event_id=self.id,
@@ -413,10 +416,66 @@ def upcoming_events():
 
     print (upcoming_events)
     return render_template('events.html', events=event_list)
-    
-@app.route('/event/<event_id>')
+
+
+@app.route('/event/<event_id>', methods=['GET', 'POST'])
 def edit_event(event_id):
-    e = Event.query.get(event_id)
+    event = Event.query.get(event_id)
+
+    access_token = session.get('access_token')
+    auth_list = [auth.name for auth in Authorization.query.all()]
+
+    if access_token is None:
+        return redirect(url_for('login'))
+
+    form = NewClassForm()
+    form.authorizations.choices = [(auth, auth) for auth in auth_list]
+    if request.method == 'GET':
+        form.populateEvent(event)
+        if form.templateRequiredAuths:
+            form.authorizations.default = [auth for auth in form.templateRequiredAuths]
+        form.process()
+        form.populateEvent(event)
+
+        return render_template('edit_event.html', title='Edit Event',
+                               form=form, authorizations=auth_list, event=event)
+
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            selected_authorizations = request.form.getlist("authorizations")
+            form.setSelectedAuthorizations(selected_authorizations)
+            details = form.collectEventDetails()
+            event_auths = [Authorization.query.filter_by(name=auth).first()
+                           for auth in details["pre-requisites"][0]]
+            if None in event_auths:
+                print("INVALID EVENT AUTHORIZATIONS!!!!")
+            event_prices = [Price(name=price['name'],
+                            description=price['description'],
+                            value=price['price'],
+                            availability=price['availability'][0])
+                            for price in details['prices']]
+
+            event.instructor_email = details["instructorEmail"]
+            event.instructor_name = details["instructorName"]
+            event.location = details["location"]
+            event.start_date = details["startTime"]
+            event.end_date = details["stopTime"]
+            event.description = details["description"]
+            event.min_age = details["minimumAge"]
+            event.max_age = details["maximumAge"]
+            event.registration_limit = details["registrationLimit"]
+            event.prices = event_prices
+            event.authorizations = event_auths
+
+            db.session.commit()
+            flash(f'{form.classTitle.data} has been updated!', 'success')
+            return redirect(url_for('upcoming_events'))
+        else:
+            flash(f'Event failed to update! Check form for errors.', 'danger')
+
+
+    form.loadTemplates()      
+    return render_template('createClass.html', title='Create Event', form=form, authorizations=auth_list)
     return render_template('edit_event.html', event=e)
 
 @app.route('/calendar')

@@ -212,6 +212,27 @@ class NewClassForm(FlaskForm):
 
             return os.path.basename(outfile.name)
 
+    def populateEvent(self, event):
+        self.classTitle.data = event.title
+        self.instructorName.data = event.instructor_name
+        self.instructorEmail.data = event.instructor_email
+        self.classLocation.data = event.location
+        self.classDescription.data = event.description
+        # self.registrationURL.data = event.registrationURL()
+        self.registrationLimit.data = event.registration_limit
+        self.classDate.data = event.start_date.date()
+        self.starttime.data = event.start_date.time()
+        self.endtime.data = event.end_date.time()
+        self.minAge.data = event.min_age
+        self.maxAge.data = event.max_age
+        self.templateRequiredAuths = [auth.name for auth in event.authorizations]
+
+        for price in event.prices:
+            if (price.name == 'MakeICT Members'):
+                self.memberPrice.data = price.value
+            elif (price.name == 'Non-Members'):
+                self.nonMemberPrice.data = price.value
+
     def createDirectoryIfNeeded(self, fpath):
         fpath = fpath.replace("\\", "/")
         index = fpath.rfind("/")
