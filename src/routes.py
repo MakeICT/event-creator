@@ -121,7 +121,7 @@ def createClass(template):
             form.setSelectedAuthorizations(selected_authorizations)
             event = form.collectEventDetails()
             event_auths = [Authorization.query.filter_by(name=auth).first()
-                           for auth in event["pre-requisites"][0]]
+                           for auth in event["pre-requisites"]]
             if None in event_auths:
                 print("INVALID EVENT AUTHORIZATIONS!!!!")
             event_prices = [Price(name=price['name'],
