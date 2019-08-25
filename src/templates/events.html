@@ -86,17 +86,20 @@
             <div class="flex-grow-1 text-center text-sm-left px-1">
               [[ event['Name'] ]]
             </div>
-            <div>
-              <i ng-if="!event['Synced'] "  class="fas fa-sync-alt float-right btn btn-warning mx-1 py-1"></i>
-              <i ng-if="event['Synced']"  class="fas fa-check float-right mx-1 py-1 btn btn-success"></i>
-            </div>
-            <div>
-              <a class= "btn btn-primary btn-block py-0" href= "/event/[[ event['Id'] ]]">Edit</a> 
-            </div>
-            <div>
-              <i ng-if="!showDetails" class="fas fa-sort-down float-right btn btn-primary mx-1 py-1"></i>
-              <i ng-if="showDetails" class="fas fa-sort-up float-right btn btn-primary mx-1 py-1"></i>
-            </div>
+            <div class="row">
+              <div>
+                <i ng-if="!event['Synced'] "  class="fas fa-sync-alt float-right btn btn-warning mx-1 py-1"></i>
+                <i ng-if="event['Synced']"  class="fas fa-check float-right mx-1 py-1 btn btn-success"></i>
+              </div>
+              <div>
+                <a class= "btn btn-primary btn-block py-0" href= "/event/[[ event['Id'] ]]">Edit</a> 
+              </div>
+              <div>
+                <i ng-if="!showDetails" class="fas fa-sort-down float-right btn btn-primary mx-1 py-1"></i>
+                <i ng-if="showDetails" class="fas fa-sort-up float-right btn btn-primary mx-1 py-1"></i>
+              </div>
+          </div>
+
         </div>
         <div class="card-body text-center text-sm-left" ng-if="showDetails">
           <div class=" d-flex justify-content-left">
