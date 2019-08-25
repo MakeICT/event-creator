@@ -401,13 +401,15 @@ def upcoming_events():
             start_date = event.start_date
             # if 'test' not in event.title.lower():
             event_list.append({
-                                "Id": event.id,
-                                "Name":event.title,
-                                "Date": start_date.strftime('%b %d %Y'),
-                                "Time": start_date.strftime('%I:%M %p'),
-                                "Description":event.htmlSummary(all_links=True),
-                                "Register":"http://makeict.wildapricot.org/event-" + str(event.id),
-                              })
+                "Id": event.id,
+                "Name":event.title,
+                "Date": start_date.strftime('%b %d %Y'),
+                "Time": start_date.strftime('%I:%M %p'),
+                "Description":event.htmlSummary(all_links=True),
+                "Register": "http://makeict.wildapricot.org/event-"
+                            + str(event.id),
+                "Synced": 1 if event.fullySynced() else 0,
+            })
             print(event_list)
             #       str(event['Id']))
             # print(start_date.strftime('%b %d') + ' | ' + start_date.strftime('%I:%M %p') + 
