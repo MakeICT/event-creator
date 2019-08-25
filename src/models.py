@@ -29,6 +29,11 @@ class BaseModel(db.Model):
     modified_date = db.Column(db.DateTime, default=db.func.current_timestamp(),
                               onupdate=db.func.current_timestamp())
 
+    def update(self):
+        self.modified_date = datetime.datetime.utcnow()
+        db.session.add(self)
+        db.session.commit()
+
 
 class Event(BaseModel):
     _tablename_ = "event"
