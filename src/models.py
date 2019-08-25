@@ -124,7 +124,7 @@ class Event(BaseModel):
             for ext_event in self.external_events:
                 platform_name = Platform.query.get(ext_event.platform_id).name
                 desc += f"<br><b>{platform_name}:</b> <a href='{ext_event.ext_event_url}'>" \
-                               f"{ext_event.ext_event_url}</a>"
+                        f"{ext_event.ext_event_url}</a>"
         else:
             if self.external_events and 'reg' not in omit:
                 for ext_event in self.external_events:
@@ -154,15 +154,17 @@ class Event(BaseModel):
 
 
 class Authorization(db.Model):
-    _tablename_="authorization"
+    _tablename_ = "authorization"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(40), nullable=False, unique=True)
     wa_group_id = db.Column(db.Integer, nullable=False, unique=True)
 
-    events = db.relationship("Event", secondary=association_table, back_populates="authorizations")
+    events = db.relationship("Event", secondary=association_table,
+                             back_populates="authorizations")
 
     def __repr__(self):
         return f"Authorization('{self.name}': '{self.wa_group_id}')"
+
 
 class Price(db.Model):
     _tablename_ = "price"
@@ -172,7 +174,8 @@ class Price(db.Model):
     description = db.Column(db.String(40), nullable=True)
     availability = db.Column(db.String(30), nullable=False)
 
-    events = db.relationship("Event", secondary=event_price, back_populates="prices")
+    events = db.relationship("Event", secondary=event_price,
+                             back_populates="prices")
 
     def __repr__(self):
         return f"Price('{self.name}': '{self.value}', '{self.availability}', '{self.events}')"
@@ -197,7 +200,6 @@ class ExternalEvent(BaseModel):
     ext_event_url = db.Column(db.String(300))
 
     sync_date = db.Column(db.DateTime, nullable=True, default=None)
-
 
     def updateSyncDate(self):
         self.sync_date = datetime.datetime.utcnow()

@@ -1,5 +1,6 @@
 import os
-from main import db, Event, Authorization
+from main import db
+from models import Event, Authorization
 
 
 def populate_auths():

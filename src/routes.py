@@ -1,21 +1,18 @@
-from flask import Flask, render_template, url_for, flash, redirect, request, session
-from flask_oauth import OAuth
-
+import datetime
+from dateutil.parser import parse
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 import json
 
-from config import settings
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-import datetime
 from flask_navbar import Nav
-from flask_navbar.elements import *
-from dateutil.parser import parse
+from flask_navbar.elements import Navbar, View
+from flask import render_template, url_for, flash, redirect, request, session
+from flask_oauth import OAuth
 
+from config import settings
 from main import app, db, loadedPlugins
 from forms import NewClassForm
-from models import Event, Authorization, Price, Platform, ExternalEvent
+from models import Event, Authorization, Price, Platform
 from event_sync import SyncEvent, SyncEvents
 
 nav = Nav()
@@ -23,51 +20,59 @@ nav.init_app(app)
 
 oauth = OAuth()
 
-
 google = oauth.remote_app('google',
-base_url='https://www.google.com/accounts/',
-authorize_url='https://accounts.google.com/o/oauth2/auth',
-request_token_url=None,
-request_token_params={'scope': 'https://www.googleapis.com/auth/plus.login', 'response_type': 'code'},
-access_token_url='https://accounts.google.com/o/oauth2/token',
-access_token_method='POST',
-access_token_params={'grant_type': 'authorization_code'},
-consumer_key=app.config['GOOGLE_CLIENT_ID'],
-consumer_secret=app.config['GOOGLE_CLIENT_SECRET'])
+                          base_url='https://www.google.com/accounts/',
+                          authorize_url='https://accounts.google.com/o/oauth2/auth',
+                          request_token_url=None,
+                          request_token_params={
+                            'scope': 'https://www.googleapis.com/auth/plus.login',
+                            'response_type': 'code'},
+                          access_token_url='https://accounts.google.com/o/oauth2/token',
+                          access_token_method='POST',
+                          access_token_params={
+                            'grant_type': 'authorization_code'},
+                          consumer_key=app.config['GOOGLE_CLIENT_ID'],
+                          consumer_secret=app.config['GOOGLE_CLIENT_SECRET'])
+
 
 @nav.navigation()
 def top_nav():
-    items = [View('Home', 'home'), View('Create Class', 'createClass'), View('Events', 'upcoming_events')]
+    items = [View('Home', 'home'),
+             View('Create Class', 'createClass'),
+             View('Events', 'upcoming_events')]
 
     return Navbar('', *items)
+
 
 @app.route("/")
 @app.route("/home")
 def home():
     access_token = session.get('access_token')
     if access_token is None:
-      return redirect(url_for('login'))
-    
-    access_token = access_token[0]
-    
-    
-    headers = {'Authorization': 'OAuth '+access_token}
-    req = Request('https://www.googleapis.com/oauth2/v1/userinfo', None, headers)
-    try:
-      res = urlopen(req)
-      response = json.load(res) 
-    except URLError as e:
-      if e.code == 401:
-        # Unauthorized - bad token
-        session.pop('access_token', None)
         return redirect(url_for('login'))
-    
+
+    access_token = access_token[0]
+
+    headers = {'Authorization': 'OAuth '+access_token}
+    req = Request('https://www.googleapis.com/oauth2/v1/userinfo',
+                  None, headers)
+    try:
+        res = urlopen(req)
+        response = json.load(res)
+    except URLError as e:
+        if e.code == 401:
+            # Unauthorized - bad token
+            session.pop('access_token', None)
+            return redirect(url_for('login'))
+
     return render_template('home.html', title='Home')
+
 
 @app.route('/login')
 def login():
-    callback=url_for('authorized', _external=True)
+    callback = url_for('authorized', _external=True)
     return google.authorize(callback=callback)
+
 
 @app.route(app.config['REDIRECT_URI'])
 @google.authorized_handler
@@ -76,11 +81,14 @@ def authorized(resp):
     session['access_token'] = access_token, ''
     return redirect(url_for('createClass'))
 
+
 @google.tokengetter
 def get_access_token():
     return session.get('access_token')
 
-@app.route('/createClass', methods=['GET', 'POST'], defaults={'template':None}, strict_slashes=False)
+
+@app.route('/createClass', methods=['GET', 'POST'],
+           defaults={'template': None}, strict_slashes=False)
 @app.route("/createClass/<template>", methods=['GET', 'POST'])
 def createClass(template):
     access_token = session.get('access_token')
@@ -88,7 +96,7 @@ def createClass(template):
     plat_list = [plat.name for plat in Platform.query.all()]
 
     if access_token is None:
-      return redirect(url_for('login'))
+        return redirect(url_for('login'))
 
     form = NewClassForm()
     form.authorizations.choices = [(auth, auth) for auth in auth_list]
@@ -97,41 +105,47 @@ def createClass(template):
         if not template or template == "Select Template":
             print("NO TEMPLATE!")
             return redirect(url_for('createClass')+'/default.js')
-        form.loadTemplates()        
+        form.loadTemplates()
         form.populateTemplate(template)
         if form.templateRequiredAuths:
             form.authorizations.default = [auth for auth in form.templateRequiredAuths]
         form.process()
         form.populateTemplate(template)
 
-        return render_template('createClass.html', title='Create Event', form=form, authorizations=auth_list)
+        return render_template('createClass.html', title='Create Event',
+                               form=form, authorizations=auth_list)
 
     if request.method == 'POST':
         if form.validate_on_submit():
             selected_authorizations = request.form.getlist("authorizations")
             form.setSelectedAuthorizations(selected_authorizations)
-            event=form.collectEventDetails()
-            # event_auths = [Authorization.query.filter_by(name=auth).first() for auth in selected_authorizations]
-            event_auths = [Authorization.query.filter_by(name=auth).first() for auth in event["pre-requisites"][0]]
+            event = form.collectEventDetails()
+            event_auths = [Authorization.query.filter_by(name=auth).first()
+                           for auth in event["pre-requisites"][0]]
             if None in event_auths:
                 print("INVALID EVENT AUTHORIZATIONS!!!!")
-            event_prices = [Price(name=price['name'], description=price['description'], value=price['price'], availability=price['availability'][0]) for price in event['prices']]
+            event_prices = [Price(name=price['name'],
+                            description=price['description'],
+                            value=price['price'],
+                            availability=price['availability'][0])
+                            for price in event['prices']]
+
             event_platforms = [Platform.query.filter_by(name=plat).first()
                                for plat in event["platforms"]]
 
             event_entry = Event(title=event["title"],
-                                instructor_email = event["instructorEmail"],
-                                instructor_name = event["instructorName"],
-                                location = event["location"],
-                                start_date = event["startTime"],
-                                end_date = event["stopTime"],
-                                description = event["description"],
-                                min_age = event["minimumAge"],
-                                max_age = event["maximumAge"],
-                                registration_limit = event["registrationLimit"],
+                                instructor_email=event["instructorEmail"],
+                                instructor_name=event["instructorName"],
+                                location=event["location"],
+                                start_date=event["startTime"],
+                                end_date=event["stopTime"],
+                                description=event["description"],
+                                min_age=event["minimumAge"],
+                                max_age=event["maximumAge"],
+                                registration_limit=event["registrationLimit"],
 
-                                prices = event_prices,
-                                authorizations = event_auths,
+                                prices=event_prices,
+                                authorizations=event_auths,
                                 platforms=event_platforms,
                                 )
 
@@ -147,7 +161,8 @@ def createClass(template):
                 flash("Template Saved as " + templateName + "!", 'success')
 
                 form.populateTemplate(templateName)
-                return render_template('createClass.html', title='Create Event', form=form, authorizations=auth_list)
+                return render_template('createClass.html', title='Create Event',
+                                       form=form, authorizations=auth_list)
             else:
                 flash(f'Class created for {form.classTitle.data}!', 'success')
                 db.session.add(event_entry)
@@ -156,9 +171,10 @@ def createClass(template):
         else:
             flash(f'Event failed to post! Check form for errors.', 'danger')
 
+    form.loadTemplates()
+    return render_template('createClass.html', title='Create Event',
+                           form=form, authorizations=auth_list)
 
-    form.loadTemplates()      
-    return render_template('createClass.html', title='Create Event', form=form, authorizations=auth_list)
 
 @app.route('/events', methods=['GET'])
 def upcoming_events():
@@ -167,35 +183,29 @@ def upcoming_events():
     event_list = []
     for event in upcoming_events:
         if event.start_date.date() >= datetime.datetime.today().date():
-        # if not event['AccessLevel'] == 'AdminOnly':
             if event.registration_limit:
-                # print(event['RegistrationsLimit'], event['ConfirmedRegistrationsCount'])
                 spots_available = event.registration_limit
                 spots = None
                 if spots_available > 0:
                     spots = str(spots_available) + 'Register'
                 else:
                     spots = 'FULL'
-            # start_date = WA_API.WADateToDateTime(event['StartDate'])
             start_date = event.start_date
-            # if 'test' not in event.title.lower():
             event_list.append({
                 "Id": event.id,
-                "Name":event.title,
+                "Name": event.title,
                 "Date": start_date.strftime('%b %d %Y'),
                 "Time": start_date.strftime('%I:%M %p'),
-                "Description":event.htmlSummary(all_links=True),
+                "Description": event.htmlSummary(all_links=True),
                 "Register": "http://makeict.wildapricot.org/event-"
                             + str(event.id),
                 "Synced": 1 if event.fullySynced() else 0,
             })
-            print(event_list)
             #       str(event['Id']))
             # print(start_date.strftime('%b %d') + ' | ' + start_date.strftime('%I:%M %p') + 
             #       ' | ' + event['Name'] + ' | ' + '<a href="http://makeict.wildapricot.org/event-' + 
             #       str(event['Id']) + '" target="_blank">Register</a><br />')
 
-    print (upcoming_events)
     return render_template('events.html', events=event_list)
 
 
@@ -259,10 +269,6 @@ def edit_event(event_id):
             flash(f'Event failed to update! Check form for errors.', 'danger')
 
 
-    form.loadTemplates()      
-    return render_template('createClass.html', title='Create Event', form=form, authorizations=auth_list)
-    return render_template('edit_event.html', event=e)
-
 @app.route('/calendar')
 def calendar():
     return render_template("calendar.html")
@@ -272,26 +278,23 @@ def calendar():
 def return_data():
     start_date_range = parse(request.args.get('start', ''), fuzzy=True)
     end_date_range = parse(request.args.get('end', ''), fuzzy=True)
-    
-    
+
     upcoming_events = Event.query.all()
     upcoming_events = sorted(upcoming_events, key=lambda event: event.start_date)
     event_list = []
     for event in upcoming_events:
-        if event.start_date.date() >= start_date_range.date() and event.start_date.date() <= end_date_range.date()  :
-        # if not event['AccessLevel'] == 'AdminOnly':
+        if event.start_date.date() >= start_date_range.date() \
+                and event.start_date.date() <= end_date_range.date():
             if event.registration_limit:
-                # print(event['RegistrationsLimit'], event['ConfirmedRegistrationsCount'])
                 spots_available = event.registration_limit
                 spots = None
                 if spots_available > 0:
                     spots = str(spots_available) + 'Register'
                 else:
                     spots = 'FULL'
-            # start_date = WA_API.WADateToDateTime(event['StartDate'])
+
             start_date = event.start_date
-            # if 'test' not in event.title.lower():
- 
+
             event_list.append({
                                 "Id": event.id,
                                 "title": event.title,
@@ -299,9 +302,9 @@ def return_data():
                                 "start": start_date.strftime('%b %d %Y'),
                                 "Date": start_date.strftime('%b %d %Y'),
                                 "Time": start_date.strftime('%I:%M %p'),
-                                "Description":event.description,
-                                "Register":"http://makeict.wildapricot.org/event-" + str(event.id),
+                                "Description": event.description,
+                                "Register": "http://makeict.wildapricot.org/event-"
+                                            + str(event.id),
                               })
 
-    
     return json.dumps(event_list)

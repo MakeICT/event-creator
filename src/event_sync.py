@@ -1,5 +1,5 @@
-from main import db, Event, Platform, ExternalEvent, loadedPlugins
-import plugins
+from main import db, loadedPlugins
+from models import Event, Platform, ExternalEvent
 
 
 def SyncEvent(event):
