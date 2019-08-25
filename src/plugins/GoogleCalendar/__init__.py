@@ -56,11 +56,11 @@ def load():
 
             GoogleApps.getCredentials(credentialsReceived)
 
-        def createEvent(self, event):
+        def _buildEvent(self, event):
             timezone = self.getGeneralSetting('timezone')
             description = event.htmlSummary(omit=['time'])
 
-            eventData = {
+            event_data = {
                 'summary': event.title,
                 'location': event.location,
                 'description': description,
@@ -69,11 +69,33 @@ def load():
                 # 'attendees': selectedResources
             }
 
+            return event_data
+
+        def createEvent(self, event):
+            eventData = self._buildEvent(event)
+
             creds = GoogleApps.getCredentials()
             service = discovery.build('calendar', 'v3', credentials=creds)
 
             cal_event = service.events().insert(
                     calendarId=self.getSetting('Calendar ID', 'primary'),
+                    body=eventData) \
+                .execute()
+
+            return (cal_event['id'], cal_event['htmlLink'])
+
+        def updateEvent(self, event):
+            eventData = self._buildEvent(event)
+
+            creds = GoogleApps.getCredentials()
+            service = discovery.build('calendar', 'v3', credentials=creds)
+
+            event_id = next(item.ext_event_id for item in event.external_events
+                            if item.platformName() == self.name)
+
+            cal_event = service.events().update(
+                    calendarId=self.getSetting('Calendar ID', 'primary'),
+                    eventId=event_id,
                     body=eventData) \
                 .execute()
 
