@@ -132,6 +132,60 @@ class WildApricotPlugin(EventPlugin):
 
         return (eventID, registration_url)
 
+    def updateEvent(self, event):
+        self.api.authenticate_with_apikey(self.getSetting('API Key'))
+        wa_event_id = None
+        for e in event.external_events:
+            if e.platformName() == self.name:
+                wa_event_id = e.ext_event_id
+        eventData = self._buildEvent(event, wa_event_id)
+
+        print("wa event id:", wa_event_id)
+
+        logging.debug('Updating event')
+        self.api.execute_request(f"Events/{wa_event_id}", eventData, method='PUT')
+
+        wa_event = self.api.GetEventByID(wa_event_id)
+        wa_event_reg_types = [t for t in wa_event['Details']['RegistrationTypes']]
+        wa_event_reg_type_names = [t['Name'] for t
+                                   in wa_event_reg_types]
+
+        reg_types = self._buildRSVPs(event, wa_event_id)
+        new_types = [t for t in reg_types
+                     if t['Name'] not in wa_event_reg_type_names]
+        existing_types = [t for t in reg_types
+                          if t['Name'] in wa_event_reg_type_names]
+
+        for rtype in new_types:
+            logging.debug('Adding registration type: ' + rtype['Name'])
+            self.api.execute_request('EventRegistrationTypes', rtype)
+
+        for rtype in existing_types:
+            logging.debug('Updating registration type: ' + rtype['Name'])
+            rtype['Id'] = next(item for item in wa_event_reg_types
+                               if item['Name'] == rtype['Name'])['Id']
+            self.api.execute_request(f"EventRegistrationTypes/{rtype['Id']}",
+                                     rtype, method='PUT')
+
+        for rtype in wa_event_reg_types:
+            if rtype['Name'] not in [rt['Name'] for rt in new_types] and \
+               rtype['Name'] not in [rt['Name'] for rt in existing_types]:
+                self.api.execute_request(f"EventRegistrationTypes/{rtype['Id']}",
+                                         method="DELETE")
+
+        auth_ids = [auth.wa_group_id for auth in event.authorizations]
+
+        for auth in event.authorizations:
+            logging.debug('Adding auth group requirements')
+            self.api.SetEventAccessControl(int(wa_event_id), restricted=True,
+                                           any_level=False, any_group=False,
+                                           group_ids=auth_ids, level_ids=[])
+
+        registration_url = \
+            'http://makeict.wildapricot.org/event-%s' % wa_event_id
+
+        return (wa_event_id, registration_url)
+
 
 def load():
     return WildApricotPlugin()

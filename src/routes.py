@@ -265,7 +265,8 @@ def edit_event(event_id):
             event.authorizations = event_auths
             event.platforms = event_platforms
 
-            db.session.commit()
+            event.update()
+
             flash(f'{form.classTitle.data} has been updated!', 'success')
             return redirect(url_for('upcoming_events'))
         else:

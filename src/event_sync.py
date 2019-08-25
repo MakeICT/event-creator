@@ -6,7 +6,11 @@ def SyncEvent(event):
     if not event.fullySynced():
         for platform in event.platforms:
             if platform.id in [ext.platform_id for ext in event.external_events]:
-                pass
+                event_result = loadedPlugins[platform.name].updateEvent(event)
+                ext_event = ExternalEvent.query.filter_by(platform_id=platform.id,
+                                                          event_id=event.id).first()
+                ext_event.updateSyncDate()
+
             else:
                 event_result = loadedPlugins[platform.name].createEvent(event)
                 event_id = event_result[0]

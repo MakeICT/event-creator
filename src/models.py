@@ -211,6 +211,9 @@ class ExternalEvent(BaseModel):
         db.session.add(self)
         db.session.commit()
 
+    def platformName(self):
+        return Platform.query.get(self.platform_id).name
+
 # class Location(db.Model):
 #     id = db.Column(db.Integer, primary_key=True)
 #     name = db.Column(db.String(40), nullable=False, unique=True)
