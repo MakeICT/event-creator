@@ -30,8 +30,10 @@ class WildApricotPlugin(EventPlugin):
                 'type': 'yesno',
             }
         ]
+        logging.debug('Connecting to API')
+        self.api = WaApiClient()
 
-    def createEvent(self, event):
+    def _buildEvent(self, event, wa_id=None):
         if self.getGeneralSetting('timezone') is not None \
                 and self.getGeneralSetting('timezone') != '':
             timezone = pytz.timezone(self.getGeneralSetting('timezone'))
@@ -43,15 +45,11 @@ class WildApricotPlugin(EventPlugin):
 
         description = event.htmlSummary(omit=['reg', 'price'])
 
-        logging.debug('Connecting to API')
-        api = WaApiClient()
-        api.authenticate_with_apikey(self.getSetting('API Key'))
-
-        eventData = {
+        event_data = {
             "Name": event.title,
-            "StartDate": api.DateTimeToWADate(
+            "StartDate": self.api.DateTimeToWADate(
                              timezone.localize(event.start_date)),
-            "EndDate": api.DateTimeToWADate(
+            "EndDate": self.api.DateTimeToWADate(
                            timezone.localize(event.end_date)),
             "Location": event.location,
             "RegistrationsLimit": event.registration_limit,
@@ -71,12 +69,17 @@ class WildApricotPlugin(EventPlugin):
             "Tags": tags
         }
 
-        logging.debug('Creating event')
-        eventID = api.execute_request('Events', eventData)
+        if wa_id:
+            event_data['id'] = wa_id
+
+        return event_data
+
+    def _buildRSVPs(self, event, wa_id):
+        rsvp_types = []
 
         for rsvpType in event.prices:
             registrationTypeData = {
-                "EventId": eventID,
+                "EventId": wa_id,
                 "Name": rsvpType.name,
                 "BasePrice": str(rsvpType.value),
                 "Description": rsvpType.description,
@@ -100,16 +103,29 @@ class WildApricotPlugin(EventPlugin):
                 else:
                     registrationTypeData['Availability'] = 'Everyone'
 
-            logging.debug('Adding registration type: ' + rsvpType.name)
-            api.execute_request('EventRegistrationTypes', registrationTypeData)
+            rsvp_types.append(registrationTypeData)
+
+        return rsvp_types
+
+    def createEvent(self, event):
+        self.api.authenticate_with_apikey(self.getSetting('API Key'))
+
+        eventData = self._buildEvent(event)
+
+        logging.debug('Creating event')
+        eventID = self.api.execute_request('Events', eventData)
+
+        for rsvp in self._buildRSVPs(event, eventID):
+            logging.debug('Adding registration type: ' + rsvp['Name'])
+            self.api.execute_request('EventRegistrationTypes', rsvp)
 
         auth_ids = [auth.wa_group_id for auth in event.authorizations]
 
         for auth in event.authorizations:
             logging.debug('Adding auth group requirements')
-            api.SetEventAccessControl(eventID, restricted=True,
-                                      any_level=False, any_group=False,
-                                      group_ids=auth_ids, level_ids=[])
+            self.api.SetEventAccessControl(eventID, restricted=True,
+                                           any_level=False, any_group=False,
+                                           group_ids=auth_ids, level_ids=[])
 
         registration_url = \
             'http://makeict.wildapricot.org/event-%s' % eventID
