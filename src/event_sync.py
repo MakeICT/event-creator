@@ -3,12 +3,6 @@ from models import Event, Platform, ExternalEvent
 
 
 def SyncEvent(event):
-    platform_list = [Platform.query.all()]
-    event.platforms = platform_list
-    db.session.add(event)
-
-    db.session.commit()
-
     if not event.fullySynced():
         for platform in event.platforms:
             if platform.id in [ext.platform_id for ext in event.external_events]:

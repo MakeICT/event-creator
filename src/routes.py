@@ -269,6 +269,13 @@ def edit_event(event_id):
             flash(f'Event failed to update! Check form for errors.', 'danger')
 
 
+@app.route('/sync_all')
+def sync_all():
+    events = Event.query.all()
+    SyncEvents(events)
+    return redirect(url_for('upcoming_events'))
+
+
 @app.route('/calendar')
 def calendar():
     return render_template("calendar.html")
