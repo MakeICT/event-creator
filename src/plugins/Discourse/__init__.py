@@ -47,8 +47,6 @@ class DiscoursePlugin(EventPlugin):
         description = event.htmlSummary()
 
         logging.debug('Connecting to API')
-        print('username:', self.getSetting('Username'))
-        print('api key:', self.getSetting('API Key'))
 
         discourse_api = DiscourseClient(
             self.getSetting('Website'),
@@ -62,11 +60,34 @@ class DiscoursePlugin(EventPlugin):
                                          category_id=int(self.getSetting('Category ID')),
                                          topic_id=None, title=title)
 
-        print(post)
         post_url = f"https://talk.makeict.org/t/{post['id']}"
 
         return (post['id'], post_url)
 
+    def updateEvent(self, event):
+        logging.debug('Discourse')
+
+        dateTimeFormat = '%Y %b %d - %I:%M %p'
+
+        description = event.htmlSummary()
+
+        logging.debug('Connecting to API')
+
+        discourse_api = DiscourseClient(
+            self.getSetting('Website'),
+            api_username=self.getSetting('Username'),
+            api_key=self.getSetting('API Key'))
+
+        logging.debug('Creating post')
+        title = 'Event notice: ' + event.title + ' (' \
+            + event.start_date.strftime(dateTimeFormat) + ')'
+
+        post_id = next(item.ext_event_id for item in event.external_events
+                       if item.platformName() == self.name)
+        discourse_api.update_post(post_id=post_id,
+                                  content=description,
+                                  category_id=int(self.getSetting('Category ID')),
+                                  topic_id=None, title=title)
 
 def load():
     return DiscoursePlugin()
