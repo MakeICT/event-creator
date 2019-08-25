@@ -15,6 +15,11 @@
 {%- endmacro %}
 
 {% macro render_multipleselect_field(field, label_visible=true, right_url=None, right_label=None) -%}
+  <style>
+    .border-darkgray {
+      border-color: rgba(206, 212 ,218 , 1.0);
+    }
+  </style>
   <div class="form-group">
     {{ field.label(class="form-control-label") }} 
     {% if field.errors %} 
@@ -25,7 +30,7 @@
               {% endfor %}
             </div>
     {% else %} 
-        {{ field(class="form-control form-control-sm selectpicker border rounded") }} 
+        {{ field(class="form-control form-control-sm selectpicker", data_style="bg-white border-darkgray rounded") }} 
     {% endif %}
   </div>
 {%- endmacro %}
