@@ -110,4 +110,16 @@ def load():
                     raise
             return True
 
+        def deleteEvent(self, event):
+            creds = GoogleApps.getCredentials()
+            service = discovery.build('calendar', 'v3', credentials=creds)
+            event_id = event.getExternalEventByPlatformName(self.name).ext_event_id
+
+            call = service.events().delete(
+                calendarId=self.getSetting('Calendar ID', 'primary'),
+                eventId=event_id,
+                )
+            call.execute()
+
     return GoogleCalendarPlugin()
+
