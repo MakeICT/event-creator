@@ -13,7 +13,7 @@ from config import settings
 from main import app, db, loadedPlugins
 from forms import NewClassForm
 from models import Event, Authorization, Price, Platform
-from event_sync import SyncEvent, SyncEvents
+from event_sync import SyncEvent, SyncEvents, MissingExternalEventError
 
 nav = Nav()
 nav.init_app(app)

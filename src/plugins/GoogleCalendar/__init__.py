@@ -3,6 +3,8 @@
 import logging
 
 import httplib2
+from googleapiclient.errors import HttpError
+
 
 import json
 from googleapiclient import discovery
@@ -96,9 +98,16 @@ def load():
             cal_event = service.events().update(
                     calendarId=self.getSetting('Calendar ID', 'primary'),
                     eventId=event_id,
-                    body=eventData) \
-                .execute()
+                    body=eventData)
 
-            return (cal_event['id'], cal_event['htmlLink'])
+            try:
+                result = cal_event.execute()
+                print(result)
+            except HttpError as err:
+                if err.resp.status == 403:
+                    return False
+                else:
+                    raise
+            return True
 
     return GoogleCalendarPlugin()

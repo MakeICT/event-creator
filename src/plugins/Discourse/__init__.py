@@ -7,6 +7,7 @@ import logging
 
 from . import pydiscourse
 from .pydiscourse import DiscourseClient
+from .pydiscourse.exceptions import DiscourseClientError
 from plugins import EventPlugin
 
 from config import settings
@@ -84,10 +85,19 @@ class DiscoursePlugin(EventPlugin):
 
         post_id = next(item.ext_event_id for item in event.external_events
                        if item.platformName() == self.name)
-        discourse_api.update_post(post_id=post_id,
-                                  content=description,
-                                  category_id=int(self.getSetting('Category ID')),
-                                  topic_id=None, title=title)
+        try:
+            discourse_api.update_post(post_id=post_id,
+                                      content=description,
+                                      category_id=int(self.getSetting('Category ID')),
+                                      topic_id=None, title=title)
+        except DiscourseClientError as err:
+            if err.__str__() == "The requested URL or resource could not be found.":
+                return False
+            else:
+                raise
+
+        return True
+
 
 def load():
     return DiscoursePlugin()

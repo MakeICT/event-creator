@@ -1,5 +1,6 @@
 import logging
 import pytz
+from urllib.error import HTTPError
 
 from .wildapricot_api import WaApiClient
 from plugins import EventPlugin
@@ -143,7 +144,13 @@ class WildApricotPlugin(EventPlugin):
         print("wa event id:", wa_event_id)
 
         logging.debug('Updating event')
-        self.api.execute_request(f"Events/{wa_event_id}", eventData, method='PUT')
+        try:
+            self.api.execute_request(f"Events/{wa_event_id}", eventData, method='PUT')
+        except HTTPError as err:
+            if err.code == 400:
+                return False
+            else:
+                raise
 
         wa_event = self.api.GetEventByID(wa_event_id)
         wa_event_reg_types = [t for t in wa_event['Details']['RegistrationTypes']]
