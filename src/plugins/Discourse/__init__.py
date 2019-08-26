@@ -5,9 +5,8 @@ import logging
 # import ui
 # from PySide import QtCore
 
-from . import pydiscourse
-from .pydiscourse import DiscourseClient
-from .pydiscourse.exceptions import DiscourseClientError
+from pydiscourse import DiscourseClient
+from pydiscourse.exceptions import DiscourseClientError
 from plugins import EventPlugin
 
 from config import settings

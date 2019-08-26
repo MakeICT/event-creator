@@ -1,6 +1,3 @@
 [submodule "src/plugins/WildApricot/wildapricot_api"]
 	path = src/plugins/WildApricot/wildapricot_api
 	url = git@github.com:MakeICT/wildapricot_api.git
-[submodule "src/plugins/Discourse/pydiscourse"]
-	path = src/plugins/Discourse/pydiscourse
-	url = git@github.com:MakeICT/pydiscourse.git

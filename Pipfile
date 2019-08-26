@@ -23,6 +23,7 @@ googleapiclient = "*"
 google-oauth-oauthlib = "*"
 google-auth-oauthlib = "*"
 google = "*"
+pydiscourse = "*"
 
 [requires]
 python_version = "3.7"
