@@ -22,8 +22,23 @@ class MissingExternalEventError(EventSyncError):
 
 def SyncEvent(event):
     if not event.fullySynced():
+        synced_platform_ids = [ext.platform_id for ext in event.external_events]
+        synced_platforms = [Platform.query.get(p_id) for p_id in synced_platform_ids]
+
+        for platform in synced_platforms:
+            if platform.id not in [p.id for p in event.platforms]:
+                # Delete old external event
+                print('=============================')
+                print(f"removing platform {platform.name} from {event.title}")
+                print(platform)
+                ext_event = ExternalEvent.query.filter_by(platform_id=platform.id,
+                                                          event_id=event.id).first()
+                loadedPlugins[platform.name].deleteEvent(event)
+                event.external_events.remove(ext_event)
+                event.update()
+
         for platform in event.platforms:
-            if platform.id in [ext.platform_id for ext in event.external_events]:
+            if platform.id in synced_platform_ids:
                 event_result = loadedPlugins[platform.name].updateEvent(event)
                 if event_result is False:
                     raise MissingExternalEventError(platform.name,
