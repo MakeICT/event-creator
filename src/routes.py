@@ -286,6 +286,15 @@ def sync_all():
     return redirect(url_for('upcoming_events'))
 
 
+@app.route('/sync/<event_id>')
+def sync(event_id):
+    try:
+        result = SyncEvent(Event.query.get(event_id))
+    except MissingExternalEventError as e:
+        flash(f'Event failed to sync to {e.platform}! Has it been remotely deleted?', 'danger')
+    return redirect(url_for('upcoming_events'))
+
+
 @app.route('/calendar')
 def calendar():
     return render_template("calendar.html")

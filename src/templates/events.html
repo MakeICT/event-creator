@@ -94,7 +94,7 @@
             </div>
             <div class="row">
               <div>
-                <i ng-if="!event['Synced'] "  class="fas fa-sync-alt float-right btn btn-warning mx-1 py-1"></i>
+                <a ng-if="!event['Synced']" href="/sync/[[event.Id]]" class="fas fa-sync-alt float-right btn btn-warning mx-1 py-1"></a>
                 <i ng-if="event['Synced']"  class="fas fa-check float-right mx-1 py-1 btn btn-success"></i>
               </div>
               <div>
