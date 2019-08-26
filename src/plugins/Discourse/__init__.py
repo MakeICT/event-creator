@@ -78,7 +78,7 @@ class DiscoursePlugin(EventPlugin):
             api_username=self.getSetting('Username'),
             api_key=self.getSetting('API Key'))
 
-        logging.debug('Creating post')
+        logging.debug('Updating post')
         title = 'Event notice: ' + event.title + ' (' \
             + event.start_date.strftime(dateTimeFormat) + ')'
 
@@ -96,6 +96,41 @@ class DiscoursePlugin(EventPlugin):
                 raise
 
         return True
+
+    def deleteEvent(self, event):
+        logging.debug('Discourse')
+
+        dateTimeFormat = '%Y %b %d - %I:%M %p'
+
+        description = event.htmlSummary()
+
+        logging.debug('Connecting to API')
+
+        discourse_api = DiscourseClient(
+            self.getSetting('Website'),
+            api_username=self.getSetting('Username'),
+            api_key=self.getSetting('API Key'))
+
+        logging.debug('Deleting post')
+        title = 'Event notice: ' + event.title + ' (' \
+            + event.start_date.strftime(dateTimeFormat) + ')'
+
+        post_id = event.getExternalEventByPlatformName(self.name).ext_event_id
+        try:
+            post = discourse_api.update_post(post_id=post_id,
+                                             content=description,
+                                             category_id=int(self.getSetting('Category ID')),
+                                             topic_id=None, title=title)
+
+        except DiscourseClientError as err:
+            if err.__str__() == "The requested URL or resource could not be found.":
+                # Looks like the post is already gone
+                return
+            else:
+                raise
+
+        topic_id = post['post']['topic_id']
+        discourse_api.delete_topic(topic_id=topic_id)
 
 
 def load():
