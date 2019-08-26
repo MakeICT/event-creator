@@ -72,6 +72,11 @@ class Event(BaseModel):
 
         return ext_event
 
+    def getExternalEventByPlatformName(self, platform_name):
+        ext_event = next(event for event in self.external_events
+                         if event.platformName() == platform_name)
+        return ext_event
+
     def fullySynced(self):
         synced = True
         ext_event_platforms = [ext.platform_id for ext in self.external_events]
