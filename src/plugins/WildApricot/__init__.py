@@ -193,6 +193,12 @@ class WildApricotPlugin(EventPlugin):
 
         return (wa_event_id, registration_url)
 
+    def deleteEvent(self, event):
+        self.api.authenticate_with_apikey(self.getSetting('API Key'))
+        wa_event_id = event.getExternalEventByPlatformName(self.name).ext_event_id
+
+        self.api.DeleteEvent(wa_event_id)
+
 
 def load():
     return WildApricotPlugin()
