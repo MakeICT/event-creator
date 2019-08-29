@@ -207,6 +207,7 @@ def edit_event(event_id):
                             availability=price['availability'][0])
                             for price in details['prices']]
 
+            event.title = details["title"]
             event.instructor_email = details["instructorEmail"]
             event.instructor_name = details["instructorName"]
             event.location = details["location"]
