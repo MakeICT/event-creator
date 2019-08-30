@@ -8,85 +8,127 @@ Create Event
 {% block content %}
 
 <!-- Modal -->
-<div class="modal fade" id="templateSaveDialog" tabindex="-1" role="dialog" aria-labelledby="templateSaveDialogTitle" aria-hidden="true">
+<script>
+  function populateTemplateDialog(value) {
+	if (value == 'saveas') {
+	  document.getElementById("dialog_mode").value = value
+      document.getElementById("ts_title").innerText = "Save";
+      document.getElementById("ts_label").innerText = "Save Template As (Specify Path and/or Name):"
+      document.getElementById("ts_name_input").value = "{{form.selectedTemplateFullName}}";
+      document.getElementById("ts_name_input").disabled = false;
+      document.getElementById("ts_name").value = "";
+      document.getElementById("ts_indicator").value = "";
+      document.getElementById("save_btn").disabled = false;      
+      document.getElementById("save_btn").hidden = false;
+      document.getElementById("ok_btn").hidden = true;
+      document.getElementById("cancel_btn").hidden = false;
 
-  <script type="text/javascript">
-    function save_action() {
-      document.getElementById("close_action").value = "save";
+    } else if (value == 'save') {
+  	  document.getElementById("dialog_mode").value = value    	
+      document.getElementById("ts_title").innerText = "Save";
+      document.getElementById("ts_label").innerText = "Are you sure you want to overwrite:"
+      document.getElementById("ts_name_input").value = "{{form.selectedTemplateFullName}}";
+      document.getElementById("ts_name_input").disabled = true;
+      document.getElementById("ts_name").value = "";
+      document.getElementById("ts_indicator").value = "";
+      document.getElementById("save_btn").disabled = false;
+      document.getElementById("save_btn").hidden = true;
+      document.getElementById("ok_btn").hidden = false;
+      document.getElementById("cancel_btn").hidden = false;
+      document.getElementById("save_btn").hidden = true;
+    	
+    } else if (value == 'delete') {
+  	  document.getElementById("dialog_mode").value = value  	
+      document.getElementById("ts_title").innerText = "Delete Template"
+      document.getElementById("ts_label").innerText = "Are you sure you want to delete template:"
+      document.getElementById("ts_name_input").value = "{{form.selectedTemplateFullName}}";
+      document.getElementById("ts_name_input").disabled = true;
+      document.getElementById("ts_name").value = "";
+      document.getElementById("ts_indicator").value = "";
+      document.getElementById("save_btn").disabled = false;
+      document.getElementById("save_btn").hidden = true;
+      document.getElementById("ok_btn").hidden = false;
+      document.getElementById("cancel_btn").hidden = false;
+
+    }
+  }
+</script>
+
+
+<script type="text/javascript">
+  function ts_action(value) {
+    document.getElementById("close_action").value = value;
+    $("#templateDialog").modal("hide"); 
+    
+    
+    var name = $('#ts_name_input').val();
+    var close_action = value;
+  
+    if (close_action == "cancel") {
+      return;
+    }
+  
+    if (close_action == 'save') {
+      document.getElementById("ts_name").value = name;
+      document.getElementById("ts_indicator").value = "save_template";
+      var doc = document.getElementById("classForm");
+      HTMLFormElement.prototype.submit.call(document.getElementById("classForm"));
+    }
+    
+    if (close_action == 'ok' && document.getElementById("dialog_mode").value == "save") {
+      document.getElementById("ts_name").value = name;
+      document.getElementById("ts_indicator").value = "save_template";
+      var doc = document.getElementById("classForm");
+      HTMLFormElement.prototype.submit.call(document.getElementById("classForm"));
+    }
+
+    if (close_action == 'ok' && document.getElementById("dialog_mode").value == "delete") {
+      document.getElementById("ts_name").value = name;
+      document.getElementById("ts_indicator").value = "delete_template";
+      var doc = document.getElementById("classForm");
+      HTMLFormElement.prototype.submit.call(document.getElementById("classForm"));
+    }
+
+
+    
+  }
+</script>
+
+<script type="text/javascript">
+  function text_keyup() {
+    var text = document.getElementById("ts_name_input").value;
+    if (text.length == 0) {
       document.getElementById("save_btn").disabled = true;
+    } else {
+      document.getElementById("save_btn").disabled = false;     
     }
-  </script>
+  }
+</script>
 
-  <script type="text/javascript">
-    function cancel_action() {
-      document.getElementById("ts_name_input").value = "";
-      document.getElementById("save_btn").disabled = true;
-      document.getElementById("close_action").value = "cancel";
-    }
-  </script>
-
-  <script type="text/javascript">
-    function text_keyup() {
-      var text = document.getElementById("ts_name_input").value;
-	  if (text.length == 0) {
-	    document.getElementById("save_btn").disabled = true;
-	  } else {
-		document.getElementById("save_btn").disabled = false;		  
-	  }
-    }
-  </script>
-
+<div class="modal fade" id="templateDialog" tabindex="-1" role="dialog" aria-labelledby="ts_title" aria-hidden="true">
+  <input type="hidden" id="dialog_mode" name="dialog_mode" value="">
   <input type="hidden" id="close_action" name="close_action" value="">
    
   <div class="modal-dialog modal-lg modal-dialog.centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="templateSaveDialogTitle">Modal title</h5>
+        <h5 class="modal-title" id="ts_title"></h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        Save template (Specify Path and/or Name):<br>
-      <input type="text" id="ts_name_input" name="ts_name_input" class="form-control" onkeyup="text_keyup();" width=100%/>        
+      <label id="ts_label"></label><br>
+      <input type="text" id="ts_name_input" name="ts_name_input" class="form-control" onkeyup="text_keyup();" width=100% disabled="disabled"/>        
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" onclick="cancel_action();" data-dismiss="modal">Cancel</button>
-        <button type="button" id="save_btn" class="btn btn-secondary" onclick="save_action();" data-dismiss="modal" disabled>Save Template</button>
+        <button type="button" id="ok_btn" class="btn btn-secondary" onclick="ts_action('ok');" data-dismiss="modal" hidden="hidden">OK</button>
+        <button type="button" id="save_btn" class="btn btn-secondary" onclick="ts_action('save');" data-dismiss="modal" hidden="hidden">Save Template</button>
+        <button type="button" id="cancel_btn" class="btn btn-secondary" onclick="ts_action('cancel');" data-dismiss="modal">Cancel</button>
       </div>
     </div>
   </div>
 </div>
-
-<script>
-$("#templateSaveDialog").on("hidden.bs.modal", function () {
-   var name = $('#ts_name_input').val();
-   var close_action = $('#close_action').val();
-   
-   if (close_action == "cancel") {
-     return;
-   }
-   
-   if (close_action == 'save') {
-     document.getElementById("close_action").value = close_action;
-     document.getElementById("ts_name").value = name;
-     document.getElementById("ts_indicator").value = "save_template";
-     var doc = document.getElementById("classForm");
-     HTMLFormElement.prototype.submit.call(document.getElementById("classForm"));
-  }
-
-});
-</script>
-<script>
-$("#templateSaveDialog").on("shown.bs.modal", function () {	 
-     document.getElementById("ts_name_input").value = "{{form.selectedTemplateFullName}}";
-     document.getElementById("ts_name").value = "";
-     document.getElementById("ts_indicator").value = "";
-     document.getElementById("save_btn").disabled = false;     
-  }
-);
-</script>
-
 
 <div class="container content-section">
   <fieldset>
@@ -101,8 +143,14 @@ $("#templateSaveDialog").on("shown.bs.modal", function () {
         {% endfor %}
       </select>
       <!-- Button trigger modal -->
-      <button type="button" class="btn btn-primary mx-2" data-toggle="modal" data-target="#templateSaveDialog">
-        Save Template File
+      <button type="button" class="btn btn-primary mx-2" data-toggle="modal" data-target="#templateDialog" onclick="populateTemplateDialog('save');">
+        Save Template
+      </button>
+      <button type="button" class="btn btn-primary mx-2" data-toggle="modal" data-target="#templateDialog" onclick="populateTemplateDialog('saveas');">
+        Save As Template
+      </button>
+      <button type="button" class="btn btn-primary mx-2" data-toggle="modal" data-target="#templateDialog" onclick="populateTemplateDialog('delete');">
+        Delete Template
       </button>
     </div>
   </fieldset>

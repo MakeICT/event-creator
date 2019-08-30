@@ -18,23 +18,6 @@ from event_sync import SyncEvent, SyncEvents, MissingExternalEventError
 nav = Nav()
 nav.init_app(app)
 
-oauth = OAuth()
-
-google = oauth.remote_app('google',
-                          base_url='https://www.google.com/accounts/',
-                          authorize_url='https://accounts.google.com/o/oauth2/auth',
-                          request_token_url=None,
-                          request_token_params={
-                            'scope': 'https://www.googleapis.com/auth/plus.login',
-                            'response_type': 'code'},
-                          access_token_url='https://accounts.google.com/o/oauth2/token',
-                          access_token_method='POST',
-                          access_token_params={
-                            'grant_type': 'authorization_code'},
-                          consumer_key=app.config['GOOGLE_CLIENT_ID'],
-                          consumer_secret=app.config['GOOGLE_CLIENT_SECRET'])
-
-
 @nav.navigation()
 def top_nav():
     items = [View('Home', 'home'),
@@ -47,56 +30,15 @@ def top_nav():
 @app.route("/")
 @app.route("/home")
 def home():
-    access_token = session.get('access_token')
-    if access_token is None:
-        return redirect(url_for('login'))
-
-    access_token = access_token[0]
-
-    headers = {'Authorization': 'OAuth '+access_token}
-    req = Request('https://www.googleapis.com/oauth2/v1/userinfo',
-                  None, headers)
-    try:
-        res = urlopen(req)
-        response = json.load(res)
-    except URLError as e:
-        if e.code == 401:
-            # Unauthorized - bad token
-            session.pop('access_token', None)
-            return redirect(url_for('login'))
-
     return render_template('home.html', title='Home')
-
-
-@app.route('/login')
-def login():
-    callback = url_for('authorized', _external=True)
-    return google.authorize(callback=callback)
-
-
-@app.route(app.config['REDIRECT_URI'])
-@google.authorized_handler
-def authorized(resp):
-    access_token = resp['access_token']
-    session['access_token'] = access_token, ''
-    return redirect(url_for('createClass'))
-
-
-@google.tokengetter
-def get_access_token():
-    return session.get('access_token')
 
 
 @app.route('/createClass', methods=['GET', 'POST'],
            defaults={'template': None}, strict_slashes=False)
 @app.route("/createClass/<template>", methods=['GET', 'POST'])
 def createClass(template):
-    access_token = session.get('access_token')
     auth_list = [auth.name for auth in Authorization.query.all()]
     plat_list = [plat.name for plat in Platform.query.all()]
-
-    if access_token is None:
-        return redirect(url_for('login'))
 
     form = NewClassForm()
     form.authorizations.choices = [(auth, auth) for auth in auth_list]
@@ -163,6 +105,10 @@ def createClass(template):
                 form.populateTemplate(templateName)
                 return render_template('createClass.html', title='Create Event',
                                        form=form, authorizations=auth_list)
+            elif indicatorValue == "delete_template":
+                flash(form.deleteTemplate(request.form.get('ts_name', '')), 'success')
+
+                return redirect(url_for('createClass')+'/default.js')                
             else:
                 flash(f'Class created for {form.classTitle.data}!', 'success')
                 db.session.add(event_entry)
@@ -219,12 +165,8 @@ def edit_event(event_id):
         # TODO: 404
         pass 
 
-    access_token = session.get('access_token')
     auth_list = [auth.name for auth in Authorization.query.all()]
     plat_list = [plat.name for plat in Platform.query.all()]
-
-    if access_token is None:
-        return redirect(url_for('login'))
 
     form = NewClassForm()
     form.authorizations.choices = [(auth, auth) for auth in auth_list]

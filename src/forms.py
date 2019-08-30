@@ -190,6 +190,19 @@ class NewClassForm(FlaskForm):
                 if tags == "Required auth's":
                     self.templateRequiredAuths = taglist[tags]
 
+    def deleteTemplate(selfself, templateName):
+        
+        if templateName != '':
+            if not templateName.endswith(".js"):
+                templateName += ".js"
+            
+            if os.path.exists('EventTemplates/' + templateName):    
+                os.remove('EventTemplates/' + templateName)
+                print("Deleting")
+                return "Template " + templateName + " deleted!"
+            
+        return "Unable to delete template " + templateName + "!"
+   
     def saveTemplate(self, event, templateName):
 
         if templateName != '':
