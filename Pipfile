@@ -24,6 +24,7 @@ google-oauth-oauthlib = "*"
 google-auth-oauthlib = "*"
 google = "*"
 pydiscourse = "*"
+flask-login = "*"
 
 [requires]
 python_version = "3.7"
