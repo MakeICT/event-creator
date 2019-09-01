@@ -134,7 +134,7 @@ class Event(BaseModel):
             for ext_event in self.external_events:
                 platform_name = Platform.query.get(ext_event.platform_id).name
                 desc += f"<br><b>{platform_name}:</b> <a href='{ext_event.ext_event_url}'>" \
-                        f"{ext_event.ext_event_url}</a>"
+                        f"link</a>"
         else:
             if self.external_events and 'reg' not in omit:
                 for ext_event in self.external_events:
@@ -158,7 +158,7 @@ class Event(BaseModel):
             desc += f"<br><b>Required Authorizations:</b> " \
                 + f"{', '.join([auth.name for auth in self.authorizations])}"
 
-        desc += '<br><br>' + self.description
+        desc += '<br><br>' + '<br>'.join(self.description.split('\n'))
 
         return desc
 

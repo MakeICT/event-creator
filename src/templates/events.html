@@ -101,24 +101,23 @@
               [[ event['Name'] ]]
             </div>
             <div class="row">
-            
               {% if current_user.is_authenticated %}
-                <div>
-                  <a ng-if="!event['Synced']" href="/sync/[[event.Id]]" class="fas fa-sync-alt float-right btn btn-warning mx-1 py-1"></a>
-                  <i ng-if="event['Synced']"  class="fas fa-check float-right mx-1 py-1 btn btn-success"></i>
-                </div>
-                <div>
-                  <a class= "btn btn-primary btn-block py-0" href= "/event/[[ event['Id'] ]]">Edit</a> 
+              <div>
+                <a ng-if="!event['Synced']" href="/sync/[[event.Id]]" class="fas fa-sync-alt float-right btn btn-warning mx-1 py-1" ng-click="$event.stopPropagation()"></a>
+                <i ng-if="event['Synced']"  class="fas fa-check float-right mx-1 py-1 btn btn-success disabled" ng-click="$event.stopPropagation()"></i>
+              </div>
+              <div>
+                <a class= "btn btn-primary py-0 fas fa-wrench mx-1 py-1" href= "/event/[[ event['Id'] ]]" ng-click="$event.stopPropagation()"></a> 
                 </div>
                 <div>
                   <a class="fas fa-trash-alt btn btn-danger mx-1 py-1" data-toggle="modal" data-target="#cancel_[[event.Id]]">
                   </a>
                 </div>
-              {% endif %}
               <div>
                 <i ng-if="!showDetails" class="fas fa-sort-down mx-1 pr-3"></i>
                 <i ng-if="showDetails" class="fas fa-sort-up mx-1 pr-3"></i>
               </div>
+              {% endif %}
             </div>
 
         </div>
