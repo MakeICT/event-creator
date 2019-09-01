@@ -35,7 +35,7 @@ def top_nav():
 @app.route("/")
 @app.route("/home")
 def home():
-    return render_template('home.html', title='Home')
+    return render_template('calendar.html', title='Home')
 
 
 @app.route('/createClass', methods=['GET', 'POST'],
