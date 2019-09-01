@@ -7,7 +7,7 @@ import json
 from flask_navbar import Nav
 from flask_navbar.elements import Navbar, View
 from flask import render_template, url_for, flash, redirect, request, session
-from flask_oauth import OAuth
+from flask_login import login_user, logout_user, current_user, login_required
 
 from config import settings
 from main import app, db, loadedPlugins
@@ -21,9 +21,14 @@ nav.init_app(app)
 @nav.navigation()
 def top_nav():
     items = [View('Home', 'home'),
-             View('Create Class', 'createClass'),
-             View('Events', 'upcoming_events')]
+             View('Create Event', 'createClass'),
+             View('Events', 'upcoming_events'),
+             View('Calendar', 'calendar')]
 
+    if current_user.is_authenticated :
+      items.append(View('Log Out', 'logout'))
+    else:
+      items.append(View('Log In', 'login'))
     return Navbar('', *items)
 
 
@@ -36,6 +41,7 @@ def home():
 @app.route('/createClass', methods=['GET', 'POST'],
            defaults={'template': None}, strict_slashes=False)
 @app.route("/createClass/<template>", methods=['GET', 'POST'])
+@login_required
 def createClass(template):
     auth_list = [auth.name for auth in Authorization.query.all()]
     plat_list = [plat.name for plat in Platform.query.all()]
@@ -159,6 +165,7 @@ def upcoming_events():
 
 
 @app.route('/event/<event_id>', methods=['GET', 'POST'])
+@login_required
 def edit_event(event_id):
     event = Event.query.get(event_id)
     if not event:
@@ -222,6 +229,7 @@ def edit_event(event_id):
 
 
 @app.route('/sync_all')
+@login_required
 def sync_all():
     events = Event.query.all()
     SyncEvents(events)
@@ -229,6 +237,7 @@ def sync_all():
 
 
 @app.route('/sync/<event_id>')
+@login_required
 def sync(event_id):
     try:
         result = SyncEvent(Event.query.get(event_id))

@@ -5,7 +5,6 @@ from flask_migrate import Migrate
 import plugins
 from config import settings
 
-
 targets = []
 actions = {}
 loadedPlugins = {}
@@ -30,7 +29,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db, compare_type=True)
 
 
-import routes
+import routes, auth
 
 
 def setPlugins(plugins):

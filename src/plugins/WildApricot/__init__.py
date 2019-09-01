@@ -8,7 +8,6 @@ from plugins import EventPlugin
 from config import settings
 import config
 
-
 class WildApricotPlugin(EventPlugin):
     def __init__(self):
         super().__init__('WildApricot')
@@ -34,6 +33,59 @@ class WildApricotPlugin(EventPlugin):
         logging.debug('Connecting to API')
         self.api = WaApiClient()
 
+    def isUserValid(self, username, password):
+        try :
+            api = WaApiClient(self.getSetting('Client ID'), self.getSetting('Client secret'))
+            approved = api.authenticate_contact(username, password)
+                    
+            return approved
+        except HTTPError as err:
+            print("Error Validating User: " + str(err.code))
+            return False
+    
+    def loadUser(self, username, password):
+        from auth import User
+        
+        try :
+                        
+            api = WaApiClient(self.getSetting('Client ID'), self.getSetting('Client secret'))
+             
+            api.authenticate_with_contact_credentials(username, password);
+            contact=api.execute_request('Contacts/me')
+            
+            id = contact['Id']
+            
+            user = User(username)
+            user.id = id
+            user.groups = []
+            user.firstName = contact['FirstName']
+            user.lastName = contact['LastName']
+                        
+            contact=api.execute_request('Contacts/' + str(id))
+                          
+            fieldValues = contact['FieldValues']
+ 
+            approved = False
+             
+            groupList = []
+            for fieldValueItem in fieldValues :
+                if fieldValueItem['FieldName'] == 'Group participation':
+                    groupList = fieldValueItem['Value']
+                    break
+                
+            for group in groupList :
+                user.groups.append(group['Label'])            
+            
+            return user
+        except HTTPError as err:
+            print("HTTPError Validating User: " + str(err.code))
+            return False
+     
+        except:
+            print("Unknown Error Validating User:")
+
+        return None
+    
     def _buildEvent(self, event, wa_id=None):
         if self.getGeneralSetting('timezone') is not None \
                 and self.getGeneralSetting('timezone') != '':
