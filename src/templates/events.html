@@ -84,12 +84,13 @@
   <!-- [[ events ]] -->
   <div class="row my-2 py-0"> 
     <div class="col">
-        <a ng-if="{{ sync_all }}" href="/sync_all" class="fas fa-sync-alt float-right btn btn-warning btn-block py-1"> Sync all events</a>
-        <a ng-if="0"  class="fas fa-check float-right mx-1 py-1 btn btn-success"></a>
+      {% if current_user.is_authenticated %}
+        <a ng-if="{{ sync_all }}" href="/sync_all" class="fas fa-sync-alt float-right btn btn-warning btn-block py-1 ng-cloak"> Sync all events</a>
+      {% endif %}
     </div>
   </div>
 
-  <div class="card my-2 py-0 border-3" ng-repeat="(key, value) in events | groupBy: 'Date'">
+  <div class="card my-2 py-0 border-3 ng-cloak" ng-repeat="(key, value) in events | groupBy: 'Date'">
     <h5 class="card-header" ng-controller="dateCtrl" ng-init="setDate(key)">  
       <b>[[ event_date | date:'MMM d']]</b> 
       <small class="text-muted">[[ event_date | date:'EEE' ]]</small>
