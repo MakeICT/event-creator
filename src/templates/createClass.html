@@ -1,9 +1,11 @@
 {% extends "layout.html" %} 
 {% from "_macros.html" import render_field, render_submit_field %}
 
-{% block pageTitle %}
-Create Event
-{% endblock %}
+{% block title %}Create Event{% endblock title %}
+
+{% block pageTitle %} Create Event {% endblock %}
+
+{% block header %}Create Event{% endblock header %}
 
 {% block content %}
 
@@ -144,13 +146,13 @@ Create Event
       </select>
       <!-- Button trigger modal -->
       <button type="button" class="btn btn-primary mx-2" data-toggle="modal" data-target="#templateDialog" onclick="populateTemplateDialog('save');">
-        Save Template
+        Save
       </button>
       <button type="button" class="btn btn-primary mx-2" data-toggle="modal" data-target="#templateDialog" onclick="populateTemplateDialog('saveas');">
-        Save As Template
+        Save As
       </button>
       <button type="button" class="btn btn-primary mx-2" data-toggle="modal" data-target="#templateDialog" onclick="populateTemplateDialog('delete');">
-        Delete Template
+        Delete
       </button>
     </div>
   </fieldset>
