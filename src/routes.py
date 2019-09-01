@@ -260,8 +260,7 @@ def return_data():
     upcoming_events = sorted(upcoming_events, key=lambda event: event.start_date)
     event_list = []
     for event in upcoming_events:
-        if event.start_date.date() >= start_date_range.date() \
-                and event.start_date.date() <= end_date_range.date():
+        if event.start_date.date() >= start_date_range.date() and event.start_date.date() <= end_date_range.date():
             if event.registration_limit:
                 spots_available = event.registration_limit
                 spots = None
@@ -276,9 +275,9 @@ def return_data():
                                 "Id": event.id,
                                 "title": event.title,
                                 "Name": event.title,
-                                "start": start_date.strftime('%b %d %Y'),
-                                "Date": start_date.strftime('%b %d %Y'),
-                                "Time": start_date.strftime('%I:%M %p'),
+                                "start": start_date.isoformat(),
+                                "Date": start_date.isoformat(),
+                                "Time": start_date.isoformat(),
                                 "Description": event.description,
                                 "Register": "http://makeict.wildapricot.org/event-"
                                             + str(event.id),
