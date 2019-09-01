@@ -36,6 +36,30 @@
 {%- endmacro %}
 
 
+{% macro confirmation_modal(id, title, text, confirm_attributes='', confirm_class='btn-primary', confirm_text="Confirm", cancel_attributes='') %}
+<div class="modal" id="{{id}}" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg modal-dialog.centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-center w-100">
+          {{ title }}
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          </button>
+        </h5>
+          <span aria-hidden="true">&times;</span>
+      </div>
+      <div class="modal-body text-center">
+        {{ text }}      
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary mr-auto mr-md-1" {{ cancel_attributes}} data-dismiss="modal">Cancel</button>
+        <button type="button" id="save_btn" class="btn {{confirm_class}}" {{confirm_attributes}} data-dismiss="modal">{{ confirm_text }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+{%- endmacro %}
+
 
 
 

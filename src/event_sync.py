@@ -67,3 +67,12 @@ def SyncEvent(event):
 def SyncEvents(events):
     for event in events:
         SyncEvent(event)
+
+
+def DeleteEvent(event):
+    event = Event.query.get(event.id)
+    event.platforms = []
+    event.update()
+    SyncEvent(event)
+    db.session.delete(event)
+    db.session.commit()

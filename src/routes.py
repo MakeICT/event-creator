@@ -13,7 +13,7 @@ from config import settings
 from main import app, db, loadedPlugins
 from forms import NewClassForm
 from models import Event, Authorization, Price, Platform
-from event_sync import SyncEvent, SyncEvents, MissingExternalEventError
+from event_sync import SyncEvent, SyncEvents, DeleteEvent, MissingExternalEventError
 
 nav = Nav()
 nav.init_app(app)
@@ -244,6 +244,16 @@ def sync(event_id):
         result = SyncEvent(Event.query.get(event_id))
     except MissingExternalEventError as e:
         flash(f'Event failed to sync to {e.platform}! Has it been remotely deleted?', 'danger')
+    return redirect(url_for('upcoming_events'))
+
+
+@app.route('/delete/<event_id>')
+def delete(event_id):
+    event = Event.query.get(event_id)
+    try:
+        result = DeleteEvent(event)
+    except MissingExternalEventError as e:
+        flash(f'Failed to delete {event.name} from  {e.platform}!', 'danger')
     return redirect(url_for('upcoming_events'))
 
 
