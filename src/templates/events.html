@@ -93,13 +93,16 @@
               [[ event['Name'] ]]
             </div>
             <div class="row">
-              <div>
-                <a ng-if="!event['Synced']" href="/sync/[[event.Id]]" class="fas fa-sync-alt float-right btn btn-warning mx-1 py-1"></a>
-                <i ng-if="event['Synced']"  class="fas fa-check float-right mx-1 py-1 btn btn-success"></i>
-              </div>
-              <div>
-                <a class= "btn btn-primary btn-block py-0" href= "/event/[[ event['Id'] ]]">Edit</a> 
-              </div>
+            
+              {% if current_user.is_authenticated %}
+                <div>
+                  <a ng-if="!event['Synced']" href="/sync/[[event.Id]]" class="fas fa-sync-alt float-right btn btn-warning mx-1 py-1"></a>
+                  <i ng-if="event['Synced']"  class="fas fa-check float-right mx-1 py-1 btn btn-success"></i>
+                </div>
+                <div>
+                  <a class= "btn btn-primary btn-block py-0" href= "/event/[[ event['Id'] ]]">Edit</a> 
+                </div>
+              {% endif %}
               <div>
                 <i ng-if="!showDetails" class="fas fa-sort-down float-right btn btn-primary mx-1 py-1"></i>
                 <i ng-if="showDetails" class="fas fa-sort-up float-right btn btn-primary mx-1 py-1"></i>
