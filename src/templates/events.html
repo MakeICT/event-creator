@@ -33,9 +33,9 @@
 
 
       $scope.setDate = function(date) {
-        console.log(date);
+        // console.log(date);
         $scope.event_date = new Date(date);
-        console.log($scope.event_date);
+        // console.log($scope.event_date);
       };
     });
 
@@ -49,11 +49,16 @@
          window.location.href = '/delete/' + event_id
       };
 
+      $scope.showDeleteModal = function(event_id, $event) {
+        document.getElementById("cancel_" + event_id).style.display = "block";
+        $event.stopPropagation()
+      }
+
       $scope.toggleDetailDisplay = function(event) {
         $scope.showDetails = !$scope.showDetails;
 
         $scope.details = event.Description;
-        console.log(event);
+        // console.log(event);
 
         // if ($scope.details == "") {
         //   // $scope.details = "Fetching Details";

@@ -52,13 +52,14 @@
 <html>
 <body background-color: #515459>
     <!-- navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-md navbar-light bg-light">
       <div class="container">
-        <a class="navbar-brand mb-0" href="/">
-            <img src="/static/Logo-secondary-trimmed.svg" class="d-inline-block align-top py-0 my-0" height="50" alt="">
+        <a class="navbar-brand mb-0 mr-4" href="/">
+            <img src="/static/Logo_Text_trimmed.svg" class="d-inline-block align-top py-0 my-0" height="25" alt="MakeICT">
         </a>
-          <span class="navbar-text">{% block pageTitle %}{% endblock pageTitle%}</span>
-          <div class="navbar-nav">
+        <div class="navbar-text">{% block pageTitle %}{% endblock pageTitle%}</div>
+        <div class="collapse navbar-collapse" id="navbarToggle">
+          <div class="navbar-nav ml-auto">
             <a class="nav-item nav-link active" href="/home">Home <span class="sr-only">(current)</span></a>
             <a class="nav-item nav-link" href="/events">Events</a>
             <a class="nav-item nav-link" href="/calendar">Calendar</a>
@@ -70,11 +71,15 @@
               <a class="nav-item nav-link" href="/login">Log In</a>
             {% endif %}
         </div>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
       </div>
     </nav>
 
     <!-- container for flashed messages  -->
-    <div class="container">
+    <div class="container p-0 p-md-2">
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
           {% for category, message in messages %}
