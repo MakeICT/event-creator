@@ -24,6 +24,7 @@ app.config['GOOGLE_CLIENT_ID'] = settings.get('Google', 'Client ID')
 app.config['GOOGLE_CLIENT_SECRET'] = settings.get('Google', 'Client Secret')
 app.config['REDIRECT_URI'] = settings.get('Google', 'OATH Redirect URL')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db, compare_type=True)
@@ -43,4 +44,4 @@ def _getChildren(parent):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, load_dotenv=True)
