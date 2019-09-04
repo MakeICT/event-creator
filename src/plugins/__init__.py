@@ -3,7 +3,7 @@
 import logging
 import os
 
-from config import settings
+from config import settings, save
 
 import plugins
 
@@ -74,7 +74,8 @@ class Plugin():
         return value
 
     def saveSetting(self, setting, value):
-        settings['plugin-%s/%s' % (self.name, setting)]: value
+        # settings['plugin-%s/%s' % (self.name, setting)]: value
+        save('plugin-' + self.name, setting, value)
 
     def prepare(self, callback=None):
         if callback:
