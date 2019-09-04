@@ -14,7 +14,7 @@ populationTypes = ['Everybody']
 lastTemplateFile = None
 
 loadedPlugins = plugins.loadAllFromPath()
-print(loadedPlugins)
+# print(loadedPlugins)
 
 app = Flask(__name__)
 

@@ -24,12 +24,12 @@ def loadAllFromPath(base='plugins'):
         leftover = len(pluginDirs)
         modules = {}
         enabled_plugins = settings.get('General', 'Plugin priority').split(',')
-        print("enabled:", enabled_plugins)
+        # print("enabled:", enabled_plugins)
 
         # for p in list(pluginDirs):
         for p in enabled_plugins:
             logging.debug('Loading plugin module: %s...' % p)
-            print('Loading plugin module: %s...' % p)
+            # print('Loading plugin module: %s...' % p)
             path = os.path.join(base, p)
             source_file = SourceFileLoader("plugins.%s" % p,
                                            os.path.join(path, "__init__.py"))
@@ -38,7 +38,7 @@ def loadAllFromPath(base='plugins'):
             plugins.__dict__[p] = mod
             # pluginDirs.remove(p)
 
-        print(modules.items())
+        # print(modules.items())
         for name, mod in modules.items():
             if name in enabled_plugins:
                 logging.debug('Initializing plugin: %s...' % name)
