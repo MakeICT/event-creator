@@ -12,7 +12,7 @@ from flask_login import login_user, logout_user, current_user, login_required
 from config import settings
 from main import app, db, loadedPlugins
 from forms import NewClassForm
-from models import Event, Authorization, Price, Platform
+from models import Event, Authorization, Price, Platform, Resource
 from event_sync import SyncEvent, SyncEvents, DeleteEvent, MissingExternalEventError
 
 nav = Nav()
