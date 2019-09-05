@@ -16,6 +16,10 @@ event_platform = db.Table('event_platform', db.Model.metadata,
     db.Column('event_id', db.Integer, db.ForeignKey('event.id')),
     db.Column('platform_id', db.Integer, db.ForeignKey('platform.id')),
 )
+event_resource = db.Table('event_resource', db.Model.metadata,
+    db.Column('event_id', db.Integer, db.ForeignKey('event.id')),
+    db.Column('resource_id', db.Integer, db.ForeignKey('resource.id')),
+)
 
 
 class BaseModel(db.Model):
@@ -53,6 +57,7 @@ class Event(BaseModel):
 
     prices = db.relationship("Price", secondary=event_price)
     authorizations = db.relationship("Authorization", secondary=association_table)
+    resources = db.relationship("Resource", secondary=event_resource)
     platforms = db.relationship("Platform", secondary=event_platform)
     external_events = db.relationship("ExternalEvent")
 
@@ -174,6 +179,18 @@ class Authorization(db.Model):
 
     def __repr__(self):
         return f"Authorization('{self.name}': '{self.wa_group_id}')"
+
+class Resource(BaseModel):
+    _tablename_ = "resource"
+
+    name = db.Column(db.String(40), nullable=False, unique=True)
+    email = db.Column(db.String(200), unique=False, nullable=True)
+
+    events = db.relationship("Event", secondary=event_resource,
+                             back_populates="resources")
+
+    def __repr__(self):
+        return f"Resource('{self.name}')"
 
 
 class Price(db.Model):

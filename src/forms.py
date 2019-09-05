@@ -48,10 +48,12 @@ class NewClassForm(FlaskForm):
 
     authorizations = SelectMultipleField('Required Authorizations', choices=[])
     platforms = SelectMultipleField('Platforms', choices=[])
+    resources = SelectMultipleField('Resources', choices=[])
 
     submit = SubmitField('Submit')
 
     templateRequiredAuths = []
+    calendarResources = []
     template_map = {}
     templates = []
 
@@ -81,7 +83,7 @@ class NewClassForm(FlaskForm):
             'minimumAge': self.minAge.data if self.minAge.data is not None else 0,
             'maximumAge': self.maxAge.data if self.maxAge.data is not None else 0,
             'pre-requisites': self.authorizations.data,
-            'resources': [],
+            'resources': self.resources.data,
             'platforms': self.platforms.data,
         }
 
@@ -106,6 +108,7 @@ class NewClassForm(FlaskForm):
                     event['tags'][tagGroup['name']].append(checkbox.text())
 
         event['tags']['Required auth\'s'] = self.auths
+        event['tags']['Resources'] = self.resources.data
 
         if self.auths:
             event['authorizationDescription'] = "Required authorizations: "
@@ -189,6 +192,8 @@ class NewClassForm(FlaskForm):
             for tags in taglist:
                 if tags == "Required auth's":
                     self.templateRequiredAuths = taglist[tags]
+                elif tags == "Resources":
+                    self.calendarResources = taglist[tags]
 
     def deleteTemplate(selfself, templateName):
         
@@ -241,6 +246,7 @@ class NewClassForm(FlaskForm):
         self.minAge.data = event.min_age
         self.maxAge.data = event.max_age
         self.templateRequiredAuths = [auth.name for auth in event.authorizations]
+        self.calendarResources = [res.name for res in event.resources]
 
         for price in event.prices:
             if (price.name == 'MakeICT Members'):

@@ -45,10 +45,12 @@ def home():
 def createClass(template):
     auth_list = [auth.name for auth in Authorization.query.all()]
     plat_list = [plat.name for plat in Platform.query.all()]
+    res_list = [res.name for res in Resource.query.all()]
 
     form = NewClassForm()
     form.authorizations.choices = [(auth, auth) for auth in auth_list]
     form.platforms.choices = [(plat, plat) for plat in plat_list]
+    form.resources.choices = [(res, res) for res in res_list]
     if request.method == 'GET':
         if not template or template == "Select Template":
             print("NO TEMPLATE!")
@@ -57,6 +59,9 @@ def createClass(template):
         form.populateTemplate(template)
         if form.templateRequiredAuths:
             form.authorizations.default = [auth for auth in form.templateRequiredAuths]
+        if form.calendarResources:
+            form.resources.default = [res for res in form.calendarResources]
+
         form.process()
         form.populateTemplate(template)
 
@@ -72,6 +77,8 @@ def createClass(template):
                            for auth in event["pre-requisites"]]
             if None in event_auths:
                 print("INVALID EVENT AUTHORIZATIONS!!!!")
+            event_resources = [Resource.query.filter_by(name=res).first()
+                               for res in event["resources"]]
             event_prices = [Price(name=price['name'],
                             description=price['description'],
                             value=price['price'],
@@ -93,6 +100,7 @@ def createClass(template):
                                 registration_limit=event["registrationLimit"],
 
                                 prices=event_prices,
+                                resources=event_resources,
                                 authorizations=event_auths,
                                 platforms=event_platforms,
                                 )
@@ -174,15 +182,21 @@ def edit_event(event_id):
 
     auth_list = [auth.name for auth in Authorization.query.all()]
     plat_list = [plat.name for plat in Platform.query.all()]
+    res_list = [res.name for res in Resource.query.all()]
+
 
     form = NewClassForm()
     form.authorizations.choices = [(auth, auth) for auth in auth_list]
     form.platforms.choices = [(plat, plat) for plat in plat_list]
+    form.resources.choices = [(res, res) for res in res_list]
 
     if request.method == 'GET':
         form.populateEvent(event)
         if form.templateRequiredAuths:
             form.authorizations.default = [auth for auth in form.templateRequiredAuths]
+        if form.calendarResources:
+            form.resources.default = [res for res in form.calendarResources]
+
         form.platforms.default = [plat.name for plat in event.platforms]
         form.process()
         form.populateEvent(event)
@@ -198,7 +212,9 @@ def edit_event(event_id):
             event_auths = [Authorization.query.filter_by(name=auth).first()
                            for auth in details["pre-requisites"]]
             event_platforms = [Platform.query.filter_by(name=plat).first()
-                              for plat in details["platforms"]]
+                               for plat in details["platforms"]]
+            event_resources = [Resource.query.filter_by(name=res).first()
+                               for res in details["resources"]]
             if None in event_auths:
                 print("INVALID EVENT AUTHORIZATIONS!!!!")
             event_prices = [Price(name=price['name'],
@@ -220,6 +236,7 @@ def edit_event(event_id):
             event.prices = event_prices
             event.authorizations = event_auths
             event.platforms = event_platforms
+            event.resources = event_resources
 
             event.update()
 

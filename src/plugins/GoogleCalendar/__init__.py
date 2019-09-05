@@ -30,10 +30,12 @@ def load():
             ]
             # @TODO: Add option for "pre" event/setup event on Google Calendar (we will use this for checkins)
 
-            resourceJSON = json.loads(self.getSetting('Resources'))
+            resourceJSON = self.getSetting('Resources', "")
             if resourceJSON != '':
                 logging.debug('Loading resources from settings')
                 self._setResourceObjects(json.loads(resourceJSON))
+
+            # self.refreshResources()
 
         def _setResourceObjects(self, objs):
             # ui.removeTagGroup('Resources')
@@ -48,11 +50,15 @@ def load():
             def credentialsReceived(credentials):
                 logging.debug('Downloading resources')
 
-                http = credentials.authorize(httplib2.Http())
-                service = discovery.build('admin', 'directory_v1', http=http)
+                # http = credentials.authorize(httplib2.Http())
+                # service = discovery.build('admin', 'directory_v1', http=http)
+
+                creds = GoogleApps.getCredentials()
+                service = discovery.build('admin', 'directory_v1', credentials=creds)
 
                 response = service.resources().calendars() \
                     .list(customer='my_customer').execute()
+                # print(json.dumps(response['items']))
                 self.saveSetting('Resources', json.dumps(response['items']))
                 self._setResourceObjects(response['items'])
 
@@ -62,13 +68,20 @@ def load():
             timezone = self.getGeneralSetting('timezone')
             description = event.htmlSummary(omit=['time'])
 
+            selectedResources = []
+            for resourceTag in [res.name for res in event.resources]:
+                for resource in self.resourceObjects:
+                    if resourceTag == resource['resourceName']:
+                        selectedResources.append({'email': resource['resourceEmail']})
+                        break
+
             event_data = {
                 'summary': event.title,
                 'location': event.location,
                 'description': description,
                 'start': {'dateTime': event.start_date.isoformat(), 'timeZone': timezone},
                 'end': {'dateTime': event.end_date.isoformat(), 'timeZone': timezone},
-                # 'attendees': selectedResources
+                'attendees': selectedResources
             }
 
             return event_data
