@@ -1,6 +1,9 @@
 import os
+import json
+
 from main import db, loadedPlugins
-from models import Event, Authorization, Platform
+from models import Event, Authorization, Platform, Resource
+from config import settings
 import plugins
 
 
@@ -20,10 +23,11 @@ def populate_auths():
                 'Full Tormach': 420395}
 
     for auth in auth_map:
-        print(auth)
-        a = Authorization(name=auth, wa_group_id=auth_map[auth])
-        db.session.add(a)
-        db.session.commit()
+        if not Authorization.query.filter_by(name=auth).first():
+            print(f"Adding new authorization: {auth}")
+            a = Authorization(name=auth, wa_group_id=auth_map[auth])
+            db.session.add(a)
+            db.session.commit()
 
 
 def populate_platforms():
@@ -38,16 +42,30 @@ def populate_platforms():
             db.session.commit()
 
 
-if os.path.exists('migrations/'):
-    os.system('rm -r migrations/versions/*')
-else:
-    os.system('flask db init')
-if os.path.exists('site.db'):
-    os.system('rm site.db')
+def populate_resources():
+    resourceJSON = settings.get('plugin-GoogleCalendar', 'Resources')
+    resources = json.loads(resourceJSON)
+    # print(resources)
+    for res in resources:
+        # print(res)
+        if not Resource.query.filter_by(name=res['resourceName']).first():
+            print(f"Adding new resource: {res['resourceName']}")
+            new_resource = Resource(name=res['resourceName'], email=res['resourceEmail'])
+            db.session.add(new_resource)
+            db.session.commit()
 
 
-os.system('flask db migrate')
-os.system('flask db upgrade')
+# if os.path.exists('migrations/'):
+#     os.system('rm -r migrations/versions/*')
+# else:
+#     os.system('flask db init')
+# if os.path.exists('site.db'):
+#     os.system('rm site.db')
+
+
+# os.system('flask db migrate')
+# os.system('flask db upgrade')
 
 populate_auths()
 populate_platforms()
+populate_resources()
