@@ -7,8 +7,6 @@ src/ui/*.py
 src/settings.ini
 src/default.js
 src/plugins/Selenium/chromedriver*
-src/plugins/GoogleApps/credentials
-src/plugins/GoogleApps/credentials/*
 
 # Distribution / packaging
 env/
