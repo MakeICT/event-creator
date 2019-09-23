@@ -23,7 +23,7 @@ app.config['SECRET_KEY'] = settings.get('General', 'SECRET_KEY')
 app.config['GOOGLE_CLIENT_ID'] = settings.get('Google', 'Client ID')
 app.config['GOOGLE_CLIENT_SECRET'] = settings.get('Google', 'Client Secret')
 app.config['REDIRECT_URI'] = settings.get('Google', 'OATH Redirect URL')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = settings.get('Database', 'URL') or 'sqlite:///site.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
