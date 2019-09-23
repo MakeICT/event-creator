@@ -145,10 +145,10 @@ class Event(BaseModel):
                         f"link</a>"
         else:
             if self.external_events and 'reg' not in omit:
-                for ext_event in self.external_events:
-                    if ext_event.primary_event:
-                        desc += f"<br><b>Register:</b> <a href='{ext_event.ext_event_url}'>" \
-                                       f"{ext_event.ext_event_url}</a>"
+                reg_url = self.registrationURL()
+                if reg_url:
+                    desc += f"<br><b>Register:</b> <a href='{reg_url}'>" \
+                                   f"{reg_url}</a>"
 
         if 'price' not in omit:
             for price in self.prices:
