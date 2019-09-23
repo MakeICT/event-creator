@@ -42,7 +42,7 @@ class BaseModel(db.Model):
 class Event(BaseModel):
     _tablename_ = "event"
 
-    title = db.Column(db.String(50), unique=False, nullable=False)
+    title = db.Column(db.String(100), unique=False, nullable=False)
     instructor_email = db.Column(db.String(120), unique=False, nullable=True)
     instructor_name = db.Column(db.String(60))
     location = db.Column(db.String(120))
