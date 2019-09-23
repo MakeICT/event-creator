@@ -50,7 +50,7 @@ class Event(BaseModel):
     end_date = db.Column(db.DateTime(), nullable=True, default=None)
     # duration = db.Column(db.Interval(), nullable=False, default=datetime.timedelta(hours=1))
     image_file = db.Column(db.String(20), nullable=True, default='default.jpg')
-    description = db.Column(db.String(500), nullable=False)
+    description = db.Column(db.String(4000), nullable=False)
     min_age = db.Column(db.Integer(), nullable=True)
     max_age = db.Column(db.Integer(), nullable=True)
     registration_limit = db.Column(db.Integer(), nullable=True)
