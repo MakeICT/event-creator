@@ -64,7 +64,7 @@ def populate_resources():
 
 
 # os.system('flask db migrate')
-# os.system('flask db upgrade')
+os.system('flask db upgrade')
 
 populate_auths()
 populate_platforms()
