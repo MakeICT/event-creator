@@ -65,7 +65,10 @@ class Event(BaseModel):
         return f"Event('{self.title}', '{self.start_date}')"
 
     def registrationURL(self):
-        return "placeholder.com"
+        for ext_event in self.external_events:
+            if ext_event.primary_event:
+                return ext_event.ext_event_url
+        return None
 
     def addExternalEvent(self, platform_name, external_id, external_url):
         platform = Platform.query.filter_by(name=platform_name).first()
