@@ -4,6 +4,7 @@ import logging
 import requests 
 from oauthlib.oauth2 import BackendApplicationClient
 from requests_oauthlib import OAuth2Session
+import pytz
 
 #add meetup api module from git submodule to path
 import importlib
@@ -73,7 +74,7 @@ class MeetupPlugin(EventPlugin):
                         "response_type": 'anonymous_code'
                         }
         response = requests.get(auth_url, params=r_parameters)
-        # print('MEETUP RESPONSE:', response.status_code, response.headers, response.url)
+        print('MEETUP RESPONSE:', response.status_code, response.headers, response.url)
         code = response.url.split('=')[1]
 
         # Request access token
@@ -84,7 +85,7 @@ class MeetupPlugin(EventPlugin):
                         "code": {code}
                         }
         response = requests.post(token_url, params=r_parameters)
-        # print('MEETUP RESPONSE:', response.status_code, response.headers, response.json())
+        print('MEETUP RESPONSE:', response.status_code, response.headers, response.json())
         access_token = response.json()['access_token']
 
         # Request oauth token with credentials
@@ -93,7 +94,7 @@ class MeetupPlugin(EventPlugin):
                         }
         r_headers = {'Authorization': f'Bearer {access_token}'}
         response = requests.post(session_url, params=r_parameters, headers=r_headers)
-        # print('MEETUP RESPONSE:', response.status_code, response.headers, response.json())
+        print('MEETUP RESPONSE:', response.status_code, response.headers, response.json())
         oauth_token = response.json()['oauth_token']
 
         # Connect to API
@@ -102,6 +103,12 @@ class MeetupPlugin(EventPlugin):
         # return api
 
     def _buildEvent(self, event):
+        if self.getGeneralSetting('timezone') is not None \
+                and self.getGeneralSetting('timezone') != '':
+            timezone = pytz.timezone(self.getGeneralSetting('timezone'))
+        else:
+            timezone = pytz.timezone("UTC")
+
         title = event.title
         description = event.htmlSummary(omit=['time'])
 
@@ -129,7 +136,7 @@ class MeetupPlugin(EventPlugin):
             'group_id': group.id,
             'name': title,
             'description': description,
-            'time': int(event.start_date.timestamp()) * 1000,
+            'time': int(timezone.localize(event.start_date).timestamp()) * 1000,
             'duration': int((event.end_date - event.start_date).total_seconds()*1000),
             'venue_id': self.getSetting('Venue ID'),
             'publish_status': publish_status,
