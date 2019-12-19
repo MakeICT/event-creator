@@ -236,8 +236,8 @@ class NewClassForm(FlaskForm):
 
     def populateEvent(self, event):
         self.classTitle.data = event.title
-        self.instructorName.data = event.instructor_name
-        self.instructorEmail.data = event.instructor_email
+        self.instructorName.data = event.host_name
+        self.instructorEmail.data = event.host_email
         self.classLocation.data = event.location
         self.classDescription.data = event.description
         # self.registrationURL.data = event.registrationURL()

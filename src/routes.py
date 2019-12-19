@@ -89,8 +89,8 @@ def createClass(template):
                                for plat in event["platforms"]]
 
             event_entry = Event(title=event["title"],
-                                instructor_email=event["instructorEmail"],
-                                instructor_name=event["instructorName"],
+                                host_email=event["instructorEmail"],
+                                host_name=event["instructorName"],
                                 location=event["location"],
                                 start_date=event["startTime"],
                                 end_date=event["stopTime"],
@@ -224,8 +224,8 @@ def edit_event(event_id):
                             for price in details['prices']]
 
             event.title = details["title"]
-            event.instructor_email = details["instructorEmail"]
-            event.instructor_name = details["instructorName"]
+            event.host_email = details["instructorEmail"]
+            event.host_name = details["instructorName"]
             event.location = details["location"]
             event.start_date = details["startTime"]
             event.end_date = details["stopTime"]

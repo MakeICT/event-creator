@@ -93,8 +93,8 @@ class WildApricotPlugin(EventPlugin):
         else:
             timezone = pytz.timezone("UTC")
 
-        tags = ["instructor_name:" + event.instructor_name,
-                "instructor_email:" + event.instructor_email]
+        tags = ["host_name:" + event.host_name,
+                "host_email:" + event.host_email]
 
         description = event.htmlSummary(omit=['reg', 'price'])
 

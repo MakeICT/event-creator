@@ -1,26 +1,11 @@
 import datetime
 import enum
+import itertools
+
+from sqlalchemy.ext.declarative import declared_attr
 
 from main import db, loadedPlugins
 import plugins
-
-
-association_table = db.Table('association', db.Model.metadata,
-    db.Column('event_id', db.Integer, db.ForeignKey('event.id')),
-    db.Column('authorization_id', db.Integer, db.ForeignKey('authorization.id'))
-)
-event_price = db.Table('event_price', db.Model.metadata,
-    db.Column('event_id', db.Integer, db.ForeignKey('event.id')),
-    db.Column('price_id', db.Integer, db.ForeignKey('price.id'))
-)
-event_platform = db.Table('event_platform', db.Model.metadata,
-    db.Column('event_id', db.Integer, db.ForeignKey('event.id')),
-    db.Column('platform_id', db.Integer, db.ForeignKey('platform.id')),
-)
-event_resource = db.Table('event_resource', db.Model.metadata,
-    db.Column('event_id', db.Integer, db.ForeignKey('event.id')),
-    db.Column('resource_id', db.Integer, db.ForeignKey('resource.id')),
-)
 
 
 class BaseModel(db.Model):
@@ -40,6 +25,87 @@ class BaseModel(db.Model):
         db.session.commit()
 
 
+class SpecialBase(BaseModel):
+    __abstract__ = True
+
+    name = db.Column(db.String(40), nullable=False)
+
+    @property
+    def all_owners(self):
+        return list(
+            itertools.chain(
+            *[
+                getattr(self, attr)
+                for attr in [a for a in dir(self) if a.endswith("_parents")]
+            ]
+        ))
+
+
+class Authorization(SpecialBase):
+    __tablename__ = "authorization"
+
+    wa_group_id = db.Column(db.Integer, nullable=False, unique=True)
+
+    def __repr__(self):
+        return f"Authorization('{self.name}': '{self.wa_group_id}')"
+
+
+class Resource(SpecialBase):
+    _tablename_ = "resource"
+
+    email = db.Column(db.String(200), unique=False, nullable=True)
+
+    def __repr__(self):
+        return f"Resource('{self.name}')"
+
+
+class Price(SpecialBase):
+    _tablename_ = "price"
+
+    value = db.Column(db.Float(), nullable=False)
+    description = db.Column(db.String(40), nullable=True)
+    availability = db.Column(db.String(30), nullable=False)
+
+    def __repr__(self):
+        return f"Price('{self.name}': '{self.value}', '{self.availability}', '{self.events}')"
+
+
+class Platform(SpecialBase):
+    _tablename_ = "platform"
+
+    def __repr__(self):
+        return f"Platform('{self.name}')"
+
+
+# class Location(SpecialBase):
+#     __tablename__ = "location"
+
+#     description = db.Column(db.String(120), nullable=False, unique=True)
+
+#     def __repr__(self):
+#         return f"Location('{self.name}')"
+
+
+class ExternalEvent(BaseModel):
+    _tablename_ = "external_event"
+
+    primary_event = db.Column(db.Boolean, default=False)
+    platform_id = db.Column(db.Integer, db.ForeignKey('platform.id'))
+    event_id = db.Column(db.Integer, db.ForeignKey('event.id'))
+    ext_event_id = db.Column(db.String(100))
+    ext_event_url = db.Column(db.String(300))
+
+    sync_date = db.Column(db.DateTime, nullable=True, default=None)
+
+    def updateSyncDate(self):
+        self.sync_date = datetime.datetime.utcnow()
+        db.session.add(self)
+        db.session.commit()
+
+    def platformName(self):
+        return Platform.query.get(self.platform_id).name
+
+
 class EventStatus(enum.Enum):
     draft = 1
     submitted = 2
@@ -55,29 +121,99 @@ class EventType(enum.Enum):
     reservation = 2
 
 
-class Event(BaseModel):
-    _tablename_ = "event"
+class BaseEventTemplate(BaseModel):
+    __abstract__ = True
 
-    status = db.Column(db.Enum(EventStatus), nullable=False, default=EventStatus.approved)
     event_type = db.Column(db.Enum(EventType), nullable=False, default=EventType._class)
 
+    # category = tags?
+
     title = db.Column(db.String(100), unique=False, nullable=False)
-    instructor_email = db.Column(db.String(120), unique=False, nullable=True)
-    instructor_name = db.Column(db.String(60))
-    location = db.Column(db.String(120))
-    start_date = db.Column(db.DateTime(), nullable=True, default=None)
-    end_date = db.Column(db.DateTime(), nullable=True, default=None)
-    # duration = db.Column(db.Interval(), nullable=False, default=datetime.timedelta(hours=1))
-    image_file = db.Column(db.String(20), nullable=True, default='default.jpg')
     description = db.Column(db.String(4000), nullable=False)
+    host_email = db.Column(db.String(120), unique=False, nullable=True)
+    host_name = db.Column(db.String(60))
+    location = db.Column(db.String(120))
+    duration = db.Column(db.Interval(), nullable=False, default=datetime.timedelta(hours=1))
+    image_file = db.Column(db.String(20), nullable=True, default='default.jpg')
+
+    @declared_attr
+    def resources(cls):
+        resource_association = db.Table(
+            '%s_resources' % cls.__tablename__,
+            cls.metadata,
+            db.Column('resource_id', db.Integer, db.ForeignKey('resource.id')),
+            db.Column('%s_id' % cls.__tablename__,
+                      db.Integer, db.ForeignKey('%s.id' % cls.__tablename__)),
+        )
+        return db.relationship(Resource, secondary=resource_association,
+                               backref="%s_parents" % cls.__name__.lower())
+    @declared_attr
+    def platforms(cls):
+        platform_association = db.Table(
+            '%s_platform' % cls.__tablename__,
+            cls.metadata,
+            db.Column('platform_id', db.Integer, db.ForeignKey('platform.id')),
+            db.Column('%s_id' % cls.__tablename__,
+                      db.Integer, db.ForeignKey('%s.id' % cls.__tablename__)),
+        )
+        return db.relationship(Platform, secondary=platform_association)
+
+
+    # Restrictions
     min_age = db.Column(db.Integer(), nullable=True)
     max_age = db.Column(db.Integer(), nullable=True)
     registration_limit = db.Column(db.Integer(), nullable=True)
 
-    prices = db.relationship("Price", secondary=event_price)
-    authorizations = db.relationship("Authorization", secondary=association_table)
-    resources = db.relationship("Resource", secondary=event_resource)
-    platforms = db.relationship("Platform", secondary=event_platform)
+    @declared_attr
+    def prices(cls):
+        price_association = db.Table(
+            '%s_price' % cls.__tablename__,
+            cls.metadata,
+            db.Column('price_id', db.Integer, db.ForeignKey('price.id')),
+            db.Column('%s_id' % cls.__tablename__,
+                      db.Integer, db.ForeignKey('%s.id' % cls.__tablename__)),
+        )
+        return db.relationship(Price, secondary=price_association)
+    @declared_attr
+    def authorizations(cls):
+        authorization_association = db.Table(
+            '%s_authorization' % cls.__tablename__,
+            cls.metadata,
+            db.Column('authorization_id', db.Integer, db.ForeignKey('authorization.id')),
+            db.Column('%s_id' % cls.__tablename__,
+                      db.Integer, db.ForeignKey('%s.id' % cls.__tablename__)),
+        )
+        return db.relationship(Authorization, secondary=authorization_association)
+
+    # # Grants
+    # def grant_auths(cls):
+    #     authorization_association = db.Table(
+    #         '%s_authorization' % cls.__tablename__,
+    #         cls.metadata,
+    #         db.Column('authorization_id', db.Integer, db.ForeignKey('authorization.id')),
+    #         db.Column('%s_id' % cls.__tablename__,
+    #                   db.Integer, db.ForeignKey('%s.id' % cls.__tablename__)),
+    #     )
+    #     return db.relationship(Authorization, secondary=authorization_association)
+    # def __repr__(self):
+    #     return f"Event Template('{self.title}')"
+
+
+class EventTemplate(BaseEventTemplate):
+    __tablename__ = "event_template"
+
+
+class Event(BaseEventTemplate):
+    _tablename_ = "event"
+
+    status = db.Column(db.Enum(EventStatus), nullable=False, default=EventStatus.approved)
+
+    start_date = db.Column(db.DateTime(), nullable=True, default=None)
+    end_date = db.Column(db.DateTime(), nullable=True, default=None)
+    submission_date = db.Column(db.DateTime(), nullable=True, default=None)
+    decision_date = db.Column(db.DateTime(), nullable=True, default=None)
+    cancelled_date = db.Column(db.DateTime(), nullable=True, default=None)
+
     external_events = db.relationship("ExternalEvent")
 
     def __repr__(self):
@@ -125,27 +261,6 @@ class Event(BaseModel):
 
         return synced
 
-    def detailedDescription(self):
-        desc = f"Instructor: {self.instructor_name}\n\n"
-        desc += self.description
-        if self.authorizations:
-            auths = [auth.name for auth in self.authorizations]
-            desc += f"\n\nRequired Authorizations: {auths}\n\n"
-
-        if self.min_age and not self.max_age:
-            desc += f"Ages: {self.min_age} and up\n\n"
-        elif self.max_age and not self.min_age:
-            desc += f"Ages: {self.max_age} and under\n\n"
-        elif self.min_age and self.max_age:
-            desc += f"Ages: {self.min_age} to {self.max_age}\n\n"
-
-        if self.prices:
-            desc += "Event Prices:\n"
-            for price in self.prices:
-                desc += f"- {price.name}: ${price.value:.2f}\n"
-
-        return desc
-
     def htmlSummary(self, all_links=False, omit=[]):
         desc = ""
 
@@ -155,7 +270,7 @@ class Event(BaseModel):
                 + self.end_date.strftime('%I:%M %p')
 
         if 'instr' not in omit:
-            desc += f"<br><b>Instructor:</b> {self.instructor_name}"
+            desc += f"<br><b>Instructor:</b> {self.host_name}"
 
         if all_links:
             for ext_event in self.external_events:
@@ -188,77 +303,3 @@ class Event(BaseModel):
         desc += '<br><br>' + '<br>'.join(self.description.split('\n'))
 
         return desc
-
-
-class Authorization(db.Model):
-    _tablename_ = "authorization"
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(40), nullable=False, unique=True)
-    wa_group_id = db.Column(db.Integer, nullable=False, unique=True)
-
-    events = db.relationship("Event", secondary=association_table,
-                             back_populates="authorizations")
-
-    def __repr__(self):
-        return f"Authorization('{self.name}': '{self.wa_group_id}')"
-
-class Resource(BaseModel):
-    _tablename_ = "resource"
-
-    name = db.Column(db.String(40), nullable=False, unique=True)
-    email = db.Column(db.String(200), unique=False, nullable=True)
-
-    events = db.relationship("Event", secondary=event_resource,
-                             back_populates="resources")
-
-    def __repr__(self):
-        return f"Resource('{self.name}')"
-
-
-class Price(db.Model):
-    _tablename_ = "price"
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(40), nullable=False)
-    value = db.Column(db.Float(), nullable=False)
-    description = db.Column(db.String(40), nullable=True)
-    availability = db.Column(db.String(30), nullable=False)
-
-    events = db.relationship("Event", secondary=event_price,
-                             back_populates="prices")
-
-    def __repr__(self):
-        return f"Price('{self.name}': '{self.value}', '{self.availability}', '{self.events}')"
-
-
-class Platform(db.Model):
-    _tablename_ = "platform"
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(40), nullable=False)
-
-    events = db.relationship("Event", secondary=event_platform,
-                             back_populates="platforms")
-
-
-class ExternalEvent(BaseModel):
-    _tablename_ = "external_event"
-
-    primary_event = db.Column(db.Boolean, default=False)
-    platform_id = db.Column(db.Integer, db.ForeignKey('platform.id'))
-    event_id = db.Column(db.Integer, db.ForeignKey('event.id'))
-    ext_event_id = db.Column(db.String(100))
-    ext_event_url = db.Column(db.String(300))
-
-    sync_date = db.Column(db.DateTime, nullable=True, default=None)
-
-    def updateSyncDate(self):
-        self.sync_date = datetime.datetime.utcnow()
-        db.session.add(self)
-        db.session.commit()
-
-    def platformName(self):
-        return Platform.query.get(self.platform_id).name
-
-# class Location(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.String(40), nullable=False, unique=True)
-#     description = db.Column(db.String(120), nullable=False, unique=True)
