@@ -1,4 +1,5 @@
 import datetime
+import enum
 
 from main import db, loadedPlugins
 import plugins
@@ -39,8 +40,26 @@ class BaseModel(db.Model):
         db.session.commit()
 
 
+class EventStatus(enum.Enum):
+    draft = 1
+    submitted = 2
+    approved = 3
+    rejected = 4
+    cancelled = 5
+    deleted = 6
+
+
+class EventType(enum.Enum):
+    event = 0
+    _class = 1
+    reservation = 2
+
+
 class Event(BaseModel):
     _tablename_ = "event"
+
+    status = db.Column(db.Enum(EventStatus), nullable=False, default=EventStatus.approved)
+    event_type = db.Column(db.Enum(EventType), nullable=False, default=EventType._class)
 
     title = db.Column(db.String(100), unique=False, nullable=False)
     instructor_email = db.Column(db.String(120), unique=False, nullable=True)
