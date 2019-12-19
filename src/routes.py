@@ -11,7 +11,7 @@ from flask_login import login_user, logout_user, current_user, login_required
 
 from config import settings
 from main import app, db, loadedPlugins
-from forms import NewClassForm
+from forms import EventForm
 from models import Event, Authorization, Price, Platform, Resource
 from event_sync import SyncEvent, SyncEvents, DeleteEvent, MissingExternalEventError
 
@@ -21,7 +21,7 @@ nav.init_app(app)
 @nav.navigation()
 def top_nav():
     items = [View('Home', 'home'),
-             View('Create Event', 'createClass'),
+             View('Create Event', 'create_event'),
              View('Events', 'upcoming_events'),
              View('Calendar', 'calendar')]
 
@@ -38,23 +38,23 @@ def home():
     return render_template('calendar.html', title='Home')
 
 
-@app.route('/createClass', methods=['GET', 'POST'],
+@app.route('/create_event', methods=['GET', 'POST'],
            defaults={'template': None}, strict_slashes=False)
-@app.route("/createClass/<template>", methods=['GET', 'POST'])
+@app.route("/create_event/<template>", methods=['GET', 'POST'])
 @login_required
-def createClass(template):
+def create_event(template):
     auth_list = [auth.name for auth in Authorization.query.all()]
     plat_list = [plat.name for plat in Platform.query.all()]
     res_list = [res.name for res in Resource.query.all()]
 
-    form = NewClassForm()
+    form = EventForm()
     form.authorizations.choices = [(auth, auth) for auth in auth_list]
     form.platforms.choices = [(plat, plat) for plat in plat_list]
     form.resources.choices = [(res, res) for res in res_list]
     if request.method == 'GET':
         if not template or template == "Select Template":
             print("NO TEMPLATE!")
-            return redirect(url_for('createClass')+'/default.js')
+            return redirect(url_for('create_event')+'/default.js')
         form.loadTemplates()
         form.populateTemplate(template)
         if form.templateRequiredAuths:
@@ -65,7 +65,7 @@ def createClass(template):
         form.process()
         form.populateTemplate(template)
 
-        return render_template('createClass.html', title='Create Event',
+        return render_template('create_event.html', title='Create Event',
                                form=form, authorizations=auth_list)
 
     if request.method == 'POST':
@@ -117,14 +117,14 @@ def createClass(template):
                 flash("Template Saved as " + templateName + "!", 'success')
 
                 form.populateTemplate(templateName)
-                return render_template('createClass.html', title='Create Event',
+                return render_template('create_event.html', title='Create Event',
                                        form=form, authorizations=auth_list)
             elif indicatorValue == "delete_template":
                 flash(form.deleteTemplate(request.form.get('ts_name', '')), 'success')
 
-                return redirect(url_for('createClass')+'/default.js')                
+                return redirect(url_for('create_event')+'/default.js')                
             else:
-                flash(f'Class created for {form.classTitle.data}!', 'success')
+                flash(f'Class created for {form.eventTitle.data}!', 'success')
                 db.session.add(event_entry)
                 db.session.commit()
                 return redirect(url_for('upcoming_events'))
@@ -132,7 +132,7 @@ def createClass(template):
             flash(f'Event failed to post! Check form for errors.', 'danger')
 
     form.loadTemplates()
-    return render_template('createClass.html', title='Create Event',
+    return render_template('create_event.html', title='Create Event',
                            form=form, authorizations=auth_list)
 
 
@@ -185,7 +185,7 @@ def edit_event(event_id):
     res_list = [res.name for res in Resource.query.all()]
 
 
-    form = NewClassForm()
+    form = EventForm()
     form.authorizations.choices = [(auth, auth) for auth in auth_list]
     form.platforms.choices = [(plat, plat) for plat in plat_list]
     form.resources.choices = [(res, res) for res in res_list]
@@ -240,7 +240,7 @@ def edit_event(event_id):
 
             event.update()
 
-            flash(f'{form.classTitle.data} has been updated!', 'success')
+            flash(f'{form.eventTitle.data} has been updated!', 'success')
             return redirect(url_for('upcoming_events'))
         else:
             flash(f'Event failed to update! Check form for errors.', 'danger')

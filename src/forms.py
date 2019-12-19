@@ -18,28 +18,28 @@ if useHtml5Fields:
     from wtforms.fields.html5 import DateField, TimeField, IntegerField
 
 
-class NewClassForm(FlaskForm):
+class EventForm(FlaskForm):
     tagGroups = []
     auths = []
 
     eventType = SelectField('Type', choices=[], validators=[DataRequired()])
 
-    classTitle = StringField('Title', validators=[DataRequired()])
+    eventTitle = StringField('Title', validators=[DataRequired()])
     instructorName = StringField('Instructor Name',
                                  validators=[DataRequired()])
     instructorEmail = StringField('Instructor Email',
                                   validators=[DataRequired(), Email()])
-    classLocation = StringField('Location')
-    classDescription = TextAreaField('Description', render_kw={"rows": 10})
+    eventLocation = StringField('Location')
+    eventDescription = TextAreaField('Description', render_kw={"rows": 10})
     registrationURL = StringField('Registration URL')
     registrationLimit = IntegerField('Registration Limit',
                                      validators=[DataRequired()])
     if useHtml5Fields:
-        classDate = DateField('Date', default=datetime.date.today())
+        eventDate = DateField('Date', default=datetime.date.today())
         starttime = TimeField(label='Start time(CDT)')
         endtime = TimeField(label='End time(CDT)')
     else:
-        classDate = DateField('Date', default=datetime.date.today(),
+        eventDate = DateField('Date', default=datetime.date.today(),
                               format='%m/%d/%Y')
         starttime = TimeField(label='Start time(CDT)', format="%H:%M %p")
         endtime = TimeField(label='End time(CDT)', format="%H:%M %p")
@@ -66,14 +66,14 @@ class NewClassForm(FlaskForm):
         self.auths = selected
 
     def collectEventDetails(self):
-        date = self.classDate.data
+        date = self.eventDate.data
 
         event = {
-            'title': self.classTitle.data.strip(),
-            'location': self.classLocation.data.strip(),
+            'title': self.eventTitle.data.strip(),
+            'location': self.eventLocation.data.strip(),
             'startTime': datetime.datetime.combine(date, self.starttime.data),
             'stopTime': datetime.datetime.combine(date, self.endtime.data),
-            'description': self.classDescription.data.strip(),
+            'description': self.eventDescription.data.strip(),
             'registrationURL': self.registrationURL.data.strip(),
             'registrationLimit': self.registrationLimit.data,
             'prices': [],
@@ -154,11 +154,11 @@ class NewClassForm(FlaskForm):
 
             data = json.load(json_file)
 
-            self.classTitle.data = data.get('title', '')
+            self.eventTitle.data = data.get('title', '')
             self.instructorName.data = data.get('instructorName', '')
             self.instructorEmail.data = data.get('instructorEmail', '')
-            self.classLocation.data = data.get('location', '')
-            self.classDescription.data = data.get('description', '')
+            self.eventLocation.data = data.get('location', '')
+            self.eventDescription.data = data.get('description', '')
             self.registrationURL.data = data.get('location', '')
             self.registrationLimit.data = data.get('registrationLimit', '')
 
@@ -235,14 +235,14 @@ class NewClassForm(FlaskForm):
             return os.path.basename(outfile.name)
 
     def populateEvent(self, event):
-        self.classTitle.data = event.title
+        self.eventTitle.data = event.title
         self.instructorName.data = event.host_name
         self.instructorEmail.data = event.host_email
-        self.classLocation.data = event.location
-        self.classDescription.data = event.description
+        self.eventLocation.data = event.location
+        self.eventDescription.data = event.description
         # self.registrationURL.data = event.registrationURL()
         self.registrationLimit.data = event.registration_limit
-        self.classDate.data = event.start_date.date()
+        self.eventDate.data = event.start_date.date()
         self.starttime.data = event.start_date.time()
         self.endtime.data = event.end_date.time()
         self.minAge.data = event.min_age
