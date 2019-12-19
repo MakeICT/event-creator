@@ -9,7 +9,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, \
                     BooleanField, IntegerField, DecimalField, \
                     DateField, DateTimeField, TextAreaField, TimeField, \
-                    SelectMultipleField
+                    SelectMultipleField, SelectField
 from wtforms.validators import DataRequired, Length, Email, URL, Optional
 from wtforms.fields.simple import TextAreaField
 
@@ -21,6 +21,8 @@ if useHtml5Fields:
 class NewClassForm(FlaskForm):
     tagGroups = []
     auths = []
+
+    eventType = SelectField('Type', choices=[], validators=[DataRequired()])
 
     classTitle = StringField('Title', validators=[DataRequired()])
     instructorName = StringField('Instructor Name',
