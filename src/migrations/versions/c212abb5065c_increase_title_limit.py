@@ -1,4 +1,4 @@
-"""empty message
+"""Increase title length limit
 
 Revision ID: c212abb5065c
 Revises: e9c6f070002f

@@ -1,4 +1,4 @@
-"""empty message
+"""Increase description length limit
 
 Revision ID: e9c6f070002f
 Revises: d0645325d33d
