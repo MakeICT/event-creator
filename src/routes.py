@@ -12,7 +12,8 @@ from flask_login import login_user, logout_user, current_user, login_required
 from config import settings
 from main import app, db, loadedPlugins
 from forms import EventForm
-from models import Event, Authorization, Price, Platform, Resource
+from models import Event, EventStatus, EventType
+from models import Authorization, Price, Platform, Resource
 from event_sync import SyncEvent, SyncEvents, DeleteEvent, MissingExternalEventError
 
 nav = Nav()
@@ -38,19 +39,25 @@ def home():
     return render_template('calendar.html', title='Home')
 
 
+def populate_select_boxes(event_form):
+    auth_list = [auth.name for auth in Authorization.query.all()]
+    plat_list = [plat.name for plat in Platform.query.all()]
+    res_list = [res.name for res in Resource.query.all()]
+    event_type_list = [event_type.name for event_type in EventType]
+
+    event_form.eventType.choices = [(t, t) for t in event_type_list]
+    event_form.authorizations.choices = [(auth, auth) for auth in auth_list]
+    event_form.platforms.choices = [(plat, plat) for plat in plat_list]
+    event_form.resources.choices = [(res, res) for res in res_list]
+
 @app.route('/create_event', methods=['GET', 'POST'],
            defaults={'template': None}, strict_slashes=False)
 @app.route("/create_event/<template>", methods=['GET', 'POST'])
 @login_required
 def create_event(template):
-    auth_list = [auth.name for auth in Authorization.query.all()]
-    plat_list = [plat.name for plat in Platform.query.all()]
-    res_list = [res.name for res in Resource.query.all()]
-
     form = EventForm()
-    form.authorizations.choices = [(auth, auth) for auth in auth_list]
-    form.platforms.choices = [(plat, plat) for plat in plat_list]
-    form.resources.choices = [(res, res) for res in res_list]
+    populate_select_boxes(form)
+
     if request.method == 'GET':
         if not template or template == "Select Template":
             print("NO TEMPLATE!")
@@ -66,7 +73,7 @@ def create_event(template):
         form.populateTemplate(template)
 
         return render_template('create_event.html', title='Create Event',
-                               form=form, authorizations=auth_list)
+                               form=form)
 
     if request.method == 'POST':
         if form.validate_on_submit():
@@ -118,7 +125,7 @@ def create_event(template):
 
                 form.populateTemplate(templateName)
                 return render_template('create_event.html', title='Create Event',
-                                       form=form, authorizations=auth_list)
+                                       form=form)
             elif indicatorValue == "delete_template":
                 flash(form.deleteTemplate(request.form.get('ts_name', '')), 'success')
 
@@ -133,7 +140,7 @@ def create_event(template):
 
     form.loadTemplates()
     return render_template('create_event.html', title='Create Event',
-                           form=form, authorizations=auth_list)
+                           form=form)
 
 
 @app.route('/events', methods=['GET'])
@@ -178,17 +185,10 @@ def edit_event(event_id):
     event = Event.query.get(event_id)
     if not event:
         # TODO: 404
-        pass 
-
-    auth_list = [auth.name for auth in Authorization.query.all()]
-    plat_list = [plat.name for plat in Platform.query.all()]
-    res_list = [res.name for res in Resource.query.all()]
-
+        pass
 
     form = EventForm()
-    form.authorizations.choices = [(auth, auth) for auth in auth_list]
-    form.platforms.choices = [(plat, plat) for plat in plat_list]
-    form.resources.choices = [(res, res) for res in res_list]
+    populate_select_boxes(form)
 
     if request.method == 'GET':
         form.populateEvent(event)
@@ -202,7 +202,7 @@ def edit_event(event_id):
         form.populateEvent(event)
 
         return render_template('edit_event.html', title='Edit Event',
-                               form=form, authorizations=auth_list, event=event)
+                               form=form, event=event)
 
     if request.method == 'POST':
         if form.validate_on_submit():
