@@ -67,7 +67,7 @@ class Price(SpecialBase):
     availability = db.Column(db.String(30), nullable=False)
 
     def __repr__(self):
-        return f"Price('{self.name}': '{self.value}', '{self.availability}', '{self.events}')"
+        return f"Price('{self.name}': '{self.value}', '{self.availability}')"
 
 
 class Platform(SpecialBase):
