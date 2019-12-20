@@ -137,7 +137,7 @@ class MeetupPlugin(EventPlugin):
             'name': title,
             'description': description,
             'time': int(timezone.localize(event.start_date).timestamp()) * 1000,
-            'duration': int((event.end_date - event.start_date).total_seconds()*1000),
+            'duration': int((event.endDateTime() - event.start_date).total_seconds()*1000),
             'venue_id': self.getSetting('Venue ID'),
             'publish_status': publish_status,
             'rsvp_limit': rsvp_limit,

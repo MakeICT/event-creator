@@ -242,9 +242,9 @@ class EventForm(FlaskForm):
         self.eventDescription.data = event.description
         # self.registrationURL.data = event.registrationURL()
         self.registrationLimit.data = event.registration_limit
-        self.eventDate.data = event.start_date.date()
-        self.starttime.data = event.start_date.time()
-        self.endtime.data = event.end_date.time()
+        self.eventDate.data = event.start_date
+        self.starttime.data = event.start_time
+        self.endtime.data = event.endTime()
         self.minAge.data = event.min_age
         self.maxAge.data = event.max_age
         self.templateRequiredAuths = [auth.name for auth in event.authorizations]

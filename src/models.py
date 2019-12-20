@@ -133,6 +133,7 @@ class BaseEventTemplate(BaseModel):
     host_email = db.Column(db.String(120), unique=False, nullable=True)
     host_name = db.Column(db.String(60))
     location = db.Column(db.String(120))
+    start_time = db.Column(db.Time(), nullable=True, default=None)
     duration = db.Column(db.Interval(), nullable=False, default=datetime.timedelta(hours=1))
     image_file = db.Column(db.String(20), nullable=True, default='default.jpg')
 
@@ -208,8 +209,7 @@ class Event(BaseEventTemplate):
 
     status = db.Column(db.Enum(EventStatus), nullable=False, default=EventStatus.approved)
 
-    start_date = db.Column(db.DateTime(), nullable=True, default=None)
-    end_date = db.Column(db.DateTime(), nullable=True, default=None)
+    start_date = db.Column(db.Date(), nullable=True, default=None)
     submission_date = db.Column(db.DateTime(), nullable=True, default=None)
     decision_date = db.Column(db.DateTime(), nullable=True, default=None)
     cancelled_date = db.Column(db.DateTime(), nullable=True, default=None)
@@ -218,6 +218,27 @@ class Event(BaseEventTemplate):
 
     def __repr__(self):
         return f"Event('{self.title}', '{self.start_date}')"
+
+    def startDateTime(self):
+        dt = datetime.datetime.combine(self.start_date, self.start_time)
+        return dt
+
+    def startDate(self):
+        return self.startDateTime().date()
+
+    def startTime(self):
+        return self.startDateTime().time()
+
+    def endDateTime(self):
+        dt = datetime.datetime.combine(self.start_date, self.start_time)
+        dt = dt + self.duration
+        return dt
+
+    def endDate(self):
+        return self.endDateTime().date()
+
+    def endTime(self):
+        return self.endDateTime().time()
 
     def registrationURL(self):
         for ext_event in self.external_events:
@@ -266,8 +287,8 @@ class Event(BaseEventTemplate):
 
         if 'time' not in omit:
             desc += "<b>Time:</b> " \
-                + self.start_date.strftime('%b %d %I:%M %p - ') \
-                + self.end_date.strftime('%I:%M %p')
+                + self.startDateTime().strftime('%b %d %I:%M %p - ') \
+                + self.endTime().strftime('%I:%M %p')
 
         if 'instr' not in omit:
             desc += f"<br><b>Instructor:</b> {self.host_name}"

@@ -80,7 +80,7 @@ def load():
                 'location': event.location,
                 'description': description,
                 'start': {'dateTime': event.start_date.isoformat(), 'timeZone': timezone},
-                'end': {'dateTime': event.end_date.isoformat(), 'timeZone': timezone},
+                'end': {'dateTime': event.endDateTime().isoformat(), 'timeZone': timezone},
                 'attendees': selectedResources
             }
 

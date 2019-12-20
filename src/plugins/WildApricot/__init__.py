@@ -103,7 +103,7 @@ class WildApricotPlugin(EventPlugin):
             "StartDate": self.api.DateTimeToWADate(
                              timezone.localize(event.start_date)),
             "EndDate": self.api.DateTimeToWADate(
-                           timezone.localize(event.end_date)),
+                           timezone.localize(event.endDateTime())),
             "Location": event.location,
             "RegistrationsLimit": event.registration_limit,
             "RegistrationEnabled": True,

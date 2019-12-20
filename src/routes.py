@@ -50,6 +50,42 @@ def populate_select_boxes(event_form):
     event_form.platforms.choices = [(plat, plat) for plat in plat_list]
     event_form.resources.choices = [(res, res) for res in res_list]
 
+
+def update_event_details(event, event_form):
+    selected_authorizations = request.form.getlist("authorizations")
+    event_form.setSelectedAuthorizations(selected_authorizations)
+    details = event_form.collectEventDetails()
+    event_auths = [Authorization.query.filter_by(name=auth).first()
+                   for auth in details["pre-requisites"]]
+    event_platforms = [Platform.query.filter_by(name=plat).first()
+                       for plat in details["platforms"]]
+    event_resources = [Resource.query.filter_by(name=res).first()
+                       for res in details["resources"]]
+    if None in event_auths:
+        print("INVALID EVENT AUTHORIZATIONS!!!!")
+    event_prices = [Price(name=price['name'],
+                    description=price['description'],
+                    value=price['price'],
+                    availability=price['availability'][0])
+                    for price in details['prices']]
+
+    event.title = details["title"]
+    event.host_email = details["instructorEmail"]
+    event.host_name = details["instructorName"]
+    event.location = details["location"]
+    event.start_date = details["startTime"].date()
+    event.start_time = details["startTime"].time()
+    event.duration = details["stopTime"] - details["startTime"]
+    event.description = details["description"]
+    event.min_age = details["minimumAge"]
+    event.max_age = details["maximumAge"]
+    event.registration_limit = details["registrationLimit"]
+    event.prices = event_prices
+    event.authorizations = event_auths
+    event.platforms = event_platforms
+    event.resources = event_resources
+
+
 @app.route('/create_event', methods=['GET', 'POST'],
            defaults={'template': None}, strict_slashes=False)
 @app.route("/create_event/<template>", methods=['GET', 'POST'])
@@ -77,42 +113,8 @@ def create_event(template):
 
     if request.method == 'POST':
         if form.validate_on_submit():
-            selected_authorizations = request.form.getlist("authorizations")
-            form.setSelectedAuthorizations(selected_authorizations)
-            event = form.collectEventDetails()
-            event_auths = [Authorization.query.filter_by(name=auth).first()
-                           for auth in event["pre-requisites"]]
-            if None in event_auths:
-                print("INVALID EVENT AUTHORIZATIONS!!!!")
-            event_resources = [Resource.query.filter_by(name=res).first()
-                               for res in event["resources"]]
-            event_prices = [Price(name=price['name'],
-                            description=price['description'],
-                            value=price['price'],
-                            availability=price['availability'][0])
-                            for price in event['prices']]
-
-            event_platforms = [Platform.query.filter_by(name=plat).first()
-                               for plat in event["platforms"]]
-
-            event_entry = Event(title=event["title"],
-                                host_email=event["instructorEmail"],
-                                host_name=event["instructorName"],
-                                location=event["location"],
-                                start_date=event["startTime"],
-                                end_date=event["stopTime"],
-                                description=event["description"],
-                                min_age=event["minimumAge"],
-                                max_age=event["maximumAge"],
-                                registration_limit=event["registrationLimit"],
-
-                                prices=event_prices,
-                                resources=event_resources,
-                                authorizations=event_auths,
-                                platforms=event_platforms,
-                                )
-
-            print(event)
+            event = Event()
+            update_event_details(event, form)
 
             indicatorValue = request.form.get('ts_indicator', '')
 
@@ -132,7 +134,7 @@ def create_event(template):
                 return redirect(url_for('create_event')+'/default.js')                
             else:
                 flash(f'Class created for {form.eventTitle.data}!', 'success')
-                db.session.add(event_entry)
+                db.session.add(event)
                 db.session.commit()
                 return redirect(url_for('upcoming_events'))
         else:
@@ -152,7 +154,7 @@ def upcoming_events():
     for event in upcoming_events:
         if not event.fullySynced():
             needs_sync = 1
-        if event.start_date.date() >= datetime.datetime.today().date():
+        if event.start_date >= datetime.datetime.today().date():
             if event.registration_limit:
                 spots_available = event.registration_limit
                 spots = None
@@ -160,12 +162,12 @@ def upcoming_events():
                     spots = str(spots_available) + 'Register'
                 else:
                     spots = 'FULL'
-            start_date = event.start_date
+
             event_list.append({
                 "Id": event.id,
                 "Name": event.title,
-                "Date": start_date.strftime('%b %d %Y'),
-                "Time": start_date.strftime('%I:%M %p'),
+                "Date": event.start_date.strftime('%b %d %Y'),
+                "Time": event.start_time.strftime('%I:%M %p'),
                 "Description": event.htmlSummary(all_links=True),
                 "Register": "http://makeict.wildapricot.org/event-"
                             + str(event.id),
@@ -206,37 +208,7 @@ def edit_event(event_id):
 
     if request.method == 'POST':
         if form.validate_on_submit():
-            selected_authorizations = request.form.getlist("authorizations")
-            form.setSelectedAuthorizations(selected_authorizations)
-            details = form.collectEventDetails()
-            event_auths = [Authorization.query.filter_by(name=auth).first()
-                           for auth in details["pre-requisites"]]
-            event_platforms = [Platform.query.filter_by(name=plat).first()
-                               for plat in details["platforms"]]
-            event_resources = [Resource.query.filter_by(name=res).first()
-                               for res in details["resources"]]
-            if None in event_auths:
-                print("INVALID EVENT AUTHORIZATIONS!!!!")
-            event_prices = [Price(name=price['name'],
-                            description=price['description'],
-                            value=price['price'],
-                            availability=price['availability'][0])
-                            for price in details['prices']]
-
-            event.title = details["title"]
-            event.host_email = details["instructorEmail"]
-            event.host_name = details["instructorName"]
-            event.location = details["location"]
-            event.start_date = details["startTime"]
-            event.end_date = details["stopTime"]
-            event.description = details["description"]
-            event.min_age = details["minimumAge"]
-            event.max_age = details["maximumAge"]
-            event.registration_limit = details["registrationLimit"]
-            event.prices = event_prices
-            event.authorizations = event_auths
-            event.platforms = event_platforms
-            event.resources = event_resources
+            update_event_details(event, form)
 
             event.update()
 
@@ -288,7 +260,7 @@ def return_data():
     upcoming_events = sorted(upcoming_events, key=lambda event: event.start_date)
     event_list = []
     for event in upcoming_events:
-        if event.start_date.date() >= start_date_range.date() and event.start_date.date() <= end_date_range.date():
+        if event.start_date >= start_date_range.date() and event.start_date <= end_date_range.date():
             if event.registration_limit:
                 spots_available = event.registration_limit
                 spots = None
