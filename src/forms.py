@@ -139,6 +139,40 @@ class EventForm(FlaskForm):
         for t in sorted(self.template_map.keys(), key=str.lower):
             self.templates.append(t)
 
+    def populate(self, event):
+        assert(isinstance(event, (EventTemplate, Event))), "Unsupported type"
+
+        # fields shared between events and templates
+        self.eventTitle.data = event.title
+        self.instructorName.data = event.host_name
+        self.instructorEmail.data = event.host_email
+        self.eventLocation.data = event.location
+        self.eventDescription.data = event.description
+        # self.registrationURL.data = event.registrationURL()
+        self.registrationLimit.data = event.registration_limit
+        self.minAge.data = event.min_age
+        self.maxAge.data = event.max_age
+        self.templateRequiredAuths = [auth.name for auth in event.authorizations]
+        self.calendarResources = [res.name for res in event.resources]
+        self.starttime.data = event.start_time
+        self.duration.data = event.duration.seconds/3600
+
+        for price in event.prices:
+            if (price.name == 'MakeICT Members'):
+                self.memberPrice.data = price.value
+            elif (price.name == 'Non-Members'):
+                self.nonMemberPrice.data = price.value
+        if isinstance(event, Event):
+            # fields specific to real events
+            self.eventDate.data = event.start_date
+
+            self.eventStatus.data = event.status
+        else:
+            self.eventDate.data = datetime.now().date()
+
+            self.eventStatus.data = EventStatus.draft
+
+
     def populateTemplate(self, templateName):
         templateFile = self.template_map.get(templateName, '')
 
