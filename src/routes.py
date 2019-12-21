@@ -108,9 +108,6 @@ def create_event(template):
         form.process()
         form.populateTemplate(template)
 
-        return render_template('create_event.html', title='Create Event',
-                               form=form)
-
     if request.method == 'POST':
         if form.validate_on_submit():
             event = Event()
@@ -193,18 +190,15 @@ def edit_event(event_id):
     populate_select_boxes(form)
 
     if request.method == 'GET':
-        form.populateEvent(event)
+        form.populate(event)
         if form.templateRequiredAuths:
             form.authorizations.default = [auth for auth in form.templateRequiredAuths]
         if form.calendarResources:
             form.resources.default = [res for res in form.calendarResources]
-
         form.platforms.default = [plat.name for plat in event.platforms]
-        form.process()
-        form.populateEvent(event)
 
-        return render_template('edit_event.html', title='Edit Event',
-                               form=form, event=event)
+        form.process()
+        form.populate(event)
 
     if request.method == 'POST':
         if form.validate_on_submit():
@@ -216,6 +210,9 @@ def edit_event(event_id):
             return redirect(url_for('upcoming_events'))
         else:
             flash(f'Event failed to update! Check form for errors.', 'danger')
+
+    return render_template('edit_event.html', title='Edit Event',
+                           form=form, event=event)
 
 
 @app.route('/sync_all')
