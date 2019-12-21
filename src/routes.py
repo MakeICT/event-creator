@@ -44,46 +44,34 @@ def populate_select_boxes(event_form):
     plat_list = [plat.name for plat in Platform.query.all()]
     res_list = [res.name for res in Resource.query.all()]
     event_type_list = [event_type.name for event_type in EventType]
+    event_status_list = [event_status.name for event_status in EventStatus]
 
-    event_form.eventType.choices = [(t, t) for t in event_type_list]
+    event_form.eventType.choices = [(t.name, t.name) for t in EventType]
+    event_form.eventStatus.choices = [(s.name, s.name) for s in EventStatus]
     event_form.authorizations.choices = [(auth, auth) for auth in auth_list]
     event_form.platforms.choices = [(plat, plat) for plat in plat_list]
     event_form.resources.choices = [(res, res) for res in res_list]
-
 
 def update_event_details(event, event_form):
     selected_authorizations = request.form.getlist("authorizations")
     event_form.setSelectedAuthorizations(selected_authorizations)
     details = event_form.collectEventDetails()
-    event_auths = [Authorization.query.filter_by(name=auth).first()
-                   for auth in details["pre-requisites"]]
-    event_platforms = [Platform.query.filter_by(name=plat).first()
-                       for plat in details["platforms"]]
-    event_resources = [Resource.query.filter_by(name=res).first()
-                       for res in details["resources"]]
-    if None in event_auths:
+    details["authorizations"] = [Authorization.query.filter_by(name=auth).first()
+                                 for auth in details["authorizations"]]
+    details["platforms"] = [Platform.query.filter_by(name=plat).first()
+                            for plat in details["platforms"]]
+    details["resources"] = [Resource.query.filter_by(name=res).first()
+                            for res in details["resources"]]
+    if None in details["authorizations"]:
         print("INVALID EVENT AUTHORIZATIONS!!!!")
-    event_prices = [Price(name=price['name'],
-                    description=price['description'],
-                    value=price['price'],
-                    availability=price['availability'][0])
-                    for price in details['prices']]
+    details["prices"] = [Price(name=price['name'],
+                         description=price['description'],
+                         value=price['price'],
+                         availability=price['availability'][0])
+                         for price in details['prices']]
 
-    event.title = details["title"]
-    event.host_email = details["instructorEmail"]
-    event.host_name = details["instructorName"]
-    event.location = details["location"]
-    event.start_date = details["startTime"].date()
-    event.start_time = details["startTime"].time()
-    event.duration = details["stopTime"] - details["startTime"]
-    event.description = details["description"]
-    event.min_age = details["minimumAge"]
-    event.max_age = details["maximumAge"]
-    event.registration_limit = details["registrationLimit"]
-    event.prices = event_prices
-    event.authorizations = event_auths
-    event.platforms = event_platforms
-    event.resources = event_resources
+    for attribute in details:
+        setattr(event, attribute, details[attribute])
 
 
 @app.route('/create_event', methods=['GET', 'POST'],
@@ -104,6 +92,7 @@ def create_event(template):
             form.authorizations.default = [auth for auth in form.templateRequiredAuths]
         if form.calendarResources:
             form.resources.default = [res for res in form.calendarResources]
+        form.platforms.default = [plat.name for plat in form.platforms]
 
         form.process()
         form.populateTemplate(template)
@@ -196,6 +185,8 @@ def edit_event(event_id):
         if form.calendarResources:
             form.resources.default = [res for res in form.calendarResources]
         form.platforms.default = [plat.name for plat in event.platforms]
+        form.eventType.default = event.event_type.name
+        form.eventStatus.default = event.status.name
 
         form.process()
         form.populate(event)

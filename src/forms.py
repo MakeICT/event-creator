@@ -9,9 +9,11 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, \
                     BooleanField, IntegerField, DecimalField, \
                     DateField, DateTimeField, TextAreaField, TimeField, \
-                    SelectMultipleField, SelectField
+                    SelectMultipleField, SelectField, FloatField
 from wtforms.validators import DataRequired, Length, Email, URL, Optional
 from wtforms.fields.simple import TextAreaField
+
+from models import Event, EventTemplate, EventStatus, EventType, Authorization, Price, Resource, Platform
 
 useHtml5Fields = True
 if useHtml5Fields:
@@ -23,6 +25,7 @@ class EventForm(FlaskForm):
     auths = []
 
     eventType = SelectField('Type', choices=[], validators=[DataRequired()])
+    eventStatus = SelectField('Status', choices=[], validators=[Optional()])
 
     eventTitle = StringField('Title', validators=[DataRequired()])
     instructorName = StringField('Instructor Name',
@@ -37,12 +40,12 @@ class EventForm(FlaskForm):
     if useHtml5Fields:
         eventDate = DateField('Date', default=datetime.date.today())
         starttime = TimeField(label='Start time(CDT)')
-        endtime = TimeField(label='End time(CDT)')
+        duration = FloatField(label='Duration (Hours)')
     else:
         eventDate = DateField('Date', default=datetime.date.today(),
                               format='%m/%d/%Y')
         starttime = TimeField(label='Start time(CDT)', format="%H:%M %p")
-        endtime = TimeField(label='End time(CDT)', format="%H:%M %p")
+        duration = FloatField(label='Duration (Hours)')
     minAge = IntegerField('Min Age', validators=[Optional()])
     maxAge = IntegerField('Max Age', validators=[Optional()])
     memberPrice = DecimalField(places=2, validators=[Optional()])
@@ -70,23 +73,23 @@ class EventForm(FlaskForm):
 
         event = {
             'title': self.eventTitle.data.strip(),
+            'status': self.eventStatus.data,
+            'event_type': self.eventType.data,
+            'host_email': self.instructorEmail.data.strip(),
+            'host_name': self.instructorName.data.strip(),
             'location': self.eventLocation.data.strip(),
-            'startTime': datetime.datetime.combine(date, self.starttime.data),
-            'stopTime': datetime.datetime.combine(date, self.endtime.data),
+            'start_date': self.eventDate.data,
+            'start_time': self.starttime.data,
+            'duration': datetime.timedelta(hours=self.duration.data),
             'description': self.eventDescription.data.strip(),
-            'registrationURL': self.registrationURL.data.strip(),
-            'registrationLimit': self.registrationLimit.data,
+            'min_age': self.minAge.data if self.minAge.data is not None else 0,
+            'max_age': self.maxAge.data if self.maxAge.data is not None else 0,
+            'registration_limit': self.registrationLimit.data,
             'prices': [],
-            'tags': {},
-            'isFree': True,
-            'priceDescription': '',
-            'instructorName': self.instructorName.data.strip(),
-            'instructorEmail': self.instructorEmail.data.strip(),
-            'minimumAge': self.minAge.data if self.minAge.data is not None else 0,
-            'maximumAge': self.maxAge.data if self.maxAge.data is not None else 0,
-            'pre-requisites': self.authorizations.data,
-            'resources': self.resources.data,
+            'authorizations': self.authorizations.data,
             'platforms': self.platforms.data,
+            'resources': self.resources.data,
+            'tags': {},
         }
 
         if self.memberPrice is not None:
@@ -111,15 +114,6 @@ class EventForm(FlaskForm):
 
         event['tags']['Required auth\'s'] = self.auths
         event['tags']['Resources'] = self.resources.data
-
-        if self.auths:
-            event['authorizationDescription'] = "Required authorizations: "
-
-            if len(self.auths) > 0:
-                event['authorizationDescription'] += ','.join(self.auths)
-
-        else:
-            event['authorizationDescription'] = None
 
         return event
 
@@ -166,11 +160,13 @@ class EventForm(FlaskForm):
             # fields specific to real events
             self.eventDate.data = event.start_date
 
-            self.eventStatus.data = event.status
+            self.eventStatus.data = event.status.name
+            self.eventType.data = event.event_type.name
         else:
             self.eventDate.data = datetime.now().date()
 
-            self.eventStatus.data = EventStatus.draft
+            self.eventStatus.data = EventStatus.draft.name
+            self.eventType.data = EventType.event.name
 
 
     def populateTemplate(self, templateName):
@@ -204,9 +200,9 @@ class EventForm(FlaskForm):
             if self.isNotBlank(value):
                 self.starttime.data = parse(value, fuzzy=True)
 
-            value = data.get('stopTime', '')
-            if self.isNotBlank(value):
-                self.endtime.data = parse(value, fuzzy=True)
+            # value = data.get('stopTime', '')
+            # if self.isNotBlank(value):
+            #     self.endtime.data = parse(value, fuzzy=True)
 
             self.minAge.data = data.get('minimumAge', '')
             self.maxAge.data = data.get('maximumAge', '')
@@ -278,7 +274,7 @@ class EventForm(FlaskForm):
         self.registrationLimit.data = event.registration_limit
         self.eventDate.data = event.start_date
         self.starttime.data = event.start_time
-        self.endtime.data = event.endTime()
+        self.duration.data = event.duration.seconds/3600
         self.minAge.data = event.min_age
         self.maxAge.data = event.max_age
         self.templateRequiredAuths = [auth.name for auth in event.authorizations]

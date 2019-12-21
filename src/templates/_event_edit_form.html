@@ -1,4 +1,4 @@
-{% from "_macros.html" import render_field, render_multipleselect_field %}
+{% from "_macros.html" import render_field, render_select_field %}
 <script>
   $('.selectpicker').selectpicker();
 </script>
@@ -11,10 +11,13 @@
   
   <div class="border rounded p-2 my-2 bg-light">
     <div class="row">
-      <div class="col-md-12">
-        {{ render_field(form.eventType) }}
+      <div class="col-md-6">
+        {{ render_select_field(form.eventType) }}
       </div>
-    </div>
+      <div class="col-md-6">
+        {{ render_select_field(form.eventStatus) }}
+      </div>
+    </div>    
 
     <div class="row">
       <div class="col-md-12">
@@ -51,7 +54,7 @@
         {{ render_field(form.starttime) }}
       </div>
       <div class="col">
-        {{ render_field(form.endtime) }}
+        {{ render_field(form.duration) }}
       </div>
     </fieldset>
 
@@ -81,19 +84,19 @@
 
     <div class="row">
       <div class="col-md-12">
-        {{ render_multipleselect_field(form.authorizations) }}
+        {{ render_select_field(form.authorizations) }}
       </div>
     </div>
 
     <div class="row">
       <div class="col-md-12">
-        {{ render_multipleselect_field(form.resources) }}
+        {{ render_select_field(form.resources) }}
       </div>
     </div>
 
     <div class="row">
       <div class="col-md-12">
-        {{ render_multipleselect_field(form.platforms) }}
+        {{ render_select_field(form.platforms) }}
       </div>
     </div>
 
