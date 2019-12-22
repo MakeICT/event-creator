@@ -26,6 +26,7 @@ class EventForm(FlaskForm):
 
     eventType = SelectField('Type', choices=[], validators=[DataRequired()])
     eventStatus = SelectField('Status', choices=[], validators=[Optional()])
+    eventTag = SelectField('Tag', choices=[], validators=[Optional()])
 
     eventTitle = StringField('Title', validators=[DataRequired()])
     instructorName = StringField('Instructor Name',
@@ -69,8 +70,6 @@ class EventForm(FlaskForm):
         self.auths = selected
 
     def collectEventDetails(self):
-        date = self.eventDate.data
-
         event = {
             'title': self.eventTitle.data.strip(),
             'status': self.eventStatus.data,
@@ -89,7 +88,7 @@ class EventForm(FlaskForm):
             'authorizations': self.authorizations.data,
             'platforms': self.platforms.data,
             'resources': self.resources.data,
-            'tags': {},
+            'tags': [self.eventTag.data],
         }
 
         if self.memberPrice is not None:
@@ -106,14 +105,14 @@ class EventForm(FlaskForm):
                 'description': '',
                 'availability': ['Everyone']})
 
-        for tagGroup in self.tagGroups:
-            event['tags'][tagGroup['name']] = []
-            for checkbox in tagGroup['checkboxes']:
-                if checkbox.isChecked():
-                    event['tags'][tagGroup['name']].append(checkbox.text())
+        # for tagGroup in self.tagGroups:
+        #     event['tags'][tagGroup['name']] = []
+        #     for checkbox in tagGroup['checkboxes']:
+        #         if checkbox.isChecked():
+        #             event['tags'][tagGroup['name']].append(checkbox.text())
 
-        event['tags']['Required auth\'s'] = self.auths
-        event['tags']['Resources'] = self.resources.data
+        # event['tags']['Required auth\'s'] = self.auths
+        # event['tags']['Resources'] = self.resources.data
 
         return event
 
@@ -134,7 +133,7 @@ class EventForm(FlaskForm):
             self.templates.append(t)
 
     def populate(self, event):
-        assert(isinstance(event, (EventTemplate, Event))), "Unsupported type"
+        assert isinstance(event, (EventTemplate, Event)), "Unsupported type"
 
         # fields shared between events and templates
         self.eventTitle.data = event.title
@@ -142,7 +141,6 @@ class EventForm(FlaskForm):
         self.instructorEmail.data = event.host_email
         self.eventLocation.data = event.location
         self.eventDescription.data = event.description
-        # self.registrationURL.data = event.registrationURL()
         self.registrationLimit.data = event.registration_limit
         self.minAge.data = event.min_age
         self.maxAge.data = event.max_age

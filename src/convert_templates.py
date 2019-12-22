@@ -4,7 +4,7 @@ from dateutil.parser import parse
 
 from main import db
 from models import Event, EventTemplate, EventType
-from models import Platform, Price, Resource, Authorization
+from models import Platform, Price, Resource, Authorization, Tag
 
 
 # import logging
@@ -30,6 +30,7 @@ class JSON_Template():
         'authorizations',
         'resources',
         'prices',
+        'tags',
         ]
 
     def __init__(self, path):
@@ -45,6 +46,7 @@ class JSON_Template():
         with open(path) as json_file:
             data = json.load(json_file)
 
+            self.event_type = EventType._class
             self.title = data.get('title', '')
             self.description = data.get('description', '')
             self.host_email = data.get('instructorEmail', '')
@@ -99,6 +101,10 @@ class JSON_Template():
                            value=price['price'],
                            availability=price['availability'][0] if price['availability'] else "")
                            for price in self.price_list]
+            self.tags = [Tag.query.filter_by(name=path.split('/')[-2]).first()]
+            if not self.tags[0]:
+                self.tags = [Tag(name= path.split('/')[-2])]
+
 
     def printTemplate(self):
         for field in self.fields_names:

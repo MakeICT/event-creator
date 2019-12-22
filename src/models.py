@@ -41,6 +41,17 @@ class SpecialBase(BaseModel):
         ))
 
 
+class Tag(SpecialBase):
+    __tablename__ = "tag"
+
+    parent_id = db.Column(db.Integer, db.ForeignKey('tag.id'), nullable=True, unique=False)  
+    children = db.relationship('Tag', lazy=True)
+
+    def __repr__(self):
+        return f"Tag('{self.name}')"
+    db.UniqueConstraint('name', name='tag_uq')
+
+
 class Authorization(SpecialBase):
     __tablename__ = "authorization"
 
@@ -126,8 +137,6 @@ class BaseEventTemplate(BaseModel):
 
     event_type = db.Column(db.Enum(EventType), nullable=False, default=EventType._class)
 
-    # category = tags?
-
     title = db.Column(db.String(100), unique=False, nullable=False)
     description = db.Column(db.String(4000), nullable=False)
     host_email = db.Column(db.String(120), unique=False, nullable=True)
@@ -136,6 +145,18 @@ class BaseEventTemplate(BaseModel):
     start_time = db.Column(db.Time(), nullable=True, default=None)
     duration = db.Column(db.Interval(), nullable=False, default=datetime.timedelta(hours=1))
     image_file = db.Column(db.String(20), nullable=True, default='default.jpg')
+
+    @declared_attr
+    def tags(cls):
+        resource_association = db.Table(
+            '%s_tags' % cls.__tablename__,
+            cls.metadata,
+            db.Column('tag_id', db.Integer, db.ForeignKey('tag.id')),
+            db.Column('%s_id' % cls.__tablename__,
+                      db.Integer, db.ForeignKey('%s.id' % cls.__tablename__)),
+        )
+        return db.relationship(Tag, secondary=resource_association,
+                               backref="%s_parents" % cls.__name__.lower())
 
     @declared_attr
     def resources(cls):
@@ -148,6 +169,7 @@ class BaseEventTemplate(BaseModel):
         )
         return db.relationship(Resource, secondary=resource_association,
                                backref="%s_parents" % cls.__name__.lower())
+
     @declared_attr
     def platforms(cls):
         platform_association = db.Table(

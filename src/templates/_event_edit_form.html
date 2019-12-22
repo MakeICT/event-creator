@@ -11,10 +11,13 @@
   
   <div class="border rounded p-2 my-2 bg-light">
     <div class="row">
-      <div class="col-md-6">
+      <div class="col-md-4">
         {{ render_select_field(form.eventType) }}
       </div>
-      <div class="col-md-6">
+      <div class="col-md-4">
+        {{ render_select_field(form.eventTag) }}
+      </div>
+      <div class="col-md-4">
         {{ render_select_field(form.eventStatus) }}
       </div>
     </div>    

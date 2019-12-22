@@ -13,7 +13,7 @@ from config import settings
 from main import app, db, loadedPlugins
 from forms import EventForm
 from models import Event, EventStatus, EventType
-from models import Authorization, Price, Platform, Resource
+from models import Authorization, Price, Platform, Resource, Tag
 from event_sync import SyncEvent, SyncEvents, DeleteEvent, MissingExternalEventError
 
 nav = Nav()
@@ -45,12 +45,15 @@ def populate_select_boxes(event_form):
     res_list = [res.name for res in Resource.query.all()]
     event_type_list = [event_type.name for event_type in EventType]
     event_status_list = [event_status.name for event_status in EventStatus]
+    tag_list = [tag.name for tag in Tag.query.all()]
 
     event_form.eventType.choices = [(t.name, t.name) for t in EventType]
     event_form.eventStatus.choices = [(s.name, s.name) for s in EventStatus]
+    event_form.eventTag.choices = [(t, t) for t in tag_list]
     event_form.authorizations.choices = [(auth, auth) for auth in auth_list]
     event_form.platforms.choices = [(plat, plat) for plat in plat_list]
     event_form.resources.choices = [(res, res) for res in res_list]
+
 
 def update_event_details(event, event_form):
     selected_authorizations = request.form.getlist("authorizations")
@@ -62,6 +65,9 @@ def update_event_details(event, event_form):
                             for plat in details["platforms"]]
     details["resources"] = [Resource.query.filter_by(name=res).first()
                             for res in details["resources"]]
+    details["tags"] = [Tag.query.filter_by(name=tag).first()
+                       for tag in details["tags"]]
+
     if None in details["authorizations"]:
         print("INVALID EVENT AUTHORIZATIONS!!!!")
     details["prices"] = [Price(name=price['name'],
@@ -187,6 +193,7 @@ def edit_event(event_id):
         form.platforms.default = [plat.name for plat in event.platforms]
         form.eventType.default = event.event_type.name
         form.eventStatus.default = event.status.name
+        form.eventTag.default = event.tags[0].name
 
         form.process()
         form.populate(event)
