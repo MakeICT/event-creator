@@ -12,8 +12,8 @@
 <!-- Modal -->
 <script>
   function populateTemplateDialog(value) {
-	if (value == 'saveas') {
-	  document.getElementById("dialog_mode").value = value
+	if (value == 'savecopy') {
+	    document.getElementById("dialog_mode").value = value
       document.getElementById("ts_title").innerText = "Save";
       document.getElementById("ts_label").innerText = "Save Template As (Specify Path and/or Name):"
       document.getElementById("ts_name_input").value = "{{form.selectedTemplateFullName}}";
@@ -72,7 +72,7 @@
   
     if (close_action == 'save') {
       document.getElementById("ts_name").value = name;
-      document.getElementById("ts_indicator").value = "save_template";
+      document.getElementById("ts_indicator").value = "save_copy_template";
       var doc = document.getElementById("classForm");
       HTMLFormElement.prototype.submit.call(document.getElementById("classForm"));
     }
@@ -135,12 +135,13 @@
 <div class="container content-section p-0">
   <fieldset>
     <div class="form-control-group form-inline">
+      <!-- Template selector -->
       <select name="Template" class="selectpicker border rounded" data-live-search="true" data-width="auto" onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
         {% for template in form.templates %}
           {% if form.selectedTemplateName and form.selectedTemplateName == template %}
-            <option value="{{ template }}" selected="selected">{{ template }}</option>
+            <option value="{{ form.template_map[template] }}" selected="selected">{{ template }}</option>
           {% else %}
-            <option value="{{ template }}">{{ template }}</option>
+            <option value="{{ form.template_map[template] }}">{{ template }}</option>
           {% endif %}
         {% endfor %}
       </select>
@@ -148,8 +149,8 @@
       <button type="button" class="btn btn-primary mx-2" data-toggle="modal" data-target="#templateDialog" onclick="populateTemplateDialog('save');">
         Save
       </button>
-      <button type="button" class="btn btn-primary mx-2" data-toggle="modal" data-target="#templateDialog" onclick="populateTemplateDialog('saveas');">
-        Save As
+      <button type="button" class="btn btn-primary mx-2" data-toggle="modal" data-target="#templateDialog" onclick="populateTemplateDialog('savecopy');">
+        Save Copy
       </button>
       <button type="button" class="btn btn-primary mx-2" data-toggle="modal" data-target="#templateDialog" onclick="populateTemplateDialog('delete');">
         Delete

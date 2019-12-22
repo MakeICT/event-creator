@@ -12,7 +12,7 @@ from flask_login import login_user, logout_user, current_user, login_required
 from config import settings
 from main import app, db, loadedPlugins
 from forms import EventForm
-from models import Event, EventStatus, EventType
+from models import Event, EventStatus, EventType, EventTemplate
 from models import Authorization, Price, Platform, Resource, Tag
 from event_sync import SyncEvent, SyncEvents, DeleteEvent, MissingExternalEventError
 
@@ -77,57 +77,70 @@ def update_event_details(event, event_form):
                          for price in details['prices']]
 
     for attribute in details:
+        try:
+            getattr(event, attribute)
+        except AttributeError:
+            pass
         setattr(event, attribute, details[attribute])
 
-
 @app.route('/create_event', methods=['GET', 'POST'],
-           defaults={'template': None}, strict_slashes=False)
-@app.route("/create_event/<template>", methods=['GET', 'POST'])
+           defaults={'template_id': None}, strict_slashes=False)
+@app.route("/create_event/<template_id>", methods=['GET', 'POST'])
 @login_required
-def create_event(template):
+def create_event(template_id):
     form = EventForm()
     populate_select_boxes(form)
 
     if request.method == 'GET':
-        if not template or template == "Select Template":
-            print("NO TEMPLATE!")
-            return redirect(url_for('create_event')+'/default.js')
+        if not template_id:
+            return redirect(url_for('create_event')+'/1')
         form.loadTemplates()
-        form.populateTemplate(template)
+        template = EventTemplate.query.filter_by(id=template_id).first()
+        form.populate(template)
         if form.templateRequiredAuths:
             form.authorizations.default = [auth for auth in form.templateRequiredAuths]
         if form.calendarResources:
             form.resources.default = [res for res in form.calendarResources]
-        form.platforms.default = [plat.name for plat in form.platforms]
+        form.platforms.default = [plat for plat in form.eventPlatforms]
 
         form.process()
-        form.populateTemplate(template)
+        form.populate(template)
 
     if request.method == 'POST':
         if form.validate_on_submit():
-            event = Event()
-            update_event_details(event, form)
 
             indicatorValue = request.form.get('ts_indicator', '')
 
-            if indicatorValue == "save_template":
-                templateFile = request.form.get('ts_name', '')
+            if indicatorValue == "save_template" or indicatorValue == "save_copy_template" :
+                if indicatorValue == "save_template":
+                    event_template = EventTemplate.query.get(template_id)
+                elif indicatorValue == "save_copy_template":
+                    event_template = EventTemplate()
+                update_event_details(event_template, form)
+                event_template.update()
 
-                templateName = form.saveTemplate(dict(event), request.form["ts_name"])
+                flash(f"{event_template.title} [{event_template.host_name}]  saved!", 'success')
+
                 form.loadTemplates()
-                flash("Template Saved as " + templateName + "!", 'success')
-
-                form.populateTemplate(templateName)
+                form.populate(event_template)
                 return render_template('create_event.html', title='Create Event',
                                        form=form)
-            elif indicatorValue == "delete_template":
-                flash(form.deleteTemplate(request.form.get('ts_name', '')), 'success')
 
-                return redirect(url_for('create_event')+'/default.js')                
+            elif indicatorValue == "delete_template":
+                event_template = EventTemplate.query.get(template_id)
+                t_name = f"{event_template.title} [{event_template.host_name}]" 
+                db.session.delete(event_template)
+                db.session.commit()
+                flash(f"{t_name} has been deleted!", 'success')
+
+                return redirect(url_for('create_event')+'/1')
             else:
-                flash(f'Class created for {form.eventTitle.data}!', 'success')
+                event = Event()
+                update_event_details(event, form)
                 db.session.add(event)
                 db.session.commit()
+
+                flash(f'Class created for {form.eventTitle.data}!', 'success')
                 return redirect(url_for('upcoming_events'))
         else:
             flash(f'Event failed to post! Check form for errors.', 'danger')
