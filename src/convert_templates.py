@@ -21,6 +21,7 @@ class JSON_Template():
         'location',
         'description',
         'registration_limit',
+        'start_time',
         'duration',
         'min_age',
         'max_age',
@@ -60,13 +61,14 @@ class JSON_Template():
 
             value = data.get('startTime', '')
             if self.isNotBlank(value):
-                self.starttime = parse(value, fuzzy=True)
+                self.start_time = parse(value, fuzzy=True)
 
             value = data.get('stopTime', '')
             if self.isNotBlank(value):
-                self.endtime = parse(value, fuzzy=True)
+                self.end_time = parse(value, fuzzy=True)
 
-            self.duration = self.endtime - self.starttime
+            self.duration = self.end_time - self.start_time
+            self.start_time = self.start_time.time()
 
             self.min_age = data.get('minimumAge', '')
             self.max_age = data.get('maximumAge', '')
