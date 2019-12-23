@@ -49,6 +49,14 @@ def populate_select_boxes(event_form):
     event_form.resources.choices = [(r.name, r.name) for r in Resource.query.all()]
 
 
+def set_select_box_defaults(event, form):
+    if event.authorizations:
+        form.authorizations.default = [auth.name for auth in event.authorizations]
+    if event.resources:
+        form.resources.default = [res.name for res in event.resources]
+    form.platforms.default = [plat.name for plat in event.platforms]
+
+
 def update_event_details(event, event_form):
     details = event_form.collectEventDetails()
     details["authorizations"] = [Authorization.query.filter_by(name=auth).first()
@@ -59,9 +67,6 @@ def update_event_details(event, event_form):
                             for res in details["resources"]]
     details["tags"] = [Tag.query.filter_by(name=tag).first()
                        for tag in details["tags"]]
-
-    if None in details["authorizations"]:
-        print("INVALID EVENT AUTHORIZATIONS!!!!")
     details["prices"] = [Price(name=price['name'],
                          description=price['description'],
                          value=price['price'],
@@ -74,14 +79,6 @@ def update_event_details(event, event_form):
         except AttributeError:
             pass
         setattr(event, attribute, details[attribute])
-
-
-def set_select_box_defaults(event, form):
-    if event.authorizations:
-        form.authorizations.default = [auth.name for auth in event.authorizations]
-    if event.resources:
-        form.resources.default = [res.name for res in event.resources]
-    form.platforms.default = [plat.name for plat in event.platforms]
 
 
 @app.route('/create_event', methods=['GET', 'POST'],
@@ -145,38 +142,6 @@ def create_event(template_id):
                            form=form)
 
 
-@app.route('/events', methods=['GET'])
-def upcoming_events():
-    upcoming_events = Event.query.all()
-    upcoming_events = sorted(upcoming_events, key=lambda event: event.start_date)
-    event_list = []
-    needs_sync = 0
-    for event in upcoming_events:
-        if not event.fullySynced():
-            needs_sync = 1
-        if event.start_date >= datetime.datetime.today().date():
-            if event.registration_limit:
-                spots_available = event.registration_limit
-                spots = None
-                if spots_available > 0:
-                    spots = str(spots_available) + 'Register'
-                else:
-                    spots = 'FULL'
-
-            event_list.append({
-                "Id": event.id,
-                "Name": event.title,
-                "Date": event.start_date.strftime('%b %d %Y'),
-                "Time": event.start_time.strftime('%I:%M %p'),
-                "Description": event.htmlSummary(all_links=True),
-                "Register": "http://makeict.wildapricot.org/event-"
-                            + str(event.id),
-                "Synced": 1 if event.fullySynced() else 0,
-            })
-
-    return render_template('events.html', events=event_list, sync_all=needs_sync)
-
-
 @app.route('/event/<event_id>', methods=['GET', 'POST'])
 @login_required
 def edit_event(event_id):
@@ -207,6 +172,38 @@ def edit_event(event_id):
 
     return render_template('edit_event.html', title='Edit Event',
                            form=form, event=event)
+
+
+@app.route('/events', methods=['GET'])
+def upcoming_events():
+    upcoming_events = Event.query.all()
+    upcoming_events = sorted(upcoming_events, key=lambda event: event.start_date)
+    event_list = []
+    needs_sync = 0
+    for event in upcoming_events:
+        if not event.fullySynced():
+            needs_sync = 1
+        if event.start_date >= datetime.datetime.today().date():
+            if event.registration_limit:
+                spots_available = event.registration_limit
+                spots = None
+                if spots_available > 0:
+                    spots = str(spots_available) + 'Register'
+                else:
+                    spots = 'FULL'
+
+            event_list.append({
+                "Id": event.id,
+                "Name": event.title,
+                "Date": event.start_date.strftime('%b %d %Y'),
+                "Time": event.start_time.strftime('%I:%M %p'),
+                "Description": event.htmlSummary(all_links=True),
+                "Register": "http://makeict.wildapricot.org/event-"
+                            + str(event.id),
+                "Synced": 1 if event.fullySynced() else 0,
+            })
+
+    return render_template('events.html', events=event_list, sync_all=needs_sync)
 
 
 @app.route('/sync_all')

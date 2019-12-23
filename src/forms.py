@@ -31,12 +31,12 @@ class EventForm(FlaskForm):
     if useHtml5Fields:
         eventDate = DateField('Date', default=datetime.date.today())
         starttime = TimeField(label='Start time(CDT)')
-        duration = FloatField(label='Duration (Hours)')
     else:
         eventDate = DateField('Date', default=datetime.date.today(),
                               format='%m/%d/%Y')
         starttime = TimeField(label='Start time(CDT)', format="%H:%M %p")
-        duration = FloatField(label='Duration (Hours)')
+
+    duration = FloatField(label='Duration (Hours)')
     minAge = IntegerField('Min Age', validators=[Optional()])
     maxAge = IntegerField('Max Age', validators=[Optional()])
     memberPrice = DecimalField(places=2, validators=[Optional()])
@@ -54,7 +54,7 @@ class EventForm(FlaskForm):
     selectedTemplateName = ""
 
     def collectEventDetails(self):
-        event = {
+        details = {
             'title': self.eventTitle.data.strip(),
             'status': self.eventStatus.data,
             'event_type': self.eventType.data,
@@ -76,20 +76,20 @@ class EventForm(FlaskForm):
         }
 
         if self.memberPrice is not None:
-            event['prices'].append({'name': 'MakeICT Members',
-                                    'price': float(self.memberPrice.data),
-                                    'description': '',
-                                    'availability': ['Members']
-                                    })
+            details['prices'].append({'name': 'MakeICT Members',
+                                      'price': float(self.memberPrice.data),
+                                      'description': '',
+                                      'availability': ['Members']
+                                      })
 
         if self.nonMemberPrice is not None:
-            event['prices'].append({
+            details['prices'].append({
                 'name': 'Non-Members',
                 'price': float(self.nonMemberPrice.data),
                 'description': '',
                 'availability': ['Everyone']})
 
-        return event
+        return details
 
     def loadTemplates(self):
         self.template_map = {}
@@ -101,6 +101,7 @@ class EventForm(FlaskForm):
 
         for t in sorted(self.template_map.keys(), key=str.lower):
             self.templates.append(t)
+        breakpoint()
 
     def populate(self, event):
         """
@@ -143,6 +144,7 @@ class EventForm(FlaskForm):
             self.eventDate.data = event.start_date
             self.eventStatus.data = event.status.name
         else:
+            # fields specific to templates
             self.eventDate.data = datetime.datetime.now().date()
             self.eventStatus.data = EventStatus.draft.name
             self.selectedTemplateName = f"{event.title} [{event.host_name}]"
