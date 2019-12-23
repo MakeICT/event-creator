@@ -27,23 +27,20 @@ def unauthorized_callback():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    
+    # redirect to home page if a user is already logged in
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+
     error = None
     if request.method == 'POST':        
         user = validateWAUser(request.form['username'], request.form['password'])
         if user is None:
-            flash('Please check your login details and try again.')
+            flash('Please check your login details and try again.', 'danger')
         else:
             login_user(user)
             return redirect(url_for('home'))
         
     
-        """Logout the current user."""
-    user = current_user
-    
-    if user is not None:
-        user.authenticated = False
-        logout_user()
             
     return render_template('login.html', error=error)
 
@@ -52,12 +49,11 @@ def login():
 def logout():
     """Logout the current user."""
     user = current_user
-    
     if user is not None:
         user.authenticated = False
         logout_user()
         
-    return render_template("login.html")
+    return redirect("login")
 
 def validateWAUser(username, password):
     waplugin = loadedPlugins['WildApricot']
