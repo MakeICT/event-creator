@@ -65,7 +65,6 @@ class EventForm(FlaskForm):
     templates = []
 
     selectedTemplateName = ""
-    selectedTemplateFullName = ""
 
     def setSelectedAuthorizations(self, selected):
         self.auths = selected
@@ -143,6 +142,12 @@ class EventForm(FlaskForm):
         self.eventType.data = event.event_type.name
         self.eventTag.data = event.tags[0].name
         self.starttime.data = event.start_time
+
+        if event.authorizations:
+            self.authorizations.default = [auth.name for auth in event.authorizations]
+        if event.resources:
+            self.resources.default = [res.name for res in event.resources]
+        self.platforms.default = [plat.name for plat in event.platforms]
 
         for price in event.prices:
             if (price.name == 'MakeICT Members'):

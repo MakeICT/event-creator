@@ -19,6 +19,7 @@ from event_sync import SyncEvent, SyncEvents, DeleteEvent, MissingExternalEventE
 nav = Nav()
 nav.init_app(app)
 
+
 @nav.navigation()
 def top_nav():
     items = [View('Home', 'home'),
@@ -27,9 +28,9 @@ def top_nav():
              View('Calendar', 'calendar')]
 
     if current_user.is_authenticated :
-      items.append(View('Log Out', 'logout'))
+        items.append(View('Log Out', 'logout'))
     else:
-      items.append(View('Log In', 'login'))
+        items.append(View('Log In', 'login'))
     return Navbar('', *items)
 
 
@@ -40,19 +41,12 @@ def home():
 
 
 def populate_select_boxes(event_form):
-    auth_list = [auth.name for auth in Authorization.query.all()]
-    plat_list = [plat.name for plat in Platform.query.all()]
-    res_list = [res.name for res in Resource.query.all()]
-    event_type_list = [event_type.name for event_type in EventType]
-    event_status_list = [event_status.name for event_status in EventStatus]
-    tag_list = [tag.name for tag in Tag.query.all()]
-
     event_form.eventType.choices = [(t.name, t.name) for t in EventType]
     event_form.eventStatus.choices = [(s.name, s.name) for s in EventStatus]
-    event_form.eventTag.choices = [(t, t) for t in tag_list]
-    event_form.authorizations.choices = [(auth, auth) for auth in auth_list]
-    event_form.platforms.choices = [(plat, plat) for plat in plat_list]
-    event_form.resources.choices = [(res, res) for res in res_list]
+    event_form.eventTag.choices = [(t.name, t.name) for t in Tag.query.all()]
+    event_form.authorizations.choices = [(a.name, a.name) for a in Authorization.query.all()]
+    event_form.platforms.choices = [(p.name, p.name) for p in Platform.query.all()]
+    event_form.resources.choices = [(r.name, r.name) for r in Resource.query.all()]
 
 
 def update_event_details(event, event_form):
@@ -83,6 +77,15 @@ def update_event_details(event, event_form):
             pass
         setattr(event, attribute, details[attribute])
 
+
+def set_select_box_defaults(event, form):
+    if event.authorizations:
+        form.authorizations.default = [auth.name for auth in event.authorizations]
+    if event.resources:
+        form.resources.default = [res.name for res in event.resources]
+    form.platforms.default = [plat.name for plat in event.platforms]
+
+
 @app.route('/create_event', methods=['GET', 'POST'],
            defaults={'template_id': None}, strict_slashes=False)
 @app.route("/create_event/<template_id>", methods=['GET', 'POST'])
@@ -96,13 +99,7 @@ def create_event(template_id):
             return redirect(url_for('create_event')+'/1')
         form.loadTemplates()
         template = EventTemplate.query.filter_by(id=template_id).first()
-        form.populate(template)
-        if form.templateRequiredAuths:
-            form.authorizations.default = [auth for auth in form.templateRequiredAuths]
-        if form.calendarResources:
-            form.resources.default = [res for res in form.calendarResources]
-        form.platforms.default = [plat for plat in form.eventPlatforms]
-
+        set_select_box_defaults(template, form)
         form.process()
         form.populate(template)
 
@@ -178,10 +175,6 @@ def upcoming_events():
                             + str(event.id),
                 "Synced": 1 if event.fullySynced() else 0,
             })
-            #       str(event['Id']))
-            # print(start_date.strftime('%b %d') + ' | ' + start_date.strftime('%I:%M %p') + 
-            #       ' | ' + event['Name'] + ' | ' + '<a href="http://makeict.wildapricot.org/event-' + 
-            #       str(event['Id']) + '" target="_blank">Register</a><br />')
 
     return render_template('events.html', events=event_list, sync_all=needs_sync)
 
@@ -199,15 +192,7 @@ def edit_event(event_id):
 
     if request.method == 'GET':
         form.populate(event)
-        if form.templateRequiredAuths:
-            form.authorizations.default = [auth for auth in form.templateRequiredAuths]
-        if form.calendarResources:
-            form.resources.default = [res for res in form.calendarResources]
-        form.platforms.default = [plat.name for plat in event.platforms]
-        form.eventType.default = event.event_type.name
-        form.eventStatus.default = event.status.name
-        form.eventTag.default = event.tags[0].name
-
+        set_select_box_defaults(event, form)
         form.process()
         form.populate(event)
 
