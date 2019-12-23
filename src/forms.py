@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta, date
 
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, BooleanField, IntegerField,  \
@@ -29,10 +29,10 @@ class EventForm(FlaskForm):
     registrationLimit = IntegerField('Registration Limit',
                                      validators=[DataRequired()])
     if useHtml5Fields:
-        eventDate = DateField('Date', default=datetime.date.today())
+        eventDate = DateField('Date', default=date.today())
         starttime = TimeField(label='Start time(CDT)')
     else:
-        eventDate = DateField('Date', default=datetime.date.today(),
+        eventDate = DateField('Date', default=date.today(),
                               format='%m/%d/%Y')
         starttime = TimeField(label='Start time(CDT)', format="%H:%M %p")
 
@@ -53,6 +53,20 @@ class EventForm(FlaskForm):
 
     selectedTemplateName = ""
 
+    def validate(self):
+        if not super().validate():
+            return False
+
+        result = True
+        start_datetime = datetime.combine(self.eventDate.data, self.starttime.data)
+
+        if not start_datetime > datetime.now():
+            self.eventDate.errors.append('start of event must be in the future')
+            self.starttime.errors.append('start of event must be in the future')
+            result = False
+
+        return result
+
     def collectEventDetails(self):
         details = {
             'title': self.eventTitle.data.strip(),
@@ -63,7 +77,7 @@ class EventForm(FlaskForm):
             'location': self.eventLocation.data.strip(),
             'start_date': self.eventDate.data,
             'start_time': self.starttime.data,
-            'duration': datetime.timedelta(hours=self.duration.data),
+            'duration': timedelta(hours=self.duration.data),
             'description': self.eventDescription.data.strip(),
             'min_age': self.minAge.data if self.minAge.data is not None else 0,
             'max_age': self.maxAge.data if self.maxAge.data is not None else 0,
@@ -144,6 +158,6 @@ class EventForm(FlaskForm):
             self.eventStatus.data = event.status.name
         else:
             # fields specific to templates
-            self.eventDate.data = datetime.datetime.now().date()
+            self.eventDate.data = datetime.now().date()
             self.eventStatus.data = EventStatus.draft.name
             self.selectedTemplateName = event.uniqueName()

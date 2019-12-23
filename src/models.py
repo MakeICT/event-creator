@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta
 import enum
 import itertools
 
@@ -20,7 +20,7 @@ class BaseModel(db.Model):
                               onupdate=db.func.current_timestamp())
 
     def update(self):
-        self.modified_date = datetime.datetime.utcnow()
+        self.modified_date = datetime.utcnow()
         db.session.add(self)
         db.session.commit()
 
@@ -109,7 +109,7 @@ class ExternalEvent(BaseModel):
     sync_date = db.Column(db.DateTime, nullable=True, default=None)
 
     def updateSyncDate(self):
-        self.sync_date = datetime.datetime.utcnow()
+        self.sync_date = datetime.utcnow()
         db.session.add(self)
         db.session.commit()
 
@@ -143,7 +143,7 @@ class BaseEventTemplate(BaseModel):
     host_name = db.Column(db.String(60))
     location = db.Column(db.String(120))
     start_time = db.Column(db.Time(), nullable=True, default=None)
-    duration = db.Column(db.Interval(), nullable=False, default=datetime.timedelta(hours=1))
+    duration = db.Column(db.Interval(), nullable=False, default=timedelta(hours=1))
     image_file = db.Column(db.String(20), nullable=True, default='default.jpg')
 
     @declared_attr
@@ -246,7 +246,7 @@ class Event(BaseEventTemplate):
         return f"Event('{self.title}', '{self.start_date}')"
 
     def startDateTime(self):
-        dt = datetime.datetime.combine(self.start_date, self.start_time)
+        dt = datetime.combine(self.start_date, self.start_time)
         return dt
 
     def startDate(self):
@@ -256,7 +256,7 @@ class Event(BaseEventTemplate):
         return self.startDateTime().time()
 
     def endDateTime(self):
-        dt = datetime.datetime.combine(self.start_date, self.start_time)
+        dt = datetime.combine(self.start_date, self.start_time)
         dt = dt + self.duration
         return dt
 
