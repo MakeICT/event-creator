@@ -218,12 +218,16 @@ class BaseEventTemplate(BaseModel):
     #                   db.Integer, db.ForeignKey('%s.id' % cls.__tablename__)),
     #     )
     #     return db.relationship(Authorization, secondary=authorization_association)
-    # def __repr__(self):
-    #     return f"Event Template('{self.title}')"
+
+    def __repr__(self):
+        return f"Event Template('{self.title}')"
 
 
 class EventTemplate(BaseEventTemplate):
     __tablename__ = "event_template"
+
+    def uniqueName(self):
+        return f"{self.title} [{self.host_name}] ({self.id})"
 
 
 class Event(BaseEventTemplate):

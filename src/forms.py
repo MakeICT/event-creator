@@ -96,12 +96,11 @@ class EventForm(FlaskForm):
         self.templates = []
 
         for t in EventTemplate.query.all():
-            self.template_map[f"{t.title} [{t.host_name}]"] = t.id
+            self.template_map[t.uniqueName()] = t.id
         self.templates.append("Select Template")
 
         for t in sorted(self.template_map.keys(), key=str.lower):
             self.templates.append(t)
-        breakpoint()
 
     def populate(self, event):
         """
@@ -147,4 +146,4 @@ class EventForm(FlaskForm):
             # fields specific to templates
             self.eventDate.data = datetime.datetime.now().date()
             self.eventStatus.data = EventStatus.draft.name
-            self.selectedTemplateName = f"{event.title} [{event.host_name}]"
+            self.selectedTemplateName = event.uniqueName()
