@@ -120,6 +120,10 @@ class EventForm(FlaskForm):
             self.templates.append(t)
 
     def populate(self, event):
+        """
+        Loads values from the provided Event or EventTemplate object into the
+        form.
+        """
         assert isinstance(event, (EventTemplate, Event)), "Unsupported type"
 
         # fields shared between events and templates
@@ -152,6 +156,7 @@ class EventForm(FlaskForm):
         else:
             self.eventDate.data = datetime.datetime.now().date()
             self.eventStatus.data = EventStatus.draft.name
+            self.selectedTemplateName = f"{event.title} [{event.host_name}]"
 
     def isBlank(self, myString):
         return not (myString and myString.strip())

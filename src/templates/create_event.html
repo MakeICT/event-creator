@@ -15,9 +15,9 @@
 	if (value == 'savecopy') {
 	    document.getElementById("dialog_mode").value = value
       document.getElementById("ts_title").innerText = "Save";
-      document.getElementById("ts_label").innerText = "Save Template As (Specify Path and/or Name):"
-      document.getElementById("ts_name_input").value = "{{form.selectedTemplateFullName}}";
-      document.getElementById("ts_name_input").disabled = false;
+      document.getElementById("ts_label").innerText = "Save a copy as:"
+      document.getElementById("ts_name_input").value = "{{form.selectedTemplateName}}";
+      document.getElementById("ts_name_input").disabled = true;
       document.getElementById("ts_name").value = "";
       document.getElementById("ts_indicator").value = "";
       document.getElementById("save_btn").disabled = false;      
@@ -29,7 +29,7 @@
   	  document.getElementById("dialog_mode").value = value    	
       document.getElementById("ts_title").innerText = "Save";
       document.getElementById("ts_label").innerText = "Are you sure you want to overwrite:"
-      document.getElementById("ts_name_input").value = "{{form.selectedTemplateFullName}}";
+      document.getElementById("ts_name_input").value = "{{form.selectedTemplateName}}";
       document.getElementById("ts_name_input").disabled = true;
       document.getElementById("ts_name").value = "";
       document.getElementById("ts_indicator").value = "";
@@ -43,7 +43,7 @@
   	  document.getElementById("dialog_mode").value = value  	
       document.getElementById("ts_title").innerText = "Delete Template"
       document.getElementById("ts_label").innerText = "Are you sure you want to delete template:"
-      document.getElementById("ts_name_input").value = "{{form.selectedTemplateFullName}}";
+      document.getElementById("ts_name_input").value = "{{form.selectedTemplateName}}";
       document.getElementById("ts_name_input").disabled = true;
       document.getElementById("ts_name").value = "";
       document.getElementById("ts_indicator").value = "";
