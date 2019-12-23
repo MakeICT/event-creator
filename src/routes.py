@@ -50,8 +50,6 @@ def populate_select_boxes(event_form):
 
 
 def update_event_details(event, event_form):
-    selected_authorizations = request.form.getlist("authorizations")
-    event_form.setSelectedAuthorizations(selected_authorizations)
     details = event_form.collectEventDetails()
     details["authorizations"] = [Authorization.query.filter_by(name=auth).first()
                                  for auth in details["authorizations"]]

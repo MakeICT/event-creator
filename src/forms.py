@@ -1,29 +1,19 @@
-import sys
 import datetime
-import dateparser
-import json
-import os
-from dateutil.parser import parse
-from flask import Flask
+
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, \
-                    BooleanField, IntegerField, DecimalField, \
-                    DateField, DateTimeField, TextAreaField, TimeField, \
+from wtforms import StringField, SubmitField, BooleanField, IntegerField,  \
+                    DecimalField, DateField, TextAreaField, TimeField, \
                     SelectMultipleField, SelectField, FloatField
 from wtforms.validators import DataRequired, Length, Email, URL, Optional
-from wtforms.fields.simple import TextAreaField
-
-from models import Event, EventTemplate, EventStatus, EventType, Authorization, Price, Resource, Platform
 
 useHtml5Fields = True
 if useHtml5Fields:
     from wtforms.fields.html5 import DateField, TimeField, IntegerField
 
+from models import Event, EventTemplate, EventStatus
+
 
 class EventForm(FlaskForm):
-    tagGroups = []
-    auths = []
-
     eventType = SelectField('Type', choices=[], validators=[DataRequired()])
     eventStatus = SelectField('Status', choices=[], validators=[Optional()])
     eventTag = SelectField('Tag', choices=[], validators=[Optional()])
@@ -58,16 +48,10 @@ class EventForm(FlaskForm):
 
     submit = SubmitField('Submit')
 
-    templateRequiredAuths = []
-    calendarResources = []
-    eventPlatforms = []
     template_map = {}
     templates = []
 
     selectedTemplateName = ""
-
-    def setSelectedAuthorizations(self, selected):
-        self.auths = selected
 
     def collectEventDetails(self):
         event = {
@@ -162,9 +146,3 @@ class EventForm(FlaskForm):
             self.eventDate.data = datetime.datetime.now().date()
             self.eventStatus.data = EventStatus.draft.name
             self.selectedTemplateName = f"{event.title} [{event.host_name}]"
-
-    def isBlank(self, myString):
-        return not (myString and myString.strip())
-
-    def isNotBlank(self, myString):
-        return bool(myString and myString.strip())
