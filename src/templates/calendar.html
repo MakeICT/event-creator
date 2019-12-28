@@ -37,6 +37,9 @@
 				defaultDate: dayStr,
 				editable: false,
 				eventLimit: true, // allow "more" link when too many events
+				height: "auto",
+				eventColor: '#007bff',
+				navlinks: true,
 				events: {
 					url: 'calendardata',
 					error: function() {
@@ -45,7 +48,12 @@
 				},
 				loading: function(bool) {
 					$('#loading').toggle(bool);
-				}
+				},
+				// eventClick: function(info) {
+				// 	console.log(info)
+				//     alert('Event: ' + info.title);
+  		// 		}
+
 			});
 		});
 
@@ -81,6 +89,7 @@
 			/*max-width: 900px;*/
 			/*margin: 40px auto;*/
 			padding: 0 10px;
+			height: 100%;
 		}
 	</style>
 {% endblock head %}

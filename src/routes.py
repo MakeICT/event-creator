@@ -267,18 +267,21 @@ def return_data():
                 else:
                     spots = 'FULL'
 
-            start_date = event.start_date
+            start_date = event.startDateTime()
+            end_date = event.endDateTime()
 
             event_list.append({
                                 "Id": event.id,
                                 "title": event.title,
                                 "Name": event.title,
                                 "start": start_date.isoformat(),
-                                "Date": start_date.isoformat(),
-                                "Time": start_date.isoformat(),
+                                "end": end_date.isoformat(),
+                                # "Date": start_date.isoformat(),
+                                # "Time": start_date.isoformat(),
                                 "Description": event.description,
                                 "Register": "http://makeict.wildapricot.org/event-"
                                             + str(event.id),
+                                "url": '/event/' + str(event.id)
                               })
 
     return json.dumps(event_list)
