@@ -33,17 +33,17 @@ class EventForm(FlaskForm):
                                      validators=[DataRequired()])
     if useHtml5Fields:
         eventDate = DateField('Date', default=date.today())
-        starttime = TimeField(label='Start time(CDT)')
+        starttime = TimeField(label='Start Time')
     else:
         eventDate = DateField('Date', default=date.today(),
                               format='%m/%d/%Y')
-        starttime = TimeField(label='Start time(CDT)', format="%H:%M %p")
+        starttime = TimeField(label='Start Time', format="%H:%M %p")
 
-    duration = FloatField(label='Duration (Hours)')
-    minAge = IntegerField('Min Age', validators=[Optional()])
-    maxAge = IntegerField('Max Age', validators=[Optional()])
-    memberPrice = DecimalField(places=2, validators=[Optional()])
-    nonMemberPrice = DecimalField(places=2, validators=[Optional()])
+    duration = FloatField(label='Duration')
+    minAge = IntegerField('Min. Age', validators=[Optional()])
+    maxAge = IntegerField('Max. Age', validators=[Optional()])
+    memberPrice = DecimalField('Member Price', places=2, validators=[Optional()])
+    nonMemberPrice = DecimalField('Non-Member Price', places=2, validators=[Optional()])
 
     authorizations = SelectMultipleField('Required Authorizations', choices=[])
     platforms = SelectMultipleField('Platforms', choices=[])

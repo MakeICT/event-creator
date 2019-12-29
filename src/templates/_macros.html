@@ -1,16 +1,28 @@
-{% macro render_field(field, label_visible=true, right_url=None, right_label=None) -%}
+{% macro render_field(field, label_visible=true, right_url=None, right_label=None, prepend=None, append=None) -%}
   <div class="form-group">
-    {{ field.label(class="form-control-label") }} 
-    {% if field.errors %} 
-        {{ field(class="form-control form-control-sm is-invalid") }}
-            <div class="invalid-feedback mt-0 pt-0">
-              {% for error in field.errors %} 
-                <span class="float-right col-md-10 pl-1">{{ error }}</span> 
-              {% endfor %}
-            </div>
-    {% else %} 
-        {{ field(class="form-control form-control-sm") }} 
-    {% endif %}
+    {{ field.label(class="form-control-label") }}
+    <div class="input-group input-group-sm"> 
+      {% if prepend %}
+        <div class="input-group-prepend">
+          <span class="input-group-text">{{ prepend }}</span>
+        </div>
+      {% endif %} 
+      {% if field.errors %} 
+          {{ field(class="form-control form-control-sm is-invalid") }}
+              <div class="invalid-feedback mt-0 pt-0">
+                {% for error in field.errors %} 
+                  <span class="float-right">{{ error }}</span> 
+                {% endfor %}
+              </div>
+      {% else %} 
+          {{ field(class="form-control form-control-sm") }} 
+      {% endif %}
+      {% if append %}
+      <div class="input-group-append">
+         <span class="input-group-text">{{ append }}</span>
+      </div>
+      {% endif %}
+    </div>
   </div>
 {%- endmacro %}
 

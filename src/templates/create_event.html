@@ -136,25 +136,33 @@
   <fieldset>
     <div class="form-control-group form-inline">
       <!-- Template selector -->
-      <select name="Template" class="selectpicker border rounded" data-live-search="true" data-width="auto" onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
-        {% for template in form.templates %}
-          {% if form.selectedTemplateName and form.selectedTemplateName == template %}
-            <option value="{{ form.template_map[template] }}" selected="selected">{{ template }}</option>
-          {% else %}
-            <option value="{{ form.template_map[template] }}">{{ template }}</option>
-          {% endif %}
-        {% endfor %}
-      </select>
+      <div class="col-md-6 px-0 my-1">
+        <select name="Template" class="selectpicker border rounded" data-live-search="true" data-width="100%" data-style="btn-sm" onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
+          {% for template in form.templates %}
+            {% if form.selectedTemplateName and form.selectedTemplateName == template %}
+              <option value="{{ form.template_map[template] }}" selected="selected">{{ template }}</option>
+            {% else %}
+              <option style="width: 100%" value="{{ form.template_map[template] }}">{{ template }}</option>
+            {% endif %}
+          {% endfor %}
+        </select>
+      </div>
       <!-- Button trigger modal -->
-      <button type="button" class="btn btn-primary mx-2" data-toggle="modal" data-target="#templateDialog" onclick="populateTemplateDialog('save');">
-        Save
-      </button>
-      <button type="button" class="btn btn-primary mx-2" data-toggle="modal" data-target="#templateDialog" onclick="populateTemplateDialog('savecopy');">
-        Save Copy
-      </button>
-      <button type="button" class="btn btn-primary mx-2" data-toggle="modal" data-target="#templateDialog" onclick="populateTemplateDialog('delete');">
-        Delete
-      </button>
+        <div class="col-4 col-md-2 pr-md-0">
+          <button type="button" class="btn btn-primary btn-sm btn-block" data-toggle="modal" data-target="#templateDialog" onclick="populateTemplateDialog('save');">
+            Save
+          </button>
+        </div>
+        <div class="col-4 col-md-2 pr-md-0">
+          <button type="button" class="btn btn-primary btn-sm btn-block" data-toggle="modal" data-target="#templateDialog" onclick="populateTemplateDialog('savecopy');">
+            Copy
+          </button>
+        </div>
+        <div class="col-4 col-md-2 pr-md-0">
+          <button type="button" class="btn btn-danger btn-sm btn-block" data-toggle="modal" data-target="#templateDialog" onclick="populateTemplateDialog('delete');">
+            Delete
+          </button>
+        </div>
     </div>
   </fieldset>
 
