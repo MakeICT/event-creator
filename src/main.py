@@ -5,6 +5,11 @@ from flask_migrate import Migrate
 import plugins
 from config import settings
 
+import logging
+
+logging.basicConfig(filename='db.log')
+logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+
 targets = []
 actions = {}
 loadedPlugins = {}
