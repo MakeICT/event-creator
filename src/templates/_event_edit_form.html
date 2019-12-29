@@ -1,9 +1,9 @@
-{% from "_macros.html" import render_field, render_select_field %}
+{% from "_macros.html" import render_field, render_select_field, render_file_field %}
 <script>
   $('.selectpicker').selectpicker();
 </script>
 
-<form method="POST" action="" id="classForm">
+<form method="POST" action="" id="classForm" enctype="multipart/form-data">
   <input type="hidden" name="ts_indicator" id="ts_indicator" value="">
   <input type="hidden" id="ts_name" name="ts_name" value="">
     
@@ -25,6 +25,12 @@
     <div class="row">
       <div class="col-md-12">
         {{ render_field(form.eventTitle) }}
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        {{ render_file_field(form.image_file, filename=event.image_file) }}
       </div>
     </div>
 

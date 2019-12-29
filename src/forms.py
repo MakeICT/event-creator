@@ -5,6 +5,7 @@ from wtforms import StringField, SubmitField, BooleanField, IntegerField,  \
                     DecimalField, DateField, TextAreaField, TimeField, \
                     SelectMultipleField, SelectField, FloatField
 from wtforms.validators import DataRequired, Length, Email, URL, Optional
+from flask_wtf.file import FileField, FileAllowed
 
 useHtml5Fields = True
 if useHtml5Fields:
@@ -19,6 +20,8 @@ class EventForm(FlaskForm):
     eventTag = SelectField('Tag', choices=[], validators=[Optional()])
 
     eventTitle = StringField('Title', validators=[DataRequired()])
+    image_file = FileField('Event Picture',
+                           validators=[FileAllowed(['jpg', 'png'])])
     instructorName = StringField('Instructor Name',
                                  validators=[DataRequired()])
     instructorEmail = StringField('Instructor Email',
@@ -70,6 +73,7 @@ class EventForm(FlaskForm):
     def collectEventDetails(self):
         details = {
             'title': self.eventTitle.data.strip(),
+            'image_file': self.image_file.data,
             'status': self.eventStatus.data,
             'event_type': self.eventType.data,
             'host_email': self.instructorEmail.data.strip(),
@@ -140,6 +144,8 @@ class EventForm(FlaskForm):
         self.eventType.data = event.event_type.name
         self.eventTag.data = event.tags[0].name
         self.starttime.data = event.start_time
+        # self.image_file.data = event.image_file
+        # self.image_file.default = event.image_file
 
         if event.authorizations:
             self.authorizations.default = [auth.name for auth in event.authorizations]

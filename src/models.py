@@ -144,7 +144,7 @@ class BaseEventTemplate(BaseModel):
     location = db.Column(db.String(120))
     start_time = db.Column(db.Time(), nullable=True, default=None)
     duration = db.Column(db.Interval(), nullable=False, default=timedelta(hours=1))
-    image_file = db.Column(db.String(20), nullable=True, default='default.jpg')
+    image_file = db.Column(db.String(40), nullable=True, default='default.jpg')
 
     @declared_attr
     def tags(cls):

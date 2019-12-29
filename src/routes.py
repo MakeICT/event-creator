@@ -15,6 +15,7 @@ from forms import EventForm
 from models import Event, EventStatus, EventType, EventTemplate
 from models import Authorization, Price, Platform, Resource, Tag
 from event_sync import SyncEvent, SyncEvents, DeleteEvent, MissingExternalEventError
+from utils import save_picture
 
 nav = Nav()
 nav.init_app(app)
@@ -72,6 +73,8 @@ def update_event_details(event, event_form):
                          value=price['price'],
                          availability=price['availability'][0])
                          for price in details['prices']]
+    if event_form.image_file.data:
+        details["image_file"] = event_form.image_file.data.filename
 
     for attribute in details:
         try:
@@ -97,10 +100,11 @@ def create_event(template_id):
         set_select_box_defaults(template, form)
         form.process()
         form.populate(template)
+        return render_template('create_event.html', title='Create Event',
+                               form=form, event=template)
 
     if request.method == 'POST':
         if form.validate_on_submit():
-
             indicatorValue = request.form.get('ts_indicator', '')
 
             if indicatorValue == "save_template" or indicatorValue == "save_copy_template" :
@@ -109,6 +113,8 @@ def create_event(template_id):
                 elif indicatorValue == "save_copy_template":
                     event_template = EventTemplate()
                 update_event_details(event_template, form)
+                folder = 't' + str(event_template.id)
+                save_picture(form.image_file.data, folder)
                 event_template.update()
 
                 flash(f"{event_template.title} [{event_template.host_name}]  saved!", 'success')
@@ -116,7 +122,7 @@ def create_event(template_id):
                 form.loadTemplates()
                 form.populate(event_template)
                 return render_template('create_event.html', title='Create Event',
-                                       form=form)
+                                       form=form, event=event_template)
 
             elif indicatorValue == "delete_template":
                 event_template = EventTemplate.query.get(template_id)
@@ -131,6 +137,8 @@ def create_event(template_id):
                 update_event_details(event, form)
                 db.session.add(event)
                 db.session.commit()
+                folder = 'e' + str(event.id)
+                save_picture(form.image_file.data, folder)
 
                 flash(f'Class created for {form.eventTitle.data}!', 'success')
                 return redirect(url_for('upcoming_events'))
@@ -163,6 +171,8 @@ def edit_event(event_id):
         if form.validate_on_submit():
             update_event_details(event, form)
 
+            folder = 'e' + str(event.id)
+            save_picture(form.image_file.data, folder)
             event.update()
 
             flash(f'{form.eventTitle.data} has been updated!', 'success')

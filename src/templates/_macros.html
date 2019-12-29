@@ -35,6 +35,39 @@
   </div>
 {%- endmacro %}
 
+{% macro render_file_field(field, label_visible=true, filename=None, right_url=None, right_label=None) -%}
+  <style>
+    .border-darkgray {
+      border-color: rgba(206, 212 ,218 , 1.0);
+    }
+  </style>
+  <div class="form-group">
+    {{ field.label(class="form-control-label") }} 
+      <div class="input-group">
+      {% if field.errors %} 
+          {{ field(style='display:none', onchange=field.id + '_syncFields()') }}
+          <div id="{{ field.id + '_fn' }}" class="form-control form-control-sm is-invalid">{{ filename }}</div>
+          <div class="invalid-feedback mt-0 pt-0">
+            {% for error in field.errors %} 
+              <span class="float-right">{{ error }}</span> 
+            {% endfor %}
+          </div>
+      {% else %} 
+          {{ field(style='display:none', onchange=field.id + '_syncFields()') }} 
+          <span id="{{ field.id + '_fn' }}" class="form-control form-control-sm rounded-left">{{ filename }}</span>
+      {% endif %}
+      <div class="input-group-append">
+        <button id="{{ field.id + '_btn' }}" type="button" onclick="document.getElementById('{{ field.id }}').click();" class="btn btn-primary btn-sm rounded-right fas fa-file-upload"></button>
+      </div>
+    </div>  
+  </div>
+  <script>
+    function {{ field.id }}_syncFields() {
+      var x = document.getElementById("{{ field.id }}").files[0].name;
+      document.getElementById("{{ field.id + '_fn' }}").innerHTML = x;
+    }
+  </script>
+{%- endmacro %}
 
 {% macro confirmation_modal(id, title, text, confirm_attributes='', confirm_class='btn-primary', confirm_text="Confirm", cancel_attributes='') %}
 <div class="modal" id="{{id}}" tabindex="-1" role="dialog">
