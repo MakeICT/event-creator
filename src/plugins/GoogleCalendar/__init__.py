@@ -64,9 +64,14 @@ def load():
 
             GoogleApps.getCredentials(credentialsReceived)
 
-        def _buildEvent(self, event):
+        def _buildEvent(self, event, event_type="class"):
+            if len(event.platforms) == 1:
+                event_type = "event"
             timezone = self.getGeneralSetting('timezone')
-            description = event.htmlSummary(omit=['time'])
+            if event_type == "event":
+                description = event.htmlSummary(omit=['time', 'price', 'links', 'age', 'auth', 'instr'])
+            else:
+                description = event.htmlSummary(omit=['time'])
 
             selectedResources = []
             for resourceTag in [res.name for res in event.resources]:

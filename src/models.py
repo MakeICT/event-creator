@@ -138,17 +138,18 @@ class Event(BaseModel):
         if 'instr' not in omit:
             desc += f"<br><b>Instructor:</b> {self.instructor_name}"
 
-        if all_links:
-            for ext_event in self.external_events:
-                platform_name = Platform.query.get(ext_event.platform_id).name
-                desc += f"<br><b>{platform_name}:</b> <a href='{ext_event.ext_event_url}'>" \
-                        f"link</a>"
-        else:
-            if self.external_events and 'reg' not in omit:
-                reg_url = self.registrationURL()
-                if reg_url:
-                    desc += f"<br><b>Register:</b> <a href='{reg_url}'>" \
-                                   f"{reg_url}</a>"
+        if 'links' not in omit:
+            if all_links:
+                for ext_event in self.external_events:
+                    platform_name = Platform.query.get(ext_event.platform_id).name
+                    desc += f"<br><b>{platform_name}:</b> <a href='{ext_event.ext_event_url}'>" \
+                            f"link</a>"
+            else:
+                if self.external_events and 'reg' not in omit:
+                    reg_url = self.registrationURL()
+                    if reg_url:
+                        desc += f"<br><b>Register:</b> <a href='{reg_url}'>" \
+                                       f"{reg_url}</a>"
 
         if 'price' not in omit:
             for price in self.prices:
