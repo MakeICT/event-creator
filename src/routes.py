@@ -138,36 +138,35 @@ def createClass(template):
 
 @app.route('/events', methods=['GET'])
 def upcoming_events():
-    upcoming_events = Event.query.all()
+    upcoming_events = Event.query.filter(Event.start_date >= datetime.datetime.utcnow().date()).all()
     upcoming_events = sorted(upcoming_events, key=lambda event: event.start_date)
     event_list = []
     needs_sync = 0
     for event in upcoming_events:
         if not event.fullySynced():
             needs_sync = 1
-        if event.start_date.date() >= datetime.datetime.today().date():
-            if event.registration_limit:
-                spots_available = event.registration_limit
-                spots = None
-                if spots_available > 0:
-                    spots = str(spots_available) + 'Register'
-                else:
-                    spots = 'FULL'
-            start_date = event.start_date
-            event_list.append({
-                "Id": event.id,
-                "Name": event.title,
-                "Date": start_date.strftime('%b %d %Y'),
-                "Time": start_date.strftime('%I:%M %p'),
-                "Description": event.htmlSummary(all_links=True),
-                "Register": "http://makeict.wildapricot.org/event-"
-                            + str(event.id),
-                "Synced": 1 if event.fullySynced() else 0,
-            })
-            #       str(event['Id']))
-            # print(start_date.strftime('%b %d') + ' | ' + start_date.strftime('%I:%M %p') + 
-            #       ' | ' + event['Name'] + ' | ' + '<a href="http://makeict.wildapricot.org/event-' + 
-            #       str(event['Id']) + '" target="_blank">Register</a><br />')
+        if event.registration_limit:
+            spots_available = event.registration_limit
+            spots = None
+            if spots_available > 0:
+                spots = str(spots_available) + 'Register'
+            else:
+                spots = 'FULL'
+        start_date = event.start_date
+        event_list.append({
+            "Id": event.id,
+            "Name": event.title,
+            "Date": start_date.strftime('%b %d %Y'),
+            "Time": start_date.strftime('%I:%M %p'),
+            "Description": event.htmlSummary(all_links=True),
+            "Register": "http://makeict.wildapricot.org/event-"
+                        + str(event.id),
+            "Synced": 1 if event.fullySynced() else 0,
+        })
+        #       str(event['Id']))
+        # print(start_date.strftime('%b %d') + ' | ' + start_date.strftime('%I:%M %p') + 
+        #       ' | ' + event['Name'] + ' | ' + '<a href="http://makeict.wildapricot.org/event-' + 
+        #       str(event['Id']) + '" target="_blank">Register</a><br />')
 
     return render_template('events.html', events=event_list, sync_all=needs_sync)
 
