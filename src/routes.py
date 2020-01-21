@@ -248,7 +248,7 @@ def edit_event(event_id):
 @app.route('/sync_all')
 @login_required
 def sync_all():
-    events = Event.query.all()
+    events = Event.query.filter(Event.start_date >= datetime.datetime.utcnow().date()).all()
     SyncEvents(events)
     return redirect(url_for('upcoming_events'))
 
