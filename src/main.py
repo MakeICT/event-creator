@@ -1,3 +1,5 @@
+import logging
+
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -17,7 +19,9 @@ loadedPlugins = plugins.loadAllFromPath()
 # print(loadedPlugins)
 
 app = Flask(__name__)
-
+plugins.logger.setLevel(logging.DEBUG)
+handler = logging.FileHandler('wa.log')
+plugins.logger.addHandler(handler)
 
 app.config['SECRET_KEY'] = settings.get('General', 'SECRET_KEY')
 app.config['GOOGLE_CLIENT_ID'] = settings.get('Google', 'Client ID')

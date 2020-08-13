@@ -8,6 +8,8 @@ from plugins import EventPlugin
 from config import settings
 import config
 
+logger = logging.getLogger(__name__)
+
 class WildApricotPlugin(EventPlugin):
     def __init__(self):
         super().__init__('WildApricot')
@@ -40,7 +42,7 @@ class WildApricotPlugin(EventPlugin):
                     
             return approved
         except HTTPError as err:
-            print("Error Validating User: " + str(err.code))
+            logger.error("Error Validating User: " + str(err.code))
             return False
     
     def loadUser(self, username, password):
@@ -76,13 +78,16 @@ class WildApricotPlugin(EventPlugin):
             for group in groupList :
                 user.groups.append(group['Label'])            
             
+            logger.debug(f"Authenticating {username}")
+            logger.debug(user.groups)
             return user
         except HTTPError as err:
-            print("HTTPError Validating User: " + str(err.code))
+            logger.debug("HTTPError Validating User: " + str(err.code))
             return False
      
         except:
-            print("Unknown Error Validating User:")
+            logger.debug("Unhandled Error Validating User:",exc_info=True)
+            raise
 
         return None
     
@@ -192,9 +197,9 @@ class WildApricotPlugin(EventPlugin):
                 wa_event_id = e.ext_event_id
         eventData = self._buildEvent(event, wa_event_id)
 
-        print("wa event id:", wa_event_id)
+        logger.debug("wa event id:", wa_event_id)
 
-        logging.debug('Updating event')
+        logger.debug('Updating event')
         try:
             self.api.execute_request(f"Events/{wa_event_id}", eventData, method='PUT')
         except HTTPError as err:

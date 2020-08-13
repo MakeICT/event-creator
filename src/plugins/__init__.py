@@ -11,6 +11,7 @@ from importlib.machinery import SourceFileLoader
 
 loaded = {}
 
+logger = logging.getLogger(__name__)
 
 def loadAllFromPath(base='plugins'):
     global loaded
