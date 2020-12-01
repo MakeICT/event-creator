@@ -48,7 +48,7 @@ def populate_resources():
     # print(resources)
     for res in resources:
         # print(res)
-        if not Resource.query.filter_by(name=res['resourceName']).first():
+        if not Resource.query.filter_by(email=res['resourceEmail']).first():
             print(f"Adding new resource: {res['resourceName']}")
             new_resource = Resource(name=res['resourceName'], email=res['resourceEmail'])
             db.session.add(new_resource)
