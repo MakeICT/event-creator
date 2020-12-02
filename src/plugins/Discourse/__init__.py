@@ -2,6 +2,12 @@
 
 import logging
 
+logger = logging.getLogger(__name__)
+file_handler = logging.FileHandler("discourse.log")
+logger.addHandler(file_handler)
+logger.setLevel('DEBUG')
+logger.debug("Loading Discourse Plugin")
+
 # import ui
 # from PySide import QtCore
 
@@ -40,45 +46,48 @@ class DiscoursePlugin(EventPlugin):
         # ui.addPopulationType('Members')
 
     def createEvent(self, event):
-        logging.debug('Discourse')
+        logger.debug('Discourse')
 
         dateTimeFormat = '%Y %b %d - %I:%M %p'
 
         description = event.htmlSummary()
 
-        logging.debug('Connecting to API')
+        logger.debug('Connecting to API')
 
         discourse_api = DiscourseClient(
             self.getSetting('Website'),
             api_username=self.getSetting('Username'),
             api_key=self.getSetting('API Key'))
 
-        logging.debug('Creating post')
+        logger.debug('Creating post')
         title = 'Event notice: ' + event.title + ' (' \
             + event.start_date.strftime(dateTimeFormat) + ')'
-        post = discourse_api.create_post(content=description,
-                                         category_id=int(self.getSetting('Category ID')),
-                                         topic_id=None, title=title)
+        try:
+            post = discourse_api.create_post(content=description,
+                                             category_id=int(self.getSetting('Category ID')),
+                                             topic_id=None, title=title)
+        except:
+            logger.debug("discourse post failed!:\n", exc_info=True)
 
         post_url = f"https://talk.makeict.org/t/{post['id']}"
 
         return (post['id'], post_url)
 
     def updateEvent(self, event):
-        logging.debug('Discourse')
+        logger.debug('Discourse')
 
         dateTimeFormat = '%Y %b %d - %I:%M %p'
 
         description = event.htmlSummary()
 
-        logging.debug('Connecting to API')
+        logger.debug('Connecting to API')
 
         discourse_api = DiscourseClient(
             self.getSetting('Website'),
             api_username=self.getSetting('Username'),
             api_key=self.getSetting('API Key'))
 
-        logging.debug('Updating post')
+        logger.debug('Updating post')
         title = 'Event notice: ' + event.title + ' (' \
             + event.start_date.strftime(dateTimeFormat) + ')'
 
@@ -98,20 +107,20 @@ class DiscoursePlugin(EventPlugin):
         return True
 
     def deleteEvent(self, event):
-        logging.debug('Discourse')
+        logger.debug('Discourse')
 
         dateTimeFormat = '%Y %b %d - %I:%M %p'
 
         description = event.htmlSummary()
 
-        logging.debug('Connecting to API')
+        logger.debug('Connecting to API')
 
         discourse_api = DiscourseClient(
             self.getSetting('Website'),
             api_username=self.getSetting('Username'),
             api_key=self.getSetting('API Key'))
 
-        logging.debug('Deleting post')
+        logger.debug('Deleting post')
         title = 'Event notice: ' + event.title + ' (' \
             + event.start_date.strftime(dateTimeFormat) + ')'
 

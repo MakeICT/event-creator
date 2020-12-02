@@ -23,6 +23,8 @@ plugins.logger.setLevel(logging.DEBUG)
 handler = logging.FileHandler('wa.log')
 plugins.logger.addHandler(handler)
 
+plugins.Meetup.logger.addHandler(handler)
+
 app.config['SECRET_KEY'] = settings.get('General', 'SECRET_KEY')
 app.config['GOOGLE_CLIENT_ID'] = settings.get('Google', 'Client ID')
 app.config['GOOGLE_CLIENT_SECRET'] = settings.get('Google', 'Client Secret')

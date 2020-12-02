@@ -19,6 +19,10 @@ from plugins.Meetup.meetup import exceptions
 from plugins import EventPlugin
 import config
 
+logger = logging.getLogger(__name__)
+file_handler = logging.FileHandler("meetup.log")
+logger.addHandler(file_handler)
+logger.error("TEST LOG")
 
 class MeetupPlugin(EventPlugin):
     api = None
@@ -57,53 +61,62 @@ class MeetupPlugin(EventPlugin):
         # ui.addTarget(self.name, self, self.createEvent)
 
     def connectAPI(self):
-        client_id = self.getSetting('client id')
-        client_secret = self.getSetting('client secret')
-        email = self.getSetting('email')
-        password = self.getSetting('password')
+        logger.error("connect")
+        try:
+            client_id = self.getSetting('client id')
+            client_secret = self.getSetting('client secret')
+            email = self.getSetting('email')
+            password = self.getSetting('password')
 
-        redirect_uri = self.getSetting('redirect uri')
-        base_url = 'https://secure.meetup.com/oauth2'
-        token_url = base_url + '/access'
-        auth_url = base_url + '/authorize'
-        session_url = "https://api.meetup.com/sessions"
+            redirect_uri = self.getSetting('redirect uri')
+            base_url = 'https://secure.meetup.com/oauth2'
+            token_url = base_url + '/access'
+            auth_url = base_url + '/authorize'
+            session_url = "https://api.meetup.com/sessions"
 
-        # Request authorization code
-        r_parameters = {"scope": 'event_management',
-                        "client_id": {client_id},
-                        "redirect_uri": {redirect_uri},
-                        "response_type": 'anonymous_code'
-                        }
-        response = requests.get(auth_url, params=r_parameters)
-        print('MEETUP RESPONSE:', response.status_code, response.headers, response.url)
-        code = response.url.split('=')[1]
+            # Request authorization code
+            r_parameters = {"scope": 'event_management',
+                            "client_id": {client_id},
+                            "redirect_uri": {redirect_uri},
+                            "response_type": 'anonymous_code'
+                            }
+            response = requests.get(auth_url, params=r_parameters)
+            logger.error(f"MEETUP RESPONSE:{response.status_code}, {response.reason}, {response.headers}, {response.url}")
+            logger.error(dir(response))
+            code = response.url.split('=')[1]
+            logger.error(response.url)
 
-        # Request access token
-        r_parameters = {"client_id": {client_id},
-                        "client_secret": {client_secret},
-                        "grant_type": 'anonymous_code',
-                        "redirect_uri": {redirect_uri},
-                        "code": {code}
-                        }
-        response = requests.post(token_url, params=r_parameters)
-        print('MEETUP RESPONSE:', response.status_code, response.headers, response.json())
-        access_token = response.json()['access_token']
+            # Request access token
+            r_parameters = {"client_id": {client_id},
+                            "client_secret": {client_secret},
+                            "grant_type": 'anonymous_code',
+                            "redirect_uri": {redirect_uri},
+                            "code": {code}
+                            }
+            response = requests.post(token_url, params=r_parameters)
+            #logger.error('MEETUP RESPONSE:', response.status_code, response.headers, response.json())
+            logger.error(response.status_code)
+            access_token = response.json()['access_token']
 
-        # Request oauth token with credentials
-        r_parameters = {"email": {email},
-                        "password": {password}
-                        }
-        r_headers = {'Authorization': f'Bearer {access_token}'}
-        response = requests.post(session_url, params=r_parameters, headers=r_headers)
-        print('MEETUP RESPONSE:', response.status_code, response.headers, response.json())
-        oauth_token = response.json()['oauth_token']
+            # Request oauth token with credentials
+            r_parameters = {"email": {email},
+                            "password": {password}
+                            }
+            r_headers = {'Authorization': f'Bearer {access_token}'}
+            response = requests.post(session_url, params=r_parameters, headers=r_headers)
+            logger.error(f'MEETUP RESPONSE: {response.status_code}, {response.headers}, {response.json()}')
+            oauth_token = response.json()['oauth_token']
 
-        # Connect to API
-        self.api = Client(oauth_token)
+            # Connect to API
+            self.api = Client(oauth_token)
 
-        # return api
+            # return api
+        except:
+            logger.error("CONNECT ERROR!")
+            logger.error("CONNECT ERROR:", exc_info=True)
 
     def _buildEvent(self, event):
+        logger.error("build")
         if self.getGeneralSetting('timezone') is not None \
                 and self.getGeneralSetting('timezone') != '':
             timezone = pytz.timezone(self.getGeneralSetting('timezone'))
@@ -152,22 +165,27 @@ class MeetupPlugin(EventPlugin):
                 "This event requires external registration. Please follow " \
                 "the link in the event description to register for this class. " \
                 "Registering on Meetup does not reserve your spot for this event."
-
+        logger.error("finish build")
         return meetup_details
 
     def createEvent(self, event):
         self.connectAPI()
+        logger.error("create")
 
         event_data = self._buildEvent(event)
-        meetupEvent = self.api.CreateEvent(event_data)
+        try:
+            meetupEvent = self.api.CreateEvent(event_data)
+        except:
+            logger.error("ERROR:", exc_info=True)
         # print(meetupEvent.__dict__)
 
         # if config.checkBool(self.getSetting('Use this as registration URL')):
         #     event['registrationURL'] = meetupEvent.event_url
-
-        return (meetupEvent.id, meetupEvent.event_url)
+        logger.error("finish create")
+        return (meetupEvent.id, meetupEvent.link)
 
     def updateEvent(self, event):
+        logger.error("update")
         self.connectAPI()
 
         event_data = self._buildEvent(event)
@@ -179,6 +197,7 @@ class MeetupPlugin(EventPlugin):
         return (meetupEvent.id, meetupEvent.link)
 
     def deleteEvent(self, event):
+        logger.error("delete")
         self.connectAPI()
 
         meetup_id = event.getExternalEventByPlatformName('Meetup').ext_event_id
