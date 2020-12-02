@@ -1,0 +1,185 @@
+{% from "_macros.html" import confirmation_modal %}
+
+{% extends 'layout.html' %}
+
+{% block title %}Upcoming Events{% endblock title %}
+
+{% block pageTitle %} Upcoming Events {% endblock %}
+
+{% block header %}Upcoming Events{% endblock header %}
+
+{% block head %}
+  <style>
+    .loader {
+      border: 16px solid #f3f3f3; /* Light grey */
+      border-top: 16px solid #3498db; /* Blue */
+      border-radius: 50%;
+      width: 120px;
+      height: 120px;
+      animation: spin 2s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+
+
+  <script>
+    app.controller("dateCtrl", function($scope) {
+      $scope.event_date = null;
+      // console.log($scope.event_date);
+
+
+      $scope.setDate = function(date) {
+        // console.log(date);
+        $scope.event_date = new Date(date);
+        // console.log($scope.event_date);
+      };
+    });
+
+    app.filter('unsafe', function($sce) { return $sce.trustAsHtml; });
+
+    app.controller("eventCtrl", function($scope) {
+      $scope.showDetails = false;
+      $scope.details = "";
+
+      $scope.delete_event = function(event_id) {
+         window.location.href = '/delete/' + event_id
+      };
+
+      $scope.showDeleteModal = function(event_id, $event) {
+        document.getElementById("cancel_" + event_id).style.display = "block";
+        $event.stopPropagation()
+      }
+
+      $scope.toggleDetailDisplay = function(event) {
+        $scope.showDetails = !$scope.showDetails;
+
+        $scope.details = event.Description;
+      };  
+    });
+  </script>
+{% endblock head %}
+
+{% block content %}
+  <body ng-app="app" ng-init="events = {{ events }}">
+  <!-- [[ events ]] -->
+  <div class="row my-2 py-0"> 
+    <div class="col">
+      {% if current_user.is_authenticated %}
+        <a ng-if="{{ sync_all }}" href="/sync_all" class="fas fa-sync-alt float-right btn btn-warning btn-block py-1 ng-cloak"> Sync all events</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <table class="table table-striped table-bordered table-hover col-xs-5 col-md-8">
+    <tr>
+      <th class="col-xs-1 col-md-1">Checked in</th>
+      <th class="col-xs-1 col-md-1" ng-if="selectedEvent.Details.GuestRegistrationSettings.Enabled === true">Guests</th>
+      <th class="col-xs-1 col-md-1">Name</th>
+      <th class="hidden-xs col-md-1">Email</th>
+      <th class="col-xs-1 col-md-1">RSVP type</th>
+      <th class="hidden-xs col-md-1">Member status</th>
+      <th class="col-xs-1 col-md-1">Waiver on file</th>
+      <th class="col-xs-1 col-md-1">Paid</th>
+      <th class="hidden-xs col-md-1">More</th>
+    </tr>
+    <tr ng-repeat="registration in (registrations|orderBy:['compiledFields[\'First name\']', 'compiledFields[\'Last name\']'])">
+      <td class="col-xs-1 col-md-1">
+        <div ng-click="toggleCheckin(registration)">
+          <div class="btn btn-block btn-warning" ng-if="registration.IsCheckedIn === null">⌛</div>
+          <div class="btn btn-block btn-success" ng-if="registration.IsCheckedIn === true">✓</div>
+          <div class="btn btn-block btn-danger" ng-if="registration.IsCheckedIn === false">✗</div>
+        </div>
+      </td>
+      <div ng-if="selectedEvent.Details.GuestRegistrationSettings.Enabled === true">
+        <td class="col-xs-1 col-md-1" ng-if="selectedEvent.Details.GuestRegistrationSettings.Enabled === true">
+          <div ng-if="selectedEvent.Details.GuestRegistrationSettings.Enabled === true">
+              <div class="btn btn-warning" style="padding-right: 8px;padding-top: 8px;padding-left: 8px;" ng-if="registration.GuestRegistrationsSummary.NumberOfGuests > 0 && registration.GuestRegistrationsSummary.NumberOfGuestsCheckedIn === null">⌛</div>
+              <select class="btn btn-danger" style="padding-right: 8px;padding-top: 8px;padding-left: 8px;" ng-change="updateGuestCheckin(registration, registration.GuestRegistrationsSummary.NumberOfGuestsCheckedIn)" ng-if="checkForGuests(registration) === 0" ng-model="registration.GuestRegistrationsSummary.NumberOfGuestsCheckedIn" ng-options="x for x in registration.GuestRegistrationsSummary.GuestOptions">
+              </select>
+              <select class="btn btn-warning" style="padding-right: 8px;padding-top: 8px;padding-left: 8px;" ng-change="updateGuestCheckin(registration, registration.GuestRegistrationsSummary.NumberOfGuestsCheckedIn)" ng-if="checkForGuests(registration) === 1" ng-model="registration.GuestRegistrationsSummary.NumberOfGuestsCheckedIn" ng-options="x for x in registration.GuestRegistrationsSummary.GuestOptions">
+              </select>
+              <select class="btn btn-success" style="padding-right: 8px;padding-top: 8px;padding-left: 8px;" ng-change="updateGuestCheckin(registration, registration.GuestRegistrationsSummary.NumberOfGuestsCheckedIn)" ng-if="checkForGuests(registration) === 2" ng-model="registration.GuestRegistrationsSummary.NumberOfGuestsCheckedIn" ng-options="x for x in registration.GuestRegistrationsSummary.GuestOptions">
+              </select>
+              </div>
+        </td>   
+      </div>
+      <td class="col-xs-1 col-md-1">{{registration.compiledFields['First name']}} {{registration.compiledFields['Last name']}}</td>
+      <td class="hidden-xs col-md-1"><a href="mailto:{{registration.Contact.Email}}">{{registration.Contact.Email}}</a></td>
+      <td class="col-xs-1 col-md-1">{{registration.RegistrationType.Name}} ({{registration.RegistrationFee | currency}})</td>
+      <td class="hidden-xs col-md-1">{{registration.Contact.Status == 'Active' ? registration.Contact.MembershipLevel.Name : registration.Contact.Status}}</td>
+      <td
+        ng-if="registration.Contact.compiledFields.latestWaiver"
+        style="font-weight: bold; cursor: pointer;"
+        class="col-xs-1 col-md-1 text-{{registration.Contact.compiledFields.waiverIsOld?'warning':'success'}}"
+        ng-click="showWaiver(registration.Contact.compiledFields.latestWaiver)"
+      >
+        ✓ Yes <span ng-if="registration.Contact.compiledFields.waiverIsOld">(old)</span> ⧉
+      </td>
+      <td
+        ng-if="!registration.Contact.compiledFields.latestWaiver"
+        style="font-weight: bold;"
+        class="col-xs-1 col-md-1 text-danger"
+      >✗ No</td>
+      <td class="col-xs-1 col-md-1" style="font-weight: bold;" ng-click="showInvoice(registration.Invoice)">
+        <div ng-if="registration.IsPaid" class="text-success">✓ Yes</div>
+        <div ng-if="!registration.IsPaid && registration.compiledFields['StorageBinNumber']=='PendingPayment'" class ="text-warning">⌛ Pending</div> 
+        <div ng-if="!registration.IsPaid && registration.compiledFields['StorageBinNumber']!='PendingPayment'" class="text-danger">✗ No</div>
+      </td>
+      <td class="hidden-xs col-md-1">
+      <button class="btn btn-block btn-default" ng-click="cancelRegistrationDialog(registration)">...</button>
+      </td>
+    </tr>
+  </table>
+  
+  <div class="card my-2 py-0 border-3 ng-cloak" ng-repeat="(key, value) in events | groupBy: 'Date'">
+    <h5 class="card-header" ng-controller="dateCtrl" ng-init="setDate(key)">  
+      <b>[[ event_date | date:'MMM d']]</b> 
+      <small class="text-muted">[[ event_date | date:'EEE' ]]</small>
+    </h5>
+    <div ng-repeat="event in value">
+      <div class="card my-1 py-0 mx-1" ng-controller = "eventCtrl"> 
+      {{ confirmation_modal("cancel_[[event.Id]]", "Delete Event", "Are you sure you want to delete this event? This action is permanent and cannot be undone.", "ng-click=delete_event([[event.Id]]);", 'btn-danger', "Delete") }}
+
+        <div class="card-header bg-white d-flex flex-sm-row flex-column align-items-center py-1 px-2" ng-click="toggleDetailDisplay(event)">
+            <div>
+              <small class="text-muted text-nowrap">[[ event["Time"] ]]</small>  
+            </div>
+            <div class="flex-grow-1 text-center text-sm-left px-1">
+              [[ event['Name'] ]]
+            </div>
+            <div class="row">
+              {% if current_user.is_authenticated %}
+                <div>
+                  <a ng-if="!event['Synced']" href="/sync/[[event.Id]]" class="fas fa-sync-alt float-right btn btn-warning mx-1 py-1" ng-click="$event.stopPropagation()"></a>
+                  <i ng-if="event['Synced']"  class="fas fa-check float-right mx-1 py-1 btn btn-success disabled" ng-click="$event.stopPropagation()"></i>
+                </div>
+                <div>
+                  <a class= "btn btn-primary py-0 fas fa-wrench mx-1 py-1" href= "/event/[[ event['Id'] ]]" ng-click="$event.stopPropagation()"></a> 
+                </div>
+                  <a class="fas fa-trash-alt btn btn-danger mx-1 py-1" data-toggle="modal" data-target="#cancel_[[event.Id]]">
+                  <a class="fas fa-tasks btn btn-secondary mx-1 py-1" href= "/event/[[ event['Id'] ]]" ng-click="$event.stopPropagation()">
+                  </a>
+              {% endif %}
+              <div>
+                <i ng-if="!showDetails" class="fas fa-sort-down mx-1 pr-3"></i>
+                <i ng-if="showDetails" class="fas fa-sort-up mx-1 pr-3"></i>
+              </div>
+            </div>
+
+        </div>
+        <div class="card-body text-left" ng-if="showDetails">
+          <div class=" d-flex container">
+            <p  ng-bind-html='details | unsafe'> [[ details ]]</p>
+          </div> 
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </body>
+{% endblock content %}
