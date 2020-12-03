@@ -14,6 +14,7 @@ sys.path.insert(1, '~/Projects/MakeICT/event-creator/src/plugins/Meetup/meetup_a
 
 
 from plugins.Meetup.meetup.api import Client
+from plugins.Meetup.meetup import exceptions
 
 from plugins import EventPlugin
 import config
@@ -125,7 +126,7 @@ class MeetupPlugin(EventPlugin):
         if config.checkBool(self.getSetting("Allow RSVP")):
             rsvp_limit = 0
 
-        if config.checkBool(self.getSetting("Post as draft")):
+        if config.checkBool(self.getSetting("post as draft")):
             publish_status = 'draft'
         else:
             publish_status = 'published'
@@ -134,6 +135,7 @@ class MeetupPlugin(EventPlugin):
 
         meetup_details = {
             'group_id': group.id,
+            'urlname': self.getSetting('group name'),
             'name': title,
             'description': description,
             'time': int(timezone.localize(event.start_date).timestamp()) * 1000,
@@ -174,14 +176,17 @@ class MeetupPlugin(EventPlugin):
         print(meetup_id)
         meetupEvent = self.api.EditEvent(event_data)
 
-        return (meetupEvent.id, meetupEvent.event_url)
+        return (meetupEvent.id, meetupEvent.link)
 
     def deleteEvent(self, event):
         self.connectAPI()
 
         meetup_id = event.getExternalEventByPlatformName('Meetup').ext_event_id
 
-        self.api.DeleteEvent({'id': meetup_id})
+        try:
+            self.api.DeleteEvent({'id': meetup_id,'urlname': self.getSetting('group name')})
+        except exceptions.HttpNotAccessibleError:
+            print('Already deleted?')
 
 
 def load():

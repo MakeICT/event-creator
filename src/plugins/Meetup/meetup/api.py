@@ -164,6 +164,8 @@ class Client(object):
             response = self.session.get(request_url, params=parameters)
         elif request_http_method == 'POST':
             response = self.session.post(request_url, data=parameters)
+        elif request_http_method == 'PATCH':
+            response = self.session.patch(request_url, data=parameters)
         elif request_http_method == 'DELETE':
             response = self.session.delete(request_url, params=parameters)
         else:
@@ -203,6 +205,8 @@ class Client(object):
             else:
                 raise exceptions.HttpTooManyRequests(response.content)
 
+        if response.status_code == 204:
+            return None
         jsonified = response.json()
         if isinstance(jsonified, list):
             return MeetupObjectList(jsonified)
