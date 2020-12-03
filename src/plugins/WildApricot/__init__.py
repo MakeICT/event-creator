@@ -148,18 +148,17 @@ class WildApricotPlugin(EventPlugin):
                 "UnavailabilityPolicy": "Show"
             }
 
-            for populationType in rsvpType.availability:
-                if populationType == 'Members':
-                    registrationTypeData['Availability'] = 'MembersOnly'
-                    registrationTypeData['AvailableForMembershipLevels'] = []
+            if rsvpType.availability == 'Members':
+                registrationTypeData['Availability'] = 'MembersOnly'
+                registrationTypeData['AvailableForMembershipLevels'] = []
 
-                    ids = self.getSetting('Level IDs for members').split(',')
+                ids = self.getSetting('Level IDs for members').split(',')
 
-                    for id in ids:
-                        registrationTypeData['AvailableForMembershipLevels'] \
-                            .append({'Id': id})
-                else:
-                    registrationTypeData['Availability'] = 'Everyone'
+                for id in ids:
+                    registrationTypeData['AvailableForMembershipLevels'] \
+                        .append({'Id': id})
+            else:
+                registrationTypeData['Availability'] = 'Everyone'
 
             rsvp_types.append(registrationTypeData)
 
