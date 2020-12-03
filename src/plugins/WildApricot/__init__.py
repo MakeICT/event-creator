@@ -136,6 +136,8 @@ class WildApricotPlugin(EventPlugin):
         rsvp_types = []
 
         for rsvpType in event.prices:
+            if rsvpType.value < 0:
+                continue
             registrationTypeData = {
                 "EventId": wa_id,
                 "Name": rsvpType.name,
