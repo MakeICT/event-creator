@@ -30,7 +30,7 @@
 
     <div class="row">
       <div class="col-md-12">
-        {{ render_file_field(form.image_file, filename=event.image_file) }}
+        {{ render_file_field(form.image_file, filename=form.image_file.data.filename) }}
       </div>
     </div>
 
