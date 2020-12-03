@@ -110,7 +110,7 @@ class WildApricotPlugin(EventPlugin):
             "EndDate": self.api.DateTimeToWADate(
                            timezone.localize(event.endDateTime())),
             "Location": event.location,
-            "RegistrationsLimit": event.registration_limit,
+            "RegistrationsLimit": event.registration_limit if event.registration_limit > 0 else None,
             "RegistrationEnabled": True,
             "StartTimeSpecified": True,
             "EndTimeSpecified": True,

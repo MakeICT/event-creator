@@ -29,8 +29,7 @@ class EventForm(FlaskForm):
     eventLocation = StringField('Location')
     eventDescription = TextAreaField('Description', render_kw={"rows": 10})
     registrationURL = StringField('Registration URL')
-    registrationLimit = IntegerField('Registration Limit',
-                                     validators=[DataRequired()])
+    registrationLimit = IntegerField('Registration Limit')
     if useHtml5Fields:
         eventDate = DateField('Date', default=date.today())
         starttime = TimeField(label='Start Time')
