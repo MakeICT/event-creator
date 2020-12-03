@@ -123,7 +123,7 @@ class Event(BaseModel):
         if self.prices:
             desc += "Event Prices:\n"
             for price in self.prices:
-                if price > 0:
+                if not price < 0:
                     desc += f"- {price.name}: ${price.value:.2f}\n"
 
         return desc
@@ -154,7 +154,7 @@ class Event(BaseModel):
 
         if 'price' not in omit:
             for price in self.prices:
-                if price.value > 0:
+                if not price.value < 0:
                     desc += f"<br><b>Price:</b> {price.name} - ${price.value:.2f}"
 
         if 'age' not in omit:
