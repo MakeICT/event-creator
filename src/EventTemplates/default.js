@@ -34,5 +34,5 @@
         "Required auth's": [],
         "Resources": []
     },
-    "title": ""
+    "title": "Default Template"
 }
