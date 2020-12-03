@@ -165,7 +165,7 @@ class MeetupPlugin(EventPlugin):
         # if config.checkBool(self.getSetting('Use this as registration URL')):
         #     event['registrationURL'] = meetupEvent.event_url
 
-        return (meetupEvent.id, meetupEvent.event_url)
+        return (meetupEvent.id, meetupEvent.link)
 
     def updateEvent(self, event):
         self.connectAPI()
