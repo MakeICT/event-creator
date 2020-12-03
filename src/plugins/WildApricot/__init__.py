@@ -106,7 +106,7 @@ class WildApricotPlugin(EventPlugin):
         event_data = {
             "Name": event.title,
             "StartDate": self.api.DateTimeToWADate(
-                             timezone.localize(event.start_date)),
+                             timezone.localize(event.startDateTime())),
             "EndDate": self.api.DateTimeToWADate(
                            timezone.localize(event.endDateTime())),
             "Location": event.location,
