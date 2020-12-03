@@ -77,12 +77,12 @@ def upgrade():
         batch_op.add_column(sa.Column('cancelled_date', sa.DateTime(), nullable=True))
         batch_op.add_column(sa.Column('decision_date', sa.DateTime(), nullable=True))
         batch_op.add_column(sa.Column('duration', sa.Interval(), nullable=False))
-        batch_op.add_column(sa.Column('host_email', sa.String(length=120), nullable=True))
-        batch_op.add_column(sa.Column('host_name', sa.String(length=60), nullable=True))
+        # batch_op.add_column(sa.Column('host_email', sa.String(length=120), nullable=True))
+        # batch_op.add_column(sa.Column('host_name', sa.String(length=60), nullable=True))
         batch_op.add_column(sa.Column('submission_date', sa.DateTime(), nullable=True))
-        batch_op.drop_column('host_email')
+        # batch_op.drop_column('host_email')
         batch_op.drop_column('end_date')
-        batch_op.drop_column('host_name')
+        # batch_op.drop_column('host_name')
 
     # ### end Alembic commands ###
 
