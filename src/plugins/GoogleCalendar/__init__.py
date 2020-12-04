@@ -79,7 +79,7 @@ def load():
                 'summary': event.title,
                 'location': event.location,
                 'description': description,
-                'start': {'dateTime': event.start_date.isoformat(), 'timeZone': timezone},
+                'start': {'dateTime': event.startDateTime().isoformat(), 'timeZone': timezone},
                 'end': {'dateTime': event.endDateTime().isoformat(), 'timeZone': timezone},
                 'attendees': selectedResources
             }
