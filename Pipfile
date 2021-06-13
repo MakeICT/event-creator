@@ -22,6 +22,8 @@ google = "*"
 pydiscourse = "*"
 flask-login = "*"
 pillow = "*"
+email-validator = "*"
+pymysql = "*"
 
 [requires]
 python_version = "3.7"
