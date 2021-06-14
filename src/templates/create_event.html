@@ -12,8 +12,8 @@
 <!-- Modal -->
 <script>
   function populateTemplateDialog(value) {
-	if (value == 'savecopy') {
-	    document.getElementById("dialog_mode").value = value
+    if (value == 'savecopy') {
+      document.getElementById("dialog_mode").value = value
       document.getElementById("ts_title").innerText = "Save";
       document.getElementById("ts_label").innerText = "Save a copy as:"
       document.getElementById("ts_name_input").value = "{{form.selectedTemplateName}}";
@@ -24,9 +24,9 @@
       document.getElementById("save_btn").hidden = false;
       document.getElementById("ok_btn").hidden = true;
       document.getElementById("cancel_btn").hidden = false;
-
+      
     } else if (value == 'save') {
-  	  document.getElementById("dialog_mode").value = value    	
+      document.getElementById("dialog_mode").value = value    	
       document.getElementById("ts_title").innerText = "Save";
       document.getElementById("ts_label").innerText = "Are you sure you want to overwrite:"
       document.getElementById("ts_name_input").value = "{{form.selectedTemplateName}}";
@@ -40,7 +40,7 @@
       document.getElementById("save_btn").hidden = true;
     	
     } else if (value == 'delete') {
-  	  document.getElementById("dialog_mode").value = value  	
+      document.getElementById("dialog_mode").value = value  	
       document.getElementById("ts_title").innerText = "Delete Template"
       document.getElementById("ts_label").innerText = "Are you sure you want to delete template:"
       document.getElementById("ts_name_input").value = "{{form.selectedTemplateName}}";
@@ -51,8 +51,16 @@
       document.getElementById("save_btn").hidden = true;
       document.getElementById("ok_btn").hidden = false;
       document.getElementById("cancel_btn").hidden = false;
-
+      
     }
+  }
+</script>
+
+<img src="/static/1x1.png" onload="save_template_false()" style="display:none">
+<script type="text/javascript">
+  function save_template_false() {
+    console.log("FALSE!");
+    document.getElementById("save_template").value = false;
   }
 </script>
 
@@ -73,6 +81,7 @@
     if (close_action == 'save') {
       document.getElementById("ts_name").value = name;
       document.getElementById("ts_indicator").value = "save_copy_template";
+      document.getElementById("save_template").value = true;
       var doc = document.getElementById("classForm");
       HTMLFormElement.prototype.submit.call(document.getElementById("classForm"));
     }
@@ -80,6 +89,7 @@
     if (close_action == 'ok' && document.getElementById("dialog_mode").value == "save") {
       document.getElementById("ts_name").value = name;
       document.getElementById("ts_indicator").value = "save_template";
+      document.getElementById("save_template").value = true;
       var doc = document.getElementById("classForm");
       HTMLFormElement.prototype.submit.call(document.getElementById("classForm"));
     }

@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta, date
+from distutils.util import strtobool
 
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, BooleanField, IntegerField,  \
                     DecimalField, DateField, TextAreaField, TimeField, \
                     SelectMultipleField, SelectField, FloatField
+from wtforms.fields.simple import HiddenField
 from wtforms.validators import DataRequired, Length, Email, URL, Optional
 from flask_wtf.file import FileField, FileAllowed
 
@@ -54,6 +56,7 @@ class EventForm(FlaskForm):
     templates = []
 
     selectedTemplateName = ""
+    save_template = HiddenField(default=False)
 
     def validate(self):
         if not super().validate():
@@ -62,7 +65,10 @@ class EventForm(FlaskForm):
         result = True
         start_datetime = datetime.combine(self.eventDate.data, self.starttime.data)
 
-        if not start_datetime > datetime.now():
+        check = strtobool(self.save_template.data)
+        print(self.save_template.data, check)
+
+        if not check and not start_datetime > datetime.now():
             self.eventDate.errors.append('start of event must be in the future')
             self.starttime.errors.append('start of event must be in the future')
             result = False
