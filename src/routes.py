@@ -113,8 +113,8 @@ def create_event(template_id):
                 elif indicatorValue == "save_copy_template":
                     event_template = EventTemplate()
                 update_event_details(event_template, form)
-                folder = 't' + str(event_template.id)
-                save_picture(form.image_file.data, folder)
+                # folder = 't' + str(event_template.id)
+                save_picture(form.image_file.data)
                 event_template.update()
 
                 flash(f"{event_template.title} [{event_template.host_name}]  saved!", 'success')
@@ -137,8 +137,8 @@ def create_event(template_id):
                 update_event_details(event, form)
                 db.session.add(event)
                 db.session.commit()
-                folder = 'e' + str(event.id)
-                save_picture(form.image_file.data, folder)
+                # folder = 'e' + str(event.id)
+                save_picture(form.image_file.data)
 
                 flash(f'Class created for {form.eventTitle.data}!', 'success')
                 return redirect(url_for('upcoming_events'))
@@ -171,8 +171,8 @@ def edit_event(event_id):
         if form.validate_on_submit():
             update_event_details(event, form)
 
-            folder = 'e' + str(event.id)
-            save_picture(form.image_file.data, folder)
+            # folder = 'e' + str(event.id)
+            save_picture(form.image_file.data)
             event.update()
 
             flash(f'{form.eventTitle.data} has been updated!', 'success')

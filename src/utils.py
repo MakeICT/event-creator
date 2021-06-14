@@ -6,7 +6,7 @@ from flask import current_app
 from werkzeug.utils import secure_filename
 
 
-def save_picture(form_picture, folder):
+def save_picture(form_picture, folder=''):
     if not form_picture:
         return False
 

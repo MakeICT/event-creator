@@ -143,7 +143,7 @@ class EventForm(FlaskForm):
         self.eventType.data = event.event_type.name
         self.eventTag.data = event.tags[0].name
         self.starttime.data = event.start_time
-        # self.image_file.data = event.image_file
+        self.image_file.data = event.image_file
         # self.image_file.default = event.image_file
 
         if event.authorizations:

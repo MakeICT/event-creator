@@ -47,7 +47,7 @@
   </div>
 {%- endmacro %}
 
-{% macro render_file_field(field, label_visible=true, filename=None, right_url=None, right_label=None) -%}
+{% macro render_file_field(field, label_visible=true, filename=None, folder='', right_url=None, right_label=None) -%}
   <style>
     .border-darkgray {
       border-color: rgba(206, 212 ,218 , 1.0);
@@ -67,6 +67,11 @@
       {% else %} 
           {{ field(style='display:none', onchange=field.id + '_syncFields()') }} 
           <span id="{{ field.id + '_fn' }}" class="form-control form-control-sm rounded-left">{{ filename }}</span>
+      {% endif %}
+      {% if filename%}
+      <div class="input-group-append">
+        <a id="{{ field.id + '_down_btn' }}" type="button" href="{{ url_for('static', filename= folder + filename)}}" download class="btn btn-secondary btn-sm fas fa-file-download" style="line-height: 1.5"></a>
+      </div>
       {% endif %}
       <div class="input-group-append">
         <button id="{{ field.id + '_btn' }}" type="button" onclick="document.getElementById('{{ field.id }}').click();" class="btn btn-primary btn-sm rounded-right fas fa-file-upload"></button>
