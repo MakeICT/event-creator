@@ -6,7 +6,7 @@ from main import app, loadedPlugins
 
 login_manager = LoginManager()
 login_manager.init_app(app)
-
+waplugin = loadedPlugins['WildApricot']
 
 class User(UserMixin):
     def __init__(self, email):
@@ -36,6 +36,25 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
 
+    url = waplugin.getOauthURL("http://localhost:5000/oauth_redirect")
+    return redirect(url)
+
+@app.route('/oauth_redirect', methods=['GET', 'POST'])
+def oauth():
+    """
+    Oauth redirect page
+    """
+    email = waplugin.authenticateWithCode(request.args['code'], "http://localhost:5000/oauth_redirect")
+
+    user = validateWAUser(email)
+
+    if user:
+        login_user(user)
+        flash("Login successful!", 'success')
+        return redirect(url_for('home'))
+    else:
+        flash('Login failed!', 'danger')
+        return redirect(url_for('home'))
     error = None
     if request.method == 'POST':
         user = validateWAUser(request.form['username'], request.form['password'])
@@ -60,12 +79,11 @@ def logout():
     return redirect(url_for('home'))
 
 
-def validateWAUser(username, password):
+def validateWAUser(username):
     """
     Authenticate username, password and group membership against Wild Apricot
     """
-    waplugin = loadedPlugins['WildApricot']
-    user = waplugin.loadUser(username, password)
+    user = waplugin.loadUser(username)
 
     if user:
         authorizedGroups = waplugin.getSetting('Authorized Groups').split(',')

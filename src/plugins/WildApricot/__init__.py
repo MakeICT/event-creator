@@ -45,15 +45,34 @@ class WildApricotPlugin(EventPlugin):
             logger.error("Error Validating User: " + str(err.code))
             return False
     
-    def loadUser(self, username, password):
+    def getOauthURL(self, redirect_uri):
+        api = WaApiClient(self.getSetting('Client ID'), self.getSetting('Client secret'))
+
+        return api.OauthURL(redirect_uri)
+
+    def authenticateWithCode(self, code, redirect_uri):
+        api = WaApiClient(self.getSetting('Client ID'), self.getSetting('Client secret'))
+
+        api.authenticate_with_oauth_code(code, redirect_uri)
+
+        return api.GetMe()['Email']
+    
+    def loadUser(self, username):
         from auth import User
         
         try :
                         
             api = WaApiClient(self.getSetting('Client ID'), self.getSetting('Client secret'))
+            # user_api = WaApiClient(self.getSetting('Client ID'), self.getSetting('Client secret'))
              
-            api.authenticate_with_contact_credentials(username, password);
-            contact=api.execute_request('Contacts/me')
+            api.authenticate_with_apikey(self.getSetting('api key'))
+            # contact=api.execute_request('Contacts/me')
+
+            # if not user_api.authenticate_contact(username, password):
+            #     print("incorrect credentials")
+            #     return None  # incorrect credentials
+            # print(username)
+            contact = api.GetContactByEmail(username)
             
             id = contact['Id']
             
@@ -63,11 +82,11 @@ class WildApricotPlugin(EventPlugin):
             user.firstName = contact['FirstName']
             user.lastName = contact['LastName']
                         
-            contact=api.execute_request('Contacts/' + str(id))
+            # contact=api.execute_request('Contacts/' + str(id))
                           
             fieldValues = contact['FieldValues']
  
-            approved = False
+            # approved = False
              
             groupList = []
             for fieldValueItem in fieldValues :
@@ -89,7 +108,7 @@ class WildApricotPlugin(EventPlugin):
             logger.debug("Unhandled Error Validating User:",exc_info=True)
             raise
 
-        return None
+        # return None
     
     def _buildEvent(self, event, wa_id=None):
         if self.getGeneralSetting('timezone') is not None \
