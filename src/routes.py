@@ -15,7 +15,7 @@ from forms import EventForm
 from models import Event, EventStatus, EventType, EventTemplate
 from models import Authorization, Price, Platform, Resource, Tag
 from event_sync import SyncEvent, SyncEvents, DeleteEvent, MissingExternalEventError
-from utils import save_picture
+from utils import fix_filename, save_picture
 
 nav = Nav()
 nav.init_app(app)
@@ -74,7 +74,7 @@ def update_event_details(event, event_form):
                          availability=price['availability'][0])
                          for price in details['prices']]
     if event_form.image_file.data:
-        details["image_file"] = event_form.image_file.data.filename
+        details["image_file"] = fix_filename(event_form.image_file.data.filename)
 
     for attribute in details:
         try:
