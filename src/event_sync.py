@@ -52,8 +52,12 @@ def SyncEvent(event):
                 event_result = loadedPlugins[platform.name].createEvent(event)
                 event_id = event_result[0]
                 event_url = event_result[1]
+                try:
+                    has_registration = event_result[2]
+                except IndexError:
+                    has_registration = False
 
-                ext_event = event.addExternalEvent(platform.name, event_id, event_url)
+                ext_event = event.addExternalEvent(platform.name, event_id, event_url, has_registration)
                 ext_event.updateSyncDate()
 
                 # Set first external event as primary event

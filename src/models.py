@@ -105,6 +105,7 @@ class ExternalEvent(BaseModel):
     event_id = db.Column(db.Integer, db.ForeignKey('event.id'))
     ext_event_id = db.Column(db.String(100))
     ext_event_url = db.Column(db.String(300))
+    has_registration = db.Column(db.Boolean, default=False)
 
     sync_date = db.Column(db.DateTime, nullable=True, default=None)
 
@@ -268,16 +269,17 @@ class Event(BaseEventTemplate):
 
     def registrationURL(self):
         for ext_event in self.external_events:
-            if ext_event.primary_event:
+            if ext_event.has_registration:
                 return ext_event.ext_event_url
         return None
 
-    def addExternalEvent(self, platform_name, external_id, external_url):
+    def addExternalEvent(self, platform_name, external_id, external_url, has_registration=False):
         platform = Platform.query.filter_by(name=platform_name).first()
         ext_event = ExternalEvent(event_id=self.id,
-                                  platform_id=platform.id,
+                                  platform_id=platform.id, 
                                   ext_event_id=external_id,
-                                  ext_event_url=external_url)
+                                  ext_event_url=external_url,
+                                  has_registration=has_registration)
         self. external_events.append(ext_event)
 
         return ext_event
