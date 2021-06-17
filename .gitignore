@@ -19,3 +19,6 @@ src/logs/
 src/EventTemplates/*
 !src/EventTemplates/default.js
 src/site.db
+
+.vscode/*
+*.log
