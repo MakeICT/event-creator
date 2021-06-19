@@ -9,17 +9,19 @@
       {% endif %} 
       {% if field.errors %} 
           {{ field(class="form-control form-control-sm is-invalid") }}
-              <div class="invalid-feedback mt-0 pt-0">
-                {% for error in field.errors %} 
-                  <span class="float-right">{{ error }}</span> 
-                {% endfor %}
-              </div>
       {% else %} 
           {{ field(class="form-control form-control-sm") }} 
       {% endif %}
       {% if append %}
       <div class="input-group-append">
          <span class="input-group-text">{{ append }}</span>
+      </div>
+      {% endif %}
+      {% if field.errors %}
+      <div class="invalid-feedback mt-0 pt-0">
+        {% for error in field.errors %} 
+          <span class="float-right">{{ error }}</span> 
+        {% endfor %}
       </div>
       {% endif %}
     </div>
@@ -59,23 +61,25 @@
       {% if field.errors %} 
           {{ field(style='display:none', onchange=field.id + '_syncFields()') }}
           <div id="{{ field.id + '_fn' }}" class="form-control form-control-sm is-invalid">{{ filename }}</div>
+          {% else %} 
+          {{ field(style='display:none', onchange=field.id + '_syncFields()') }} 
+          <span id="{{ field.id + '_fn' }}" class="form-control form-control-sm rounded-left">{{ filename }}</span>
+          {% endif %}
+          {% if filename%}
+          <div class="input-group-append">
+            <a id="{{ field.id + '_down_btn' }}" type="button" href="{{ url_for('static', filename= folder + filename)}}" download class="btn btn-secondary btn-sm fas fa-file-download" style="line-height: 1.5"></a>
+          </div>
+          {% endif %}
+          <div class="input-group-append">
+            <button id="{{ field.id + '_btn' }}" type="button" onclick="document.getElementById('{{ field.id }}').click();" class="btn btn-primary btn-sm rounded-right fas fa-file-upload"></button>
+          </div>
+          {% if field.errors %} 
           <div class="invalid-feedback mt-0 pt-0">
             {% for error in field.errors %} 
               <span class="float-right">{{ error }}</span> 
             {% endfor %}
           </div>
-      {% else %} 
-          {{ field(style='display:none', onchange=field.id + '_syncFields()') }} 
-          <span id="{{ field.id + '_fn' }}" class="form-control form-control-sm rounded-left">{{ filename }}</span>
-      {% endif %}
-      {% if filename%}
-      <div class="input-group-append">
-        <a id="{{ field.id + '_down_btn' }}" type="button" href="{{ url_for('static', filename= folder + filename)}}" download class="btn btn-secondary btn-sm fas fa-file-download" style="line-height: 1.5"></a>
-      </div>
-      {% endif %}
-      <div class="input-group-append">
-        <button id="{{ field.id + '_btn' }}" type="button" onclick="document.getElementById('{{ field.id }}').click();" class="btn btn-primary btn-sm rounded-right fas fa-file-upload"></button>
-      </div>
+          {% endif %}
     </div>  
   </div>
   <script>
