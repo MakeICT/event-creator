@@ -2,7 +2,7 @@ import os
 import json
 
 from main import db, loadedPlugins
-from models import Event, Authorization, Platform, Resource
+from models import EventTemplate, Authorization, Platform, Resource
 from config import settings
 import plugins
 
@@ -55,6 +55,15 @@ def populate_resources():
             db.session.commit()
 
 
+def create_default_template():
+    if not EventTemplate.query.get(1):
+        default = EventTemplate()
+        default.title = "Default Template"
+        default.description = "This automatically generated default template can be edited and saved to fit your needs."
+        db.session.add(default)
+        db.session.commit()
+
+
 # if os.path.exists('migrations/'):
 #     os.system('rm -r migrations/versions/*')
 # else:
@@ -69,3 +78,4 @@ os.system('flask db upgrade')
 populate_auths()
 populate_platforms()
 populate_resources()
+create_default_template()

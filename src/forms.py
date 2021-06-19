@@ -147,7 +147,10 @@ class EventForm(FlaskForm):
         self.starttime.data = event.start_time
         self.duration.data = event.duration.seconds/3600
         self.eventType.data = event.event_type.name
-        self.eventTag.data = event.tags[0].name
+        try:
+            self.eventTag.data = event.tags[0].name
+        except IndexError:
+            pass
         self.starttime.data = event.start_time
         self.image_file.data = event.image_file
         # self.image_file.default = event.image_file
