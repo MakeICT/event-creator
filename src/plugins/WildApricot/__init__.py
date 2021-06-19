@@ -206,7 +206,7 @@ class WildApricotPlugin(EventPlugin):
         registration_url = \
             'http://makeict.wildapricot.org/event-%s' % eventID
 
-        return (eventID, registration_url)
+        return (eventID, registration_url, True)
 
     def updateEvent(self, event):
         self.api.authenticate_with_apikey(self.getSetting('API Key'))
