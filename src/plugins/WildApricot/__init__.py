@@ -216,7 +216,7 @@ class WildApricotPlugin(EventPlugin):
                 wa_event_id = e.ext_event_id
         eventData = self._buildEvent(event, wa_event_id)
 
-        logger.debug("wa event id:", wa_event_id)
+        logger.debug("wa event id:" + wa_event_id)
 
         logger.debug('Updating event')
         try:
