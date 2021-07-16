@@ -51,6 +51,9 @@ def loadAllFromPath(base='plugins'):
     # if len(pluginDirs) > 0:
     #     logging.error('Failed to load plugin modules: %s' % pluginDirs)
 
+    global loadedPlugins
+    loadedPlugins = enabled_plugins
+
     return loaded
 
 

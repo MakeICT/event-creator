@@ -37,6 +37,10 @@ def SyncEvent(event):
                 event.external_events.remove(ext_event)
                 event.update()
 
+        def get_plugin_priority(plugin):
+            return [p for p in loadedPlugins].index(plugin.name)
+
+        event.platforms.sort(key=get_plugin_priority)
         for platform in event.platforms:
             if platform.id in synced_platform_ids:
                 event_result = loadedPlugins[platform.name].updateEvent(event)
