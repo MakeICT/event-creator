@@ -148,7 +148,7 @@ class MeetupPlugin(EventPlugin):
         }
         # print(meetup_details['time'])
         if event.registrationURL():
-            meetup_details['question_0'] = \
+            meetup_details['question'] = \
                 "This event requires external registration. Please follow " \
                 "the link in the event description to register for this class. " \
                 "Registering on Meetup does not reserve your spot for this event."
