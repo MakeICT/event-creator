@@ -15,8 +15,8 @@
     if (value == 'savecopy') {
       document.getElementById("dialog_mode").value = value
       document.getElementById("ts_title").innerText = "Save";
-      document.getElementById("ts_label").innerText = "Save a copy as:"
-      document.getElementById("ts_name_input").value = "{{form.selectedTemplateName}}";
+      document.getElementById("ts_label").innerText = "Save a copy of this template as:"
+      document.getElementById("ts_name_input").value = $("#eventTitle").val();
       document.getElementById("ts_name_input").disabled = true;
       document.getElementById("ts_name").value = "";
       document.getElementById("ts_indicator").value = "";
@@ -28,8 +28,8 @@
     } else if (value == 'save') {
       document.getElementById("dialog_mode").value = value    	
       document.getElementById("ts_title").innerText = "Save";
-      document.getElementById("ts_label").innerText = "Are you sure you want to overwrite:"
-      document.getElementById("ts_name_input").value = "{{form.selectedTemplateName}}";
+      document.getElementById("ts_label").innerText = "Save this template as:"
+      document.getElementById("ts_name_input").value = $("#eventTitle").val();
       document.getElementById("ts_name_input").disabled = true;
       document.getElementById("ts_name").value = "";
       document.getElementById("ts_indicator").value = "";
