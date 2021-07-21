@@ -56,6 +56,8 @@ def SyncEvent(event):
                 ext_event = event.addExternalEvent(platform.name, event_id, event_url)
                 ext_event.updateSyncDate()
 
+                synced_platform_ids.append(platform.id)
+
                 # Set first external event as primary event
                 if len(event.external_events) == 1:
                     ext_event = event.external_events[0]
