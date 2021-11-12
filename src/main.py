@@ -36,7 +36,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db, compare_type=True)
 
 
-import routes
+from routes import *
 import auth
 
 
