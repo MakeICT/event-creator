@@ -135,7 +135,7 @@
 <div class="container content-section p-0">
   <fieldset>
     <div class="form-control-group form-inline">
-      <select name="Template" class="selectpicker border rounded" data-live-search="true" data-width="auto" onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
+      <select name="Template" class="selectpicker border rounded" data-live-search="true" data-width="auto" onchange="this.options[this.selectedIndex].value && (window.location = encodeURIComponent(this.options[this.selectedIndex].value));">
         {% for template in form.templates %}
           {% if form.selectedTemplateName and form.selectedTemplateName == template %}
             <option value="{{ template }}" selected="selected">{{ template }}</option>
