@@ -27,6 +27,13 @@
 
 
   <script>
+    $(window).on('pageshow', function(event) {
+      if (dirty) {
+        location.reload();
+      }
+    });
+    dirty=false;
+
     app.controller("dateCtrl", function($scope) {
       $scope.event_date = null;
       // console.log($scope.event_date);
@@ -45,6 +52,11 @@
       $scope.showDetails = false;
       $scope.details = "";
 
+      angular.element(document).ready(function () {
+        console.log("angular ready");
+        // document.getElementById('msg').innerHTML = 'Hello';
+      });
+
       $scope.delete_event = function(event_id) {
          window.location.href = '/delete/' + event_id
       };
@@ -52,6 +64,15 @@
       $scope.showDeleteModal = function(event_id, $event) {
         document.getElementById("cancel_" + event_id).style.display = "block";
         $event.stopPropagation()
+      }
+
+      $scope.preventDoubleClick = function($event) {
+        // console.log("No double click!");
+        // console.log(event.target);
+        event.target.disabled = true;
+        event.target.classList.add("disabled");
+        event.stopPropagation();
+        dirty=true;
       }
 
       $scope.toggleDetailDisplay = function(event) {
@@ -85,7 +106,7 @@
   <div class="row my-2 py-0"> 
     <div class="col">
       {% if current_user.is_authenticated %}
-        <a ng-if="{{ sync_all }}" href="/sync_all" class="fas fa-sync-alt float-right btn btn-warning btn-block py-1 ng-cloak"> Sync all events</a>
+        <a ng-if="{{ sync_all }}" href="/sync_all" class="fas fa-sync-alt float-right btn btn-warning btn-block py-1 ng-cloak" ng-click="preventDoubleClick()"> Sync all events</a>
       {% endif %}
     </div>
   </div>
@@ -109,7 +130,7 @@
             <div class="row">
               {% if current_user.is_authenticated %}
                 <div>
-                  <a ng-if="!event['Synced']" href="/sync/[[event.Id]]" class="fas fa-sync-alt float-right btn btn-warning mx-1 py-1" ng-click="$event.stopPropagation()"></a>
+                  <a ng-if="!event['Synced']" href="/sync/[[event.Id]]" class="fas fa-sync-alt float-right btn btn-warning mx-1 py-1" ng-click="preventDoubleClick()"></a>
                   <i ng-if="event['Synced']"  class="fas fa-check float-right mx-1 py-1 btn btn-success disabled" ng-click="$event.stopPropagation()"></i>
                 </div>
                 <div>
