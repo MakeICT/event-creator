@@ -335,7 +335,8 @@ class Event(BaseEventTemplate):
 
         if 'price' not in omit:
             for price in self.prices:
-                desc += f"<br><b>Price:</b> {price.name} - ${price.value:.2f}"
+                if not price.value < 0:
+                    desc += f"<br><b>Price:</b> {price.name} - ${price.value:.2f}"
 
         if 'age' not in omit:
             if self.min_age and not self.max_age:
