@@ -319,7 +319,7 @@ class Event(BaseEventTemplate):
                 + self.endTime().strftime('%I:%M %p')
 
         if 'instr' not in omit:
-            desc += f"<br><b>Instructor:</b> {self.host_name}"
+            desc += f"<br><b>Host:</b> {self.host_name}"
 
         if all_links:
             for ext_event in self.external_events:

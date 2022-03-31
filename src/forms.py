@@ -24,9 +24,9 @@ class EventForm(FlaskForm):
     eventTitle = StringField('Title', validators=[DataRequired()])
     image_file = FileField('Event Picture',
                            validators=[FileAllowed(['jpg', 'png'])])
-    instructorName = StringField('Instructor Name',
+    hostName = StringField('Host Name',
                                  validators=[DataRequired()])
-    instructorEmail = StringField('Instructor Email',
+    hostEmail = StringField('Host Email',
                                   validators=[DataRequired(), Email()])
     eventLocation = StringField('Location')
     eventDescription = TextAreaField('Description', render_kw={"rows": 10})
@@ -81,8 +81,8 @@ class EventForm(FlaskForm):
             'image_file': self.image_file.data,
             'status': self.eventStatus.data,
             'event_type': self.eventType.data,
-            'host_email': self.instructorEmail.data.strip(),
-            'host_name': self.instructorName.data.strip(),
+            'host_email': self.hostEmail.data.strip(),
+            'host_name': self.hostName.data.strip(),
             'location': self.eventLocation.data.strip(),
             'start_date': self.eventDate.data,
             'start_time': self.starttime.data,
@@ -134,8 +134,8 @@ class EventForm(FlaskForm):
 
         # fields shared between events and templates
         self.eventTitle.data = event.title
-        self.instructorName.data = event.host_name
-        self.instructorEmail.data = event.host_email
+        self.hostName.data = event.host_name
+        self.hostEmail.data = event.host_email
         self.eventLocation.data = event.location
         self.eventDescription.data = event.description
         self.registrationLimit.data = event.registration_limit
