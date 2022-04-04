@@ -25,6 +25,10 @@ flask-login = "*"
 pillow = "*"
 pymysql = "*"
 email-validator = "*"
+pandas = "*"
+gql = "*"
+requests-toolbelt = "*"
+requests-oauthlib = "*"
 
 [requires]
 python_version = "3"

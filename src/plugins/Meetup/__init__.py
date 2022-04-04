@@ -1,30 +1,47 @@
 # -*- coding: utf-8 -*-
 
 import logging
-import requests 
-from oauthlib.oauth2 import BackendApplicationClient
 from requests_oauthlib import OAuth2Session
 import pytz
+from time import time
+import pandas as pd
+
+from gql import Client, gql
+# from gql.transport.aiohttp import AIOHTTPTransport
+from gql.transport.requests import RequestsHTTPTransport
 
 #add meetup api module from git submodule to path
 import importlib
 import sys
 import os
+import json
 sys.path.insert(1, '~/Projects/MakeICT/event-creator/src/plugins/Meetup/meetup_api/')
 
 
-from plugins.Meetup.meetup.api import Client
-from plugins.Meetup.meetup import exceptions
+# from plugins.Meetup.meetup.api import Client
+# from plugins.Meetup.meetup import exceptions
 
 from plugins import EventPlugin
 import config
 
 
 class MeetupPlugin(EventPlugin):
-    api = None
+    oauth = None
+    token = None
+    client_id = None
+    client_secret = None
+
+    redirect_uri = None
+    base_url = 'https://secure.meetup.com/oauth2'
+    token_url = base_url + '/access'
+    auth_url = base_url + '/authorize'
+    gql_url = 'https://api.meetup.com/gql'
 
     def __init__(self):
         super().__init__('Meetup')
+        self.client_id = self.getSetting('client id')
+        self.client_secret = self.getSetting('client secret')
+        self.redirect_uri = self.getSetting('redirect uri')
 
         self.options = [
             {
@@ -55,53 +72,64 @@ class MeetupPlugin(EventPlugin):
         ]
         # @TODO: Download venue list and add them to the location dropdown in the UI
         # ui.addTarget(self.name, self, self.createEvent)
+        
+    def token_saver(self, token):
+        print("Saving Token!!")
+        config.save('plugin-Meetup', 'token', json.dumps(token))
+        self.token = token
 
-    def connectAPI(self):
-        client_id = self.getSetting('client id')
-        client_secret = self.getSetting('client secret')
-        email = self.getSetting('email')
-        password = self.getSetting('password')
+    def authenticateOauth(self):
+        extra = {
+            'client_id': self.client_id,
+            'client_secret': self.client_secret
+        }
 
-        redirect_uri = self.getSetting('redirect uri')
-        base_url = 'https://secure.meetup.com/oauth2'
-        token_url = base_url + '/access'
-        auth_url = base_url + '/authorize'
-        session_url = "https://api.meetup.com/sessions"
+        self.token = config.settings.get('plugin-Meetup', 'token')
+        if self.token:
+            self.token = json.loads(self.token)
+            self.oauth = OAuth2Session(self.client_id, auto_refresh_url=self.token_url, redirect_uri=self.redirect_uri,
+                                  auto_refresh_kwargs=extra, token_updater=self.token_saver, token=self.token)
+        else:
+            self.oauth = OAuth2Session(self.client_id, auto_refresh_url=self.token_url, redirect_uri=self.redirect_uri,
+                                auto_refresh_kwargs=extra, token_updater=self.token_saver)
+            authorization_url, state = self.oauth.authorization_url(self.auth_url)
+            print(authorization_url)
 
-        # Request authorization code
-        r_parameters = {"scope": 'event_management',
-                        "client_id": {client_id},
-                        "redirect_uri": {redirect_uri},
-                        "response_type": 'anonymous_code'
-                        }
-        response = requests.get(auth_url, params=r_parameters)
-        print('MEETUP RESPONSE:', response.status_code, response.headers, response.url)
-        code = response.url.split('=')[1]
+            print('Please go to %s and authorize access.' % authorization_url)
+            authorization_response = input('Enter the full callback URL: ')
 
-        # Request access token
-        r_parameters = {"client_id": {client_id},
-                        "client_secret": {client_secret},
-                        "grant_type": 'anonymous_code',
-                        "redirect_uri": {redirect_uri},
-                        "code": {code}
-                        }
-        response = requests.post(token_url, params=r_parameters)
-        print('MEETUP RESPONSE:', response.status_code, response.headers, response.json())
-        access_token = response.json()['access_token']
+            self.token = self.oauth.fetch_token(
+                    self.token_url,
+                    authorization_response=authorization_response,
+                    include_client_id=True,
+                    client_secret=self.client_secret)
+            self.token_saver(self.token)
+        
+        if self.token['expires_at'] < time() + 60:
+            new_token = self.oauth.refresh_token(self.token_url, **extra)
+            print(new_token)
+            self.token_saver(new_token)
 
-        # Request oauth token with credentials
-        r_parameters = {"email": {email},
-                        "password": {password}
-                        }
-        r_headers = {'Authorization': f'Bearer {access_token}'}
-        response = requests.post(session_url, params=r_parameters, headers=r_headers)
-        print('MEETUP RESPONSE:', response.status_code, response.headers, response.json())
-        oauth_token = response.json()['oauth_token']
-
-        # Connect to API
-        self.api = Client(oauth_token)
-
+        print(self.token)
         # return api
+
+    def _call(self, query, variables):
+        self.authenticateOauth()
+
+        headers = {
+            'Authorization': 'Bearer ' + self.token['access_token'],
+            'Content-Type': 'application/json'
+        }
+
+        # Select your transport with a defined url endpoint
+        transport = RequestsHTTPTransport(url=self.gql_url, headers=headers)
+
+        # Create a GraphQL client using the defined transport
+        client = Client(transport=transport, fetch_schema_from_transport=False)
+
+        result = client.execute(gql(query), variable_values=variables)
+
+        return result
 
     def _buildEvent(self, event):
         if self.getGeneralSetting('timezone') is not None \
@@ -127,24 +155,21 @@ class MeetupPlugin(EventPlugin):
             rsvp_limit = 0
 
         if config.checkBool(self.getSetting("post as draft")):
-            publish_status = 'draft'
+            publish_status = 'DRAFT'
         else:
-            publish_status = 'published'
-
-        group = self.api.GetGroup({'urlname': self.getSetting('group name')})
+            publish_status = 'PUBLISHED'
 
         meetup_details = {
-            'group_id': group.id,
-            'urlname': self.getSetting('group name'),
-            'name': title,
+            'groupUrlname': self.getSetting('group name'),
+            'title': title,
             'description': description,
-            'time': int(timezone.localize(event.startDateTime()).timestamp()) * 1000,
-            'duration': int((event.endDateTime() - event.startDateTime()).total_seconds()*1000),
-            'venue_id': self.getSetting('Venue ID'),
-            'publish_status': publish_status,
-            'rsvp_limit': rsvp_limit,
-            'guest_limit': 0,
-            'waitlisting': 'off',
+            'startDateTime': timezone.localize(event.startDateTime()).strftime("%Y-%m-%dT%H:%M"),
+            'duration': pd.Timedelta(event.endDateTime() - event.startDateTime()).isoformat(),
+            'venueId': self.getSetting('Venue ID'),
+            'publishStatus': publish_status,
+            # 'rsvp_limit': rsvp_limit,
+            # 'guest_limit': 0,
+            # 'waitlisting': 'off',
         }
         # print(meetup_details['time'])
         if event.registrationURL():
@@ -156,36 +181,99 @@ class MeetupPlugin(EventPlugin):
         return meetup_details
 
     def createEvent(self, event):
-        self.connectAPI()
-
         event_data = self._buildEvent(event)
-        meetupEvent = self.api.CreateEvent(event_data)
-        # print(meetupEvent.__dict__)
+        query = """
+        mutation($input: CreateEventInput!) {
+          createEvent(input: $input) {
+            event {
+              id
+              eventUrl
+            }
+            errors {
+              message
+              code
+              field
+            }
+          }
+        }
+        """
+
+        variables = {
+            "input": {
+                **event_data
+            }
+        }
 
         # if config.checkBool(self.getSetting('Use this as registration URL')):
         #     event['registrationURL'] = meetupEvent.event_url
 
-        return (meetupEvent.id, meetupEvent.link)
+        result = self._call(query, variables)
+        print(result)
+
+        event_info = result['createEvent']['event']
+        return (event_info['id'].split('!')[0], event_info['eventUrl'])
 
     def updateEvent(self, event):
-        self.connectAPI()
-
         event_data = self._buildEvent(event)
         meetup_id = event.getExternalEventByPlatformName('Meetup').ext_event_id
-        event_data['id'] = meetup_id
-        print(meetup_id)
-        meetupEvent = self.api.EditEvent(event_data)
+        event_data['eventId'] = meetup_id.split('!')[0]
+        event_data.pop('groupUrlname')
 
-        return (meetupEvent.id, meetupEvent.link)
+        query = """
+        mutation($input: EditEventInput!) {
+          editEvent(input: $input) {
+            event {
+              id
+              eventUrl
+            }
+            errors {
+              message
+              code
+              field
+            }
+          }
+        }
+        """
+
+        variables = {
+            "input": {
+                **event_data
+            }
+        }
+
+        print(meetup_id)
+        result = self._call(query, variables)
+        print(result)
+
+        event_info = result['editEvent']['event']
+        return (event_info['id'], event_info['eventUrl'])
 
     def deleteEvent(self, event):
-        self.connectAPI()
+        meetup_id = event.getExternalEventByPlatformName('Meetup').ext_event_id.split('!')[0]
 
-        meetup_id = event.getExternalEventByPlatformName('Meetup').ext_event_id
 
-        try:
-            self.api.DeleteEvent({'id': meetup_id,'urlname': self.getSetting('group name')})
-        except exceptions.HttpNotAccessibleError:
+        query = """
+        mutation($input: DeleteEventInput!) {
+          deleteEvent(input: $input) {
+            success
+            errors {
+              message
+              code
+              field
+            }
+          }
+        }
+        """
+
+        variables = {
+            "input": {
+                "eventId": meetup_id
+            }
+        }
+
+        result = self._call(query, variables)
+        print(result)
+        if not result['deleteEvent']['success']:
             print('Already deleted?')
 
 
