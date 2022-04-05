@@ -227,6 +227,8 @@ class BaseEventTemplate(BaseModel):
 class EventTemplate(BaseEventTemplate):
     __tablename__ = "event_template"
 
+    events = db.relationship("Event", back_populates="template")
+
     def uniqueName(self):
         return f"{self.title} [{self.host_name}] ({self.id})"
 
@@ -241,6 +243,8 @@ class Event(BaseEventTemplate):
     decision_date = db.Column(db.DateTime(), nullable=True, default=None)
     cancelled_date = db.Column(db.DateTime(), nullable=True, default=None)
 
+    template_id = db.Column(db.Integer, db.ForeignKey('event_template.id'))
+    template = db.relationship("EventTemplate", back_populates="events")
     external_events = db.relationship("ExternalEvent")
 
     def __repr__(self):
