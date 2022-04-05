@@ -186,32 +186,31 @@ def edit_event(event_id):
 
 @app.route('/events', methods=['GET'])
 def upcoming_events():
-    upcoming_events = Event.query.all()
+    upcoming_events = Event.query.filter(Event.start_date >= datetime.datetime.utcnow().date()).all()
     upcoming_events = sorted(upcoming_events, key=lambda event: event.start_date)
     event_list = []
     needs_sync = 0
     for event in upcoming_events:
         if not event.fullySynced():
             needs_sync = 1
-        if event.start_date >= datetime.datetime.today().date():
-            if event.registration_limit:
-                spots_available = event.registration_limit
-                spots = None
-                if spots_available > 0:
-                    spots = str(spots_available) + 'Register'
-                else:
-                    spots = 'FULL'
+        if event.registration_limit:
+            spots_available = event.registration_limit
+            spots = None
+            if spots_available > 0:
+                spots = str(spots_available) + 'Register'
+            else:
+                spots = 'FULL'
 
-            event_list.append({
-                "Id": event.id,
-                "Name": event.title,
-                "Date": event.start_date.strftime('%b %d %Y'),
-                "Time": event.start_time.strftime('%I:%M %p'),
-                "Description": event.htmlSummary(all_links=True),
-                "Register": "http://makeict.wildapricot.org/event-"
-                            + str(event.id),
-                "Synced": 1 if event.fullySynced() else 0,
-            })
+        event_list.append({
+            "Id": event.id,
+            "Name": event.title,
+            "Date": event.start_date.strftime('%b %d %Y'),
+            "Time": event.start_time.strftime('%I:%M %p'),
+            "Description": event.htmlSummary(all_links=True),
+            "Register": "http://makeict.wildapricot.org/event-"
+                        + str(event.id),
+            "Synced": 1 if event.fullySynced() else 0,
+        })
 
     return render_template('events.html', events=event_list, sync_all=needs_sync)
 
@@ -219,7 +218,7 @@ def upcoming_events():
 @app.route('/sync_all')
 @login_required
 def sync_all():
-    events = Event.query.all()
+    events = Event.query.filter(Event.start_date >= datetime.datetime.utcnow().date()).all()
     SyncEvents(events)
     return redirect(url_for('upcoming_events'))
 
