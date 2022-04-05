@@ -104,9 +104,16 @@ def create_event(template_id):
                                form=form, event=template)
 
     if request.method == 'POST':
-        if form.validate_on_submit():
-            indicatorValue = request.form.get('ts_indicator', '')
+        indicatorValue = request.form.get('ts_indicator', '')
+        if indicatorValue == "delete_template":
+            event_template = EventTemplate.query.get(template_id)
+            t_name = f"{event_template.title} [{event_template.host_name}]" 
+            db.session.delete(event_template)
+            db.session.commit()
+            flash(f"{t_name} has been deleted!", 'success')
 
+            return redirect(url_for('create_event')+'/1')
+        elif form.validate_on_submit():
             if indicatorValue == "save_template" or indicatorValue == "save_copy_template" :
                 if indicatorValue == "save_template":
                     event_template = EventTemplate.query.get(template_id)
@@ -123,15 +130,6 @@ def create_event(template_id):
                 form.populate(event_template)
                 return render_template('create_event.html', title='Create Event',
                                        form=form, event=event_template)
-
-            elif indicatorValue == "delete_template":
-                event_template = EventTemplate.query.get(template_id)
-                t_name = f"{event_template.title} [{event_template.host_name}]" 
-                db.session.delete(event_template)
-                db.session.commit()
-                flash(f"{t_name} has been deleted!", 'success')
-
-                return redirect(url_for('create_event')+'/1')
             else:
                 event = Event()
                 update_event_details(event, form)
