@@ -54,15 +54,20 @@ class DiscoursePlugin(EventPlugin):
             api_key=self.getSetting('API Key'))
 
         logging.debug('Creating post')
-        title = f"Event Updates - {event.start_date.strftime('%B %Y')}"
-        topic_ext_id = f"event_updates_{event.start_date.month}-{event.start_date.year}"
+        title = f"Event Updates for {event.start_date.strftime('%B %Y')}"
+        topic_ext_id = f"{self.getSetting('Category ID')}_event_updates_{event.start_date.month}-{event.start_date.year}"
         topic_id = None
         try:
             topic = discourse_api._get(f"/t/external_id/{topic_ext_id}.json", override_request_kwargs={"allow_redirects": True})
             topic_id = topic['id']
             title = None
         except DiscourseClientError:
-            pass
+            # create the monthly topic if it doesn't exist
+            monthly_topic_description = f"Event updates for {event.start_date.month} {event.start_date.year}"
+            discourse_api.create_post(content=monthly_topic_description,
+                                      category_id=int(self.getSetting('Category ID')),
+                                      external_id=topic_ext_id, title=title)
+        
 
         post = discourse_api.create_post(content=description,
                                          category_id=int(self.getSetting('Category ID')),
