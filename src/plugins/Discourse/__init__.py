@@ -63,15 +63,13 @@ class DiscoursePlugin(EventPlugin):
             title = None
         except DiscourseClientError:
             # create the monthly topic if it doesn't exist
-            monthly_topic_description = f"Event updates for {event.start_date.month} {event.start_date.year}"
-            discourse_api.create_post(content=monthly_topic_description,
-                                      category_id=int(self.getSetting('Category ID')),
-                                      external_id=topic_ext_id, title=title)
-        
-
+            monthly_topic_description = f"Event updates for {event.start_date.strftime('%B %Y')}"
+            post = discourse_api.create_post(content=monthly_topic_description,
+                                              category_id=int(self.getSetting('Category ID')),
+                                              external_id=topic_ext_id, title=title)
+            topic_id = post['topic_id']
         post = discourse_api.create_post(content=description,
-                                         category_id=int(self.getSetting('Category ID')),
-                                         external_id=topic_ext_id, title=title, topic_id=topic_id)
+                                         topic_id=topic_id)
 
         post_url = f"https://talk.makeict.org/t/{post['id']}"
 
