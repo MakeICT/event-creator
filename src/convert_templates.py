@@ -97,8 +97,15 @@ class JSON_Template():
             self.platforms = Platform.query.all()
             self.authorizations = [Authorization.query.filter_by(name=auth).first()
                                    for auth in self.req_auths]
-            self.resources = [Resource.query.filter_by(name=res).first()
-                              for res in self.calendar_resources]
+            self.resources = []
+            for res in self.calendar_resources:
+                if res == "Classroom":
+                    res = "Classroom 3"
+                db_res = Resource.query.filter_by(name=res).first()
+                if db_res:
+                    self.resources.append(db_res)
+            # self.resources = [Resource.query.filter_by(name=res).first()
+            #                   for res in self.calendar_resources]
             self.prices = [Price(name=price['name'],
                            description=price['description'],
                            value=price['price'],
