@@ -72,9 +72,8 @@ class JSON_Template():
             self.duration = self.end_time - self.start_time
             self.start_time = self.start_time.time()
 
-            self.min_age = data.get('minimumAge', '')
-            self.max_age = data.get('maximumAge', '')
-
+            self.min_age = data.get('minimumAge', 0)
+            self.max_age = data.get('maximumAge', 0)
             self.event_type = EventType._class
             self.image_file = 'default.jpg'
 
