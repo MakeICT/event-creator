@@ -105,8 +105,9 @@ def create_event(template_id):
 
     if request.method == 'POST':
         indicatorValue = request.form.get('ts_indicator', '')
-        if indicatorValue == "delete_template":
+        if template_id:
             event_template = EventTemplate.query.get(template_id)
+        if indicatorValue == "delete_template":
             t_name = f"{event_template.title} [{event_template.host_name}]" 
             db.session.delete(event_template)
             db.session.commit()
@@ -115,9 +116,7 @@ def create_event(template_id):
             return redirect(url_for('create_event')+'/1')
         elif form.validate_on_submit():
             if indicatorValue == "save_template" or indicatorValue == "save_copy_template" :
-                if indicatorValue == "save_template":
-                    event_template = EventTemplate.query.get(template_id)
-                elif indicatorValue == "save_copy_template":
+                if indicatorValue == "save_copy_template":
                     event_template = EventTemplate()
                 update_event_details(event_template, form)
                 # folder = 't' + str(event_template.id)
@@ -144,8 +143,9 @@ def create_event(template_id):
             flash(f'Event failed to post! Check form for errors.', 'danger')
 
     form.loadTemplates()
+    form.selectedTemplateName = event_template.uniqueName()
     return render_template('create_event.html', title='Create Event',
-                           form=form)
+                           form=form, event=event_template)
 
 
 @app.route('/event/<event_id>', methods=['GET', 'POST'])
