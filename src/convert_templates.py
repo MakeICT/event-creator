@@ -1,6 +1,7 @@
 import json
 import os
 from dateutil.parser import parse
+from datetime import datetime
 
 from main import db
 from models import Event, EventTemplate, EventType
@@ -35,6 +36,7 @@ class JSON_Template():
         ]
 
     def __init__(self, path):
+        self.path = path
         self.populateTemplate(path)
 
     def isBlank(self, myString):
@@ -124,14 +126,16 @@ class JSON_Template():
                 setattr(db_template, field, getattr(self, field))
             except (AttributeError, TypeError):
                 pass
+        db_template.created_date = datetime.fromtimestamp(os.path.getctime(self.path))
+        db_template.modified_date = datetime.fromtimestamp(os.path.getmtime(self.path))
         if db_template.title:
             db.session.add(db_template)
             db.session.commit()
 
 
 basepath = './EventTemplates/'
-EventTemplate.query.delete()
-Price.query.delete()
+# EventTemplate.query.delete()
+# Price.query.delete()
 
 # r=root, d=directories, f = files
 count = 0
