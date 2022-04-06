@@ -140,7 +140,10 @@ def create_event(template_id):
                 flash(f'Class created for {form.eventTitle.data}!', 'success')
                 return redirect(url_for('upcoming_events'))
         else:
-            flash(f'Event failed to post! Check form for errors.', 'danger')
+            if indicatorValue == "save_template" or indicatorValue == "save_copy_template" :
+                flash(f'Template failed to save! Check form for errors.', 'danger')
+            else:
+                flash(f'Event failed to post! Check form for errors.', 'danger')
 
     form.loadTemplates()
     form.selectedTemplateName = event_template.uniqueName()
