@@ -2,7 +2,7 @@ from flask import render_template, url_for, redirect, request, flash
 from flask_login import login_user, logout_user, current_user, login_required,\
                         LoginManager, UserMixin
 
-from main import app, loadedPlugins
+from main import app, loadedPlugins, settings
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -36,7 +36,7 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
 
-    url = waplugin.getOauthURL("http://localhost:5000/oauth_redirect")
+    url = waplugin.getOauthURL(settings.get('plugin-WildApricot', 'redirect_uri'))
     return redirect(url)
 
 @app.route('/oauth_redirect', methods=['GET', 'POST'])
@@ -44,7 +44,7 @@ def oauth():
     """
     Oauth redirect page
     """
-    email = waplugin.authenticateWithCode(request.args['code'], "http://localhost:5000/oauth_redirect")
+    email = waplugin.authenticateWithCode(request.args['code'], settings.get('plugin-WildApricot', 'redirect_uri'))
 
     user = validateWAUser(email)
 
