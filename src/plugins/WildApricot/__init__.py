@@ -135,7 +135,7 @@ class WildApricotPlugin(EventPlugin):
             "EndTimeSpecified": True,
             "Details": {
                 "DescriptionHtml": description,
-                "AccessControl": {"AccessLevel": "Public"},
+                # "AccessControl": {"AccessLevel": "Public"},
                 "GuestRegistrationSettings": {
                     "CreateContactMode": "CreateContactForAllGuests"
                 },
@@ -145,7 +145,8 @@ class WildApricotPlugin(EventPlugin):
             },
             "Tags": tags
         }
-
+        if not self.getSetting('post as draft'):
+            event_data['Details']['AccessControl'] = {"AccessLevel": "Public"}
         if wa_id:
             event_data['id'] = wa_id
 
