@@ -71,7 +71,7 @@ class DiscoursePlugin(EventPlugin):
         post = discourse_api.create_post(content=description,
                                          topic_id=topic_id)
 
-        post_url = f"https://talk.makeict.org/t/{post['id']}"
+        post_url = f"https://talk.makeict.org/p/{post['id']}"
 
         return (post['id'], post_url)
 
