@@ -1,0 +1,10 @@
+.dropdown-menu.show {
+    width: 100% !important;
+    overflow: auto !important;
+    white-space: normal;
+    font-size: .875rem;
+    line-height: 1.5;
+}
+.dropdown-item {
+    white-space: normal;
+}
