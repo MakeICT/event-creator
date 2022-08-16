@@ -105,10 +105,9 @@ class DiscoursePlugin(EventPlugin):
             post = discourse_api.post_by_id(post_id=post_id)
             topic_id = post['post']['topic_id']
             discourse_api.delete_topic(topic_id=topic_id)
-            logging.error(f"Could not delete {event.id} from Discourse")
         except DiscourseClientError:
+            logging.error(f"Could not delete {event.id} from Discourse")
 
-        discourse_api._delete(f"/posts/{post_id}.json")
 
 
 def load():
