@@ -50,6 +50,8 @@ def SyncEvent(event):
                 ext_event = ExternalEvent.query.filter_by(platform_id=platform.id,
                                                           event_id=event.id).first()
                 print("update sync date for", platform.name)
+                ext_event.ext_event_id = event_result[0]
+                ext_event.ext_event_url = event_result[1]
                 ext_event.updateSyncDate()
 
             else:

@@ -78,9 +78,9 @@ class DiscoursePlugin(EventPlugin):
     def updateEvent(self, event):
         logging.debug('Discourse')
         self.deleteEvent(event)
-        self.createEvent(event)
+        post = self.createEvent(event)
 
-        return True
+        return post
 
     def deleteEvent(self, event):
         logging.debug('Discourse')
@@ -96,8 +96,23 @@ class DiscoursePlugin(EventPlugin):
 
         post_id = next(item.ext_event_id for item in event.external_events
                        if item.platformName() == self.name)
+        try:
+            discourse_api._delete(f"/posts/{post_id}.json")
+            logging.info(f"Deleted {event.id} from Discourse")
+            post = discourse_api.post_by_id(post_id=post_id)
+        except DiscourseClientError:
+            logging.warning(f"Could not delete {event.id} from Discourse")
+            logging.warning(f"Trying to delete using deprecated scheme")
+            try:
+                post = discourse_api.post_by_id(post_id=post_id)
+                topic = discourse_api.topic(slug=post['topic_slug'], topic_id=post['topic_id'])
+                if not topic['external_id']:
+                    topic_id = post['topic_id']
+                    discourse_api.delete_topic(topic_id=topic_id)
+                    logging.info(f"Deleted {event.id} from Discourse")
+            except DiscourseClientError:
+                logging.error(f"Could not delete {event.id} from Discourse")
 
-        discourse_api._delete(f"/posts/{post_id}.json")
 
 
 def load():
