@@ -145,7 +145,7 @@ class WildApricotPlugin(EventPlugin):
             },
             "Tags": tags
         }
-        if not self.getSetting('post as draft'):
+        if not config.checkBool(self.getSetting("post as draft")):
             event_data['Details']['AccessControl'] = {"AccessLevel": "Public"}
         if wa_id:
             event_data['id'] = wa_id
