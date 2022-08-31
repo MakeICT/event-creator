@@ -121,7 +121,7 @@ def load():
                     return False
                 else:
                     raise
-            return (cal_event['id'], cal_event['htmlLink'])
+            return (result['id'], result['htmlLink'])
 
         def deleteEvent(self, event):
             creds = GoogleApps.getCredentials()
