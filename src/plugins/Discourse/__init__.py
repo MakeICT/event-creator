@@ -106,7 +106,7 @@ class DiscoursePlugin(EventPlugin):
             try:
                 post = discourse_api.post_by_id(post_id=post_id)
                 topic = discourse_api.topic(slug=post['topic_slug'], topic_id=post['topic_id'])
-                if not topic['external_id']:
+                if not topic.get('external_id'):
                     topic_id = post['topic_id']
                     discourse_api.delete_topic(topic_id=topic_id)
                     logging.info(f"Deleted {event.id} from Discourse")
