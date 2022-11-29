@@ -127,8 +127,8 @@ def create_event(template_id):
 
                 form.loadTemplates()
                 form.populate(event_template)
-                return render_template('create_event.html', title='Create Event',
-                                       form=form, event=event_template)
+                return(redirect(url_for('create_event', template_id=event_template.id)))
+
             else:
                 event = Event()
                 update_event_details(event, form)
