@@ -47,7 +47,7 @@ def populate_select_boxes(event_form):
     event_form.eventTag.choices = [(t.name, t.name) for t in Tag.query.all()]
     event_form.authorizations.choices = sorted([(a.name, a.name) for a in Authorization.query.all()])
     event_form.platforms.choices = sorted([(p.name, p.name) for p in Platform.query.all()])
-    event_form.resources.choices = sorted([(r.name, r.name) for r in Resource.query.all()])
+    event_form.resources.choices = sorted([(r.name, f"{r.name} - ({r.capacity})") for r in Resource.query.all()])
 
 
 def set_select_box_defaults(event, form):

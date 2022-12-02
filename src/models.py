@@ -65,6 +65,7 @@ class Resource(SpecialBase):
     _tablename_ = "resource"
 
     email = db.Column(db.String(200), unique=False, nullable=True)
+    capacity = db.Column(db.Integer, unique=False, nullable=True)
 
     def __repr__(self):
         return f"Resource('{self.name}')"

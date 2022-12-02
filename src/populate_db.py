@@ -48,12 +48,18 @@ def populate_resources():
     # print(resources)
     for res in resources:
         # print(res)
-        if not Resource.query.filter_by(email=res['resourceEmail']).first():
+        existing_resource = Resource.query.filter_by(email=res['resourceEmail']).first()
+        if not existing_resource:
             print(f"Adding new resource: {res['resourceName']}")
-            new_resource = Resource(name=res['resourceName'], email=res['resourceEmail'])
+            new_resource = Resource(name=res['resourceName'], email=res['resourceEmail'], capacity=res.get("capacity"))
             db.session.add(new_resource)
             db.session.commit()
-
+        else:
+            print(f"Updating resource: {res['resourceName']}")
+            existing_resource.name = res["resourceName"]
+            existing_resource.capacity = res.get("capacity")
+            db.session.add(existing_resource)
+            db.session.commit()
 
 def create_default_template():
     if not EventTemplate.query.get(1):
