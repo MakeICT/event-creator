@@ -64,6 +64,7 @@ def populate_resources():
 def create_default_template():
     if not EventTemplate.query.get(1):
         default = EventTemplate()
+        default.id = 1
         default.title = "Default Template"
         default.description = "This automatically generated default template can be edited and saved to fit your needs."
         db.session.add(default)

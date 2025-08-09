@@ -57,7 +57,6 @@ def set_select_box_defaults(event, form):
         form.resources.default = [res.name for res in event.resources]
     form.platforms.default = [plat.name for plat in event.platforms]
 
-
 def update_event_details(event, event_form):
     details = event_form.collectEventDetails()
     details["authorizations"] = [Authorization.query.filter_by(name=auth).first()
@@ -96,7 +95,14 @@ def create_event(template_id):
         if not template_id:
             return redirect(url_for('create_event')+'/1')
         form.loadTemplates()
+        print("RETRIEVING TEMPLATE")
         template = EventTemplate.query.filter_by(id=template_id).first()
+        if int(template_id) == 1 and template == None:
+            # some fool deleted the default template ;-;
+            print("re-generating default template")
+            from populate_db import create_default_template
+            return redirect(url_for('create_event')+'/1')
+
         set_select_box_defaults(template, form)
         form.process()
         form.populate(template)
